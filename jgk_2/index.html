@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>情報学基礎論II テスト対策アプリ</title>
+    <title>情報学基礎論II テスト対策アプリ (5年分収録)</title>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -21,27 +21,29 @@
     <style>
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background-color: #f1f5f9;
-            /* Prevent pull-to-refresh on mobile */
+            background-color: #f8fafc;
             overscroll-behavior-y: none;
+            -webkit-tap-highlight-color: transparent;
         }
         
         /* Custom Animations */
         @keyframes fade-in-up {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in-up {
             animation: fade-in-up 0.5s ease-out forwards;
         }
 
-        /* Hide scrollbar for clean UI */
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .animate-pulse-soft {
+            animation: pulse-soft 2s infinite;
+        }
+
+        /* Hide scrollbar */
         ::-webkit-scrollbar {
             width: 0px;
             background: transparent;
@@ -54,106 +56,240 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- Icons (SVG Components) ---
-        // Lucide icons converted to React SVG components for standalone usage
-        const Zap = (props) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        );
-        const Award = (props) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
-        );
-        const TrendingUp = (props) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-        );
-        const BookOpen = (props) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        );
-        const Clock = (props) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        );
-        const CheckCircle = (props) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        );
-        const XCircle = (props) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-        );
-        const RefreshCw = (props) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        );
+        // --- Icons ---
+        const Zap = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
+        const Award = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>;
+        const TrendingUp = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>;
+        const BookOpen = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>;
+        const CheckCircle = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
+        const XCircle = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>;
+        const ChevronRight = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 18 15 12 9 6"/></svg>;
+        const Home = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+        const Lock = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
 
-        // --- Data ---
-        const QUESTIONS = [
+        // --- Data: 5 Years of Exam Sets ---
+        const EXAM_SETS = [
             {
-                id: 1,
-                category: 'アナログとデジタル',
-                text: 'デジタル情報の「劣化」に関する説明として、講義資料の内容に即して最も適切なものはどれですか？',
-                options: [
-                'デジタル情報は数値データなので、どのような環境でも絶対に劣化しない',
-                '現実のデジタル情報は物理的な状態（電圧や磁気など）で保存されるため、ノイズや経年劣化の影響を受ける',
-                'CDなどの光ディスクは物理的な凹凸で記録するため、傷がついても読み取りエラーは発生しない',
-                'デジタル信号はアナログ信号と異なり、コピーしても物理的な保存媒体が必要ないため劣化しない'
-                ],
-                correctIndex: 1,
-                explanation: '講義資料(Slide 4-6)によると、理論上のデジタル値は劣化しませんが、現実は物理的な状態（電荷、磁気、凹凸）で保存・処理されるため、熱や経年劣化、ノイズの影響を受けます。'
+                id: 'set1',
+                title: '第1回：基礎理論とデジタル',
+                subtitle: 'アナログ/デジタル・原子構造',
+                difficulty: '★☆☆',
+                questions: [
+                    {
+                        category: 'デジタル',
+                        text: '現実世界における「デジタル情報」の性質として、講義資料で説明されている内容はどれ？',
+                        options: ['理論的にも物理的にも絶対に劣化しない', '物理的な状態(電荷や磁気)で保存されるため、環境により劣化・消失のリスクがある', 'アナログ信号よりもノイズに弱く、コピーを作成できない', '一度デジタル化すれば、媒体が破損してもデータは読み出せる'],
+                        correctIndex: 1,
+                        explanation: 'デジタル値自体は劣化しませんが、それを記録する物理媒体（電荷、磁気、凹凸）は熱や経年劣化の影響を受けます。(Slide 4)'
+                    },
+                    {
+                        category: '電気の正体',
+                        text: '原子において、原子核の周りを回っている「負の電荷」を持つ粒子は何？',
+                        options: ['陽子 (Proton)', '中性子 (Neutron)', '電子 (Electron)', '光子 (Photon)'],
+                        correctIndex: 2,
+                        explanation: '負の電荷を持つのは電子です。陽子は正の電荷を持ちます。通常、陽子と電子の数が等しく電気的に中和しています。(Slide 9)'
+                    },
+                    {
+                        category: '自由電子',
+                        text: '金属結合において、原子核の束縛を離れて自由に動き回ることができる電子を何と呼ぶ？',
+                        options: ['価電子', '自由電子', '陽イオン', '絶縁電子'],
+                        correctIndex: 1,
+                        explanation: '最外殻の電子がエネルギーを得て動き回れるようになったものを「自由電子」と呼び、これが電流の正体となります。(Slide 9)'
+                    },
+                    {
+                        category: '電流の定義',
+                        text: '電流の単位「アンペア(A)」の定義に関連する記述として正しいものは？',
+                        options: ['1秒間に1クーロンの電荷が流れるときの電流', '1秒間に1ボルトの電圧がかかるときの電流', '電子1個が1秒間に移動する速度', '抵抗1オームに10ボルトかけた時の電流'],
+                        correctIndex: 0,
+                        explanation: '電流I = Q/t。つまり毎秒1クーロン(C)の電荷を流す電流が1アンペア(A)と定義されます。(Slide 10)'
+                    },
+                    {
+                        category: '電流の向き',
+                        text: '回路図における電流の向きと、実際の電子の移動方向の関係は？',
+                        options: ['同じ方向である', '逆方向である', '直角に交わる', '関係はない'],
+                        correctIndex: 1,
+                        explanation: '電流はプラスからマイナスへ流れると定義されていますが、電子はマイナスからプラスへ移動します。歴史的な経緯で逆になっています。(Slide 11)'
+                    }
+                ]
             },
             {
-                id: 2,
-                category: '電気の基礎',
-                text: '電流と電子の流れの向きについての説明で、正しいものはどれですか？',
-                options: [
-                '電流の向きと電子の流れる向きは「同じ」である',
-                '電流の向きと電子の流れる向きは「逆」である',
-                '電流はプラスからマイナスへ、電子もプラスからマイナスへ流れる',
-                '電子はマイナスからプラスへ流れるが、電流の向きは定義されていない'
-                ],
-                correctIndex: 1,
-                explanation: '講義資料(Slide 11)によると、電流は正極(+)から負極(-)へ流れると定義されていますが、実体である電子は負極(-)から正極(+)へ流れるため、その向きは「逆」になります。'
+                id: 'set2',
+                title: '第2回：基本法則と物質',
+                subtitle: 'オームの法則・導体/絶縁体',
+                difficulty: '★★☆',
+                questions: [
+                    {
+                        category: '電圧',
+                        text: '電気的な位置エネルギーの差であり、電流を流そうとする圧力を何と呼ぶ？',
+                        options: ['電力 (Watt)', '電位差・電圧 (Volt)', '抵抗 (Ohm)', '静電容量 (Farad)'],
+                        correctIndex: 1,
+                        explanation: '水圧に例えられる、電流を流そうとする働きを電圧（電位差）と呼びます。(Slide 12)'
+                    },
+                    {
+                        category: '電池の接続',
+                        text: '1.5Vの乾電池を2つ「直列」につないだ場合、全体の電圧は何Vになる？',
+                        options: ['1.5V', '3.0V', '0.75V', '変わらない'],
+                        correctIndex: 1,
+                        explanation: '電池を直列につなぐと、起電力（電圧）は和になります。1.5V + 1.5V = 3.0V です。(Slide 13)'
+                    },
+                    {
+                        category: '抵抗',
+                        text: '抵抗（電気抵抗）の説明として正しいものは？',
+                        options: ['電子の流れを促進する性質', '電流の流れを妨げ、電気エネルギーを熱に変える性質', '電圧を電流に変換する装置', '温度が上がると必ず抵抗値が下がる性質'],
+                        correctIndex: 1,
+                        explanation: '抵抗は電子の衝突により電流を妨げ、ジュール熱を発生させます。(Slide 14)'
+                    },
+                    {
+                        category: '物質の分類',
+                        text: '「シリコン(Si)」や「ゲルマニウム(Ge)」は、導体・絶縁体のどちらに分類される？',
+                        options: ['導体 (Conductor)', '絶縁体 (Insulator)', '半導体 (Semiconductor)', '超伝導体 (Superconductor)'],
+                        correctIndex: 2,
+                        explanation: '条件によって導体や絶縁体のような性質を示す物質を「半導体」と呼びます。ICチップの材料です。(Slide 15)'
+                    },
+                    {
+                        category: 'オームの法則',
+                        text: '20Vの電圧をかけたとき、0.5Aの電流が流れた。この回路の抵抗は何Ωか？',
+                        options: ['10 Ω', '20 Ω', '40 Ω', '100 Ω'],
+                        correctIndex: 2,
+                        explanation: 'オームの法則 R = V / I より、20 ÷ 0.5 = 40[Ω] となります。(Slide 16)'
+                    }
+                ]
             },
             {
-                id: 3,
-                category: 'オームの法則',
-                text: '電圧12Vの電池に500Ωの抵抗が接続されているとき、流れる電流は何mAですか？',
-                options: [
-                '2.4 mA',
-                '24 mA',
-                '60 mA',
-                '240 mA'
-                ],
-                correctIndex: 1,
-                explanation: 'オームの法則 I = V / R より、I = 12 / 500 = 0.024 [A] です。これをmAに換算すると 24 mA となります。(Slide 16の例題)'
+                id: 'set3',
+                title: '第3回：回路計算の基礎',
+                subtitle: '直列・並列・合成抵抗',
+                difficulty: '★★☆',
+                questions: [
+                    {
+                        category: '直列回路',
+                        text: '抵抗R1とR2を直列に接続したときの合成抵抗Rは？',
+                        options: ['R = R1 × R2', 'R = R1 + R2', '1/R = 1/R1 + 1/R2', 'R = (R1+R2)/2'],
+                        correctIndex: 1,
+                        explanation: '直列回路の合成抵抗は、単純な足し算になります。(Slide 18)'
+                    },
+                    {
+                        category: '直列回路の性質',
+                        text: '直列回路において、各抵抗を流れる「電流」の大きさはどうなる？',
+                        options: ['抵抗値が大きいほど小さい', '抵抗値が小さいほど小さい', '回路のどこでも等しい', '電源に近いほど大きい'],
+                        correctIndex: 2,
+                        explanation: '直列回路では、電流の逃げ道がないため、どこでも電流の値は一定です。(Slide 18)'
+                    },
+                    {
+                        category: '並列回路',
+                        text: '抵抗R1とR2を並列に接続したときの合成抵抗Rの公式は？',
+                        options: ['R = R1 + R2', 'R = R1 × R2', '1/R = 1/R1 + 1/R2', 'R = R1 - R2'],
+                        correctIndex: 2,
+                        explanation: '並列回路では、各抵抗の逆数の和が、合成抵抗の逆数になります。(Slide 19)'
+                    },
+                    {
+                        category: '合成抵抗計算',
+                        text: '10Ωの抵抗を3つ「並列」につないだ時の合成抵抗は？',
+                        options: ['3.33... Ω', '10 Ω', '30 Ω', '0.3 Ω'],
+                        correctIndex: 0,
+                        explanation: '同じ抵抗Rをn個並列につなぐと、合成抵抗は R/n になります。10÷3 ≒ 3.33Ω です。(Slide 19)'
+                    },
+                    {
+                        category: '並列回路の性質',
+                        text: '並列回路において、各抵抗にかかる「電圧」はどうなる？',
+                        options: ['全ての抵抗で等しい', '抵抗値に比例して大きくなる', '抵抗値に反比例して小さくなる', '電流値によって変化する'],
+                        correctIndex: 0,
+                        explanation: '並列回路では、分岐したそれぞれの枝にかかる電圧は全て電源電圧と同じになります。(Slide 19)'
+                    }
+                ]
             },
             {
-                id: 4,
-                category: '回路計算',
-                text: '12Ωの抵抗と4Ωの抵抗を「並列」に接続した部分の合成抵抗はいくらになりますか？',
-                options: [
-                '3 Ω',
-                '8 Ω',
-                '16 Ω',
-                '48 Ω'
-                ],
-                correctIndex: 0,
-                explanation: '和分の積、または逆数の和で計算します。1/R = 1/12 + 1/4 = 1/12 + 3/12 = 4/12 = 1/3 なので、R = 3[Ω] です。(Slide 22の問題解説より)'
+                id: 'set4',
+                title: '第4回：応用計算テクニック',
+                subtitle: '分圧・分流・複雑な回路',
+                difficulty: '★★★',
+                questions: [
+                    {
+                        category: '分圧の法則',
+                        text: '直列回路で、抵抗値の比に応じて電圧が分配される法則を何という？',
+                        options: ['オームの法則', 'キルヒホッフの法則', '分圧の法則', 'ジュールの法則'],
+                        correctIndex: 2,
+                        explanation: '抵抗の大きさに比例して電圧が配分されることを分圧の法則と呼びます。(Slide 20)'
+                    },
+                    {
+                        category: '分圧計算',
+                        text: '10Ωと40Ωの抵抗を直列につなぎ、100Vの電圧をかけた。40Ωの抵抗にかかる電圧は？',
+                        options: ['20V', '40V', '60V', '80V'],
+                        correctIndex: 3,
+                        explanation: '分圧の式 V2 = V × (R2 / (R1+R2)) より、100 × (40 / 50) = 80V です。(Slide 20)'
+                    },
+                    {
+                        category: '分流の法則',
+                        text: '並列回路において、抵抗値が「小さい」方に流れる電流はどうなる？',
+                        options: ['より多く流れる', 'より少なく流れる', '抵抗値に関わらず同じ', '流れない'],
+                        correctIndex: 0,
+                        explanation: '電流は抵抗が小さい（流れやすい）方へより多く流れます。抵抗値と電流は反比例します。(Slide 20)'
+                    },
+                    {
+                        category: '複雑な計算',
+                        text: '「6Ωの抵抗2つを並列」にした塊と、「2Ωの抵抗」を直列につないだ。全体の合成抵抗は？',
+                        options: ['4 Ω', '5 Ω', '8 Ω', '14 Ω'],
+                        correctIndex: 1,
+                        explanation: 'まず並列部分：6Ωが2つで半分の3Ω。次に直列部分：3Ω + 2Ω = 5Ω となります。(Slide 22類似)'
+                    },
+                    {
+                        category: '単位変換',
+                        text: '計算結果が「0.02A」となった。これをmA（ミリアンペア）で表すと？',
+                        options: ['0.2 mA', '2 mA', '20 mA', '200 mA'],
+                        correctIndex: 2,
+                        explanation: '1A = 1000mA なので、0.02 × 1000 = 20mA です。LEDの電流値などでよく使われます。(Slide 16)'
+                    }
+                ]
             },
             {
-                id: 5,
-                category: '直列回路の性質',
-                text: '直列回路における電圧降下についての説明で、正しいものはどれですか？',
-                options: [
-                '各抵抗での電圧降下の和は、電源電圧と等しくなる',
-                '各抵抗での電圧降下は、抵抗値に関わらず全て同じ値になる',
-                '回路のどこで測定しても、電圧降下の値は電流値と同じになる',
-                '抵抗が大きいほど、その部分での電圧降下は小さくなる'
-                ],
-                correctIndex: 0,
-                explanation: '直列回路では電流が一定で、各抵抗での電圧降下(V=IR)の総和は電源電圧と等しくなります（キルヒホッフの第2法則）。(Slide 17-18)'
+                id: 'set5',
+                title: '第5回：電子部品と実習',
+                subtitle: '部品特性・ブレッドボード・実体配線',
+                difficulty: '★★☆',
+                questions: [
+                    {
+                        category: 'ブレッドボード',
+                        text: 'ブレッドボードの中央部分の穴は、通常どのようにつながっている？',
+                        options: ['横一列（電源ラインと同じ向き）につながっている', '縦5つの穴（a-e, f-j）がつながっている', 'すべての穴がつながっている', 'どこもつながっていない'],
+                        correctIndex: 1,
+                        explanation: '部品を挿すエリアは、縦方向（abcdeの5つ）が内部で導通しています。(Slide 31)'
+                    },
+                    {
+                        category: 'LED',
+                        text: 'LED（発光ダイオード）には極性がある。足が長く、電源のプラス側につなぐ端子を何という？',
+                        options: ['アノード (Anode)', 'カソード (Cathode)', 'ベース (Base)', 'ゲート (Gate)'],
+                        correctIndex: 0,
+                        explanation: '足が長い方がアノード(+)、短い方がカソード(-)です。(Slide 30)'
+                    },
+                    {
+                        category: 'センサー',
+                        text: '課題で使用する「CdSセル（フォトレジスタ）」の性質は？',
+                        options: ['光が当たると抵抗が小さくなる', '光が当たると抵抗が大きくなる', '光が当たると電気を発生する', '温度が上がると光る'],
+                        correctIndex: 0,
+                        explanation: 'CdSは光の強さに応じて抵抗値が変化するセンサーで、明るいほど抵抗が低くなります。(Slide 30)'
+                    },
+                    {
+                        category: 'トランジスタ',
+                        text: 'NPNトランジスタの3つの端子の名前の組み合わせとして正しいものは？',
+                        options: ['アノード・カソード・ゲート', 'ベース・コレクタ・エミッタ', '入力・出力・接地', 'プラス・マイナス・グランド'],
+                        correctIndex: 1,
+                        explanation: 'トランジスタの端子は、ベース(B)、コレクタ(C)、エミッタ(E)の3つです。(Slide 30)'
+                    },
+                    {
+                        category: '配線の作法',
+                        text: '回路を作成する際、通常「GND（マイナス、0V）」側の配線には何色を使うのが一般的？',
+                        options: ['赤色', '黄色', '黒色（または青）', '白色'],
+                        correctIndex: 2,
+                        explanation: 'プラス電源は赤、マイナス(GND)は黒や青を使うのが一般的なルールです。(Slide 32)'
+                    }
+                ]
             }
         ];
 
         // --- Components ---
 
         const ProgressBar = ({ current, total }) => (
-            <div className="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+            <div className="w-full bg-slate-200 rounded-full h-2.5 mb-6 overflow-hidden">
                 <div
                 className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${(current / total) * 100}%` }}
@@ -174,7 +310,7 @@
                 </h3>
                 </div>
                 
-                <div className="bg-slate-50 p-4 rounded-lg mb-6 text-slate-700 leading-relaxed text-sm md:text-base">
+                <div className="bg-slate-50 p-4 rounded-lg mb-6 text-slate-700 leading-relaxed text-sm">
                 <span className="font-bold block mb-1 text-slate-900">解説:</span>
                 {explanation}
                 </div>
@@ -184,7 +320,7 @@
                 className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
                 >
                 次へ進む
-                <TrendingUp className="w-5 h-5" />
+                <ChevronRight className="w-5 h-5" />
                 </button>
             </div>
         );
@@ -192,260 +328,254 @@
         // --- Main App Component ---
 
         function StudyApp() {
-            const [gameState, setGameState] = useState('start'); // start, playing, result
-            const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+            const [view, setView] = useState('menu'); // menu, playing, result
+            const [selectedSetId, setSelectedSetId] = useState(null);
+            const [currentQIndex, setCurrentQIndex] = useState(0);
             const [selectedOption, setSelectedOption] = useState(null);
             const [isAnswered, setIsAnswered] = useState(false);
             const [score, setScore] = useState(0);
+            
+            // Stats (Saved in LocalStorage)
             const [stats, setStats] = useState({
-                totalAnswered: 0,
-                totalCorrect: 0,
-                streakDays: 0,
-                lastStudyDate: null,
-                bestScore: 0
+                completedSets: [],
+                totalScore: 0
             });
 
-            // Load stats from localStorage on mount
             useEffect(() => {
-                const savedStats = localStorage.getItem('elec_math_stats');
-                if (savedStats) {
-                setStats(JSON.parse(savedStats));
-                }
+                const saved = localStorage.getItem('elec_math_v2_stats');
+                if (saved) setStats(JSON.parse(saved));
             }, []);
 
-            // Update stats helper
-            const updateStats = (currentScore) => {
-                const today = new Date().toDateString();
+            const saveStats = (setId, setScore) => {
                 const newStats = { ...stats };
-
-                // Update streak
-                if (newStats.lastStudyDate !== today) {
-                if (newStats.lastStudyDate === new Date(Date.now() - 86400000).toDateString()) {
-                    newStats.streakDays += 1;
-                } else {
-                    newStats.streakDays = 1;
+                if (!newStats.completedSets.includes(setId)) {
+                    newStats.completedSets.push(setId);
                 }
-                newStats.lastStudyDate = today;
-                }
-
-                newStats.totalAnswered += QUESTIONS.length;
-                newStats.totalCorrect += currentScore;
-                newStats.bestScore = Math.max(newStats.bestScore, currentScore);
-
+                // Update total score is complex with retries, keeping it simple: count completions
                 setStats(newStats);
-                localStorage.setItem('elec_math_stats', JSON.stringify(newStats));
+                localStorage.setItem('elec_math_v2_stats', JSON.stringify(newStats));
             };
 
-            const startGame = () => {
-                setGameState('playing');
-                setCurrentQuestionIndex(0);
+            const startExam = (setId) => {
+                setSelectedSetId(setId);
+                setView('playing');
+                setCurrentQIndex(0);
                 setScore(0);
                 setIsAnswered(false);
                 setSelectedOption(null);
             };
 
+            const goHome = () => {
+                setView('menu');
+                setSelectedSetId(null);
+            };
+
             const handleAnswer = (index) => {
                 if (isAnswered) return;
-                
                 setSelectedOption(index);
                 setIsAnswered(true);
-                
-                if (index === QUESTIONS[currentQuestionIndex].correctIndex) {
-                setScore(s => s + 1);
+                const currentSet = EXAM_SETS.find(s => s.id === selectedSetId);
+                if (index === currentSet.questions[currentQIndex].correctIndex) {
+                    setScore(s => s + 1);
                 }
             };
 
             const handleNext = () => {
-                if (currentQuestionIndex < QUESTIONS.length - 1) {
-                setCurrentQuestionIndex(prev => prev + 1);
-                setIsAnswered(false);
-                setSelectedOption(null);
+                const currentSet = EXAM_SETS.find(s => s.id === selectedSetId);
+                if (currentQIndex < currentSet.questions.length - 1) {
+                    setCurrentQIndex(p => p + 1);
+                    setIsAnswered(false);
+                    setSelectedOption(null);
                 } else {
-                updateStats(score + (selectedOption === QUESTIONS[currentQuestionIndex].correctIndex ? 1 : 0));
-                setGameState('result');
+                    saveStats(selectedSetId, score + (selectedOption === currentSet.questions[currentQIndex].correctIndex ? 1 : 0));
+                    setView('result');
                 }
             };
 
-            const currentQuestion = QUESTIONS[currentQuestionIndex];
-
-            // --- Render Views ---
-
-            if (gameState === 'start') {
+            // --- MENU VIEW ---
+            if (view === 'menu') {
                 return (
-                <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100 p-4 flex flex-col items-center justify-center text-slate-800">
-                    <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
-                    <div className="bg-blue-600 p-8 text-center">
-                        <div className="flex justify-center mb-4">
-                            <Zap className="w-16 h-16 text-yellow-300" />
-                        </div>
-                        <h1 className="text-2xl font-bold text-white mb-2">情報学基礎論II</h1>
-                        <h2 className="text-xl font-bold text-blue-100">電気と数学 マスター</h2>
-                    </div>
-                    
-                    <div className="p-6">
-                        <div className="grid grid-cols-2 gap-4 mb-8">
-                        <div className="bg-indigo-50 p-4 rounded-xl flex flex-col items-center">
-                            <span className="text-indigo-600 mb-1"><Award className="w-6 h-6" /></span>
-                            <span className="text-sm text-slate-500">最高スコア</span>
-                            <span className="text-xl font-bold text-slate-800">{stats.bestScore}/{QUESTIONS.length}</span>
-                        </div>
-                        <div className="bg-orange-50 p-4 rounded-xl flex flex-col items-center">
-                            <span className="text-orange-500 mb-1"><TrendingUp className="w-6 h-6" /></span>
-                            <span className="text-sm text-slate-500">連続学習</span>
-                            <span className="text-xl font-bold text-slate-800">{stats.streakDays}日</span>
-                        </div>
-                        </div>
-
-                        <div className="space-y-3 mb-8">
-                        <div className="flex items-center gap-3 text-slate-600 text-sm">
-                            <BookOpen className="w-4 h-4" />
-                            <span>全5問の予想問題で実力チェック</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-slate-600 text-sm">
-                            <Clock className="w-4 h-4" />
-                            <span>スキマ時間の1-2分で完了</span>
-                        </div>
-                        </div>
-
-                        <button
-                        onClick={startGame}
-                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg transition-transform active:scale-95 text-lg"
-                        >
-                        テスト対策を始める
-                        </button>
-                    </div>
-                    </div>
-                    <p className="mt-6 text-xs text-slate-500">工学院大学 情報学基礎論II 2025対応</p>
-                </div>
-                );
-            }
-
-            if (gameState === 'result') {
-                const percentage = Math.round((score / QUESTIONS.length) * 100);
-                let message = '';
-                let messageColor = '';
-
-                if (percentage === 100) {
-                message = '完璧です！定期テストも安心ですね！';
-                messageColor = 'text-green-600';
-                } else if (percentage >= 80) {
-                message = '素晴らしい！あと少しで満点です。';
-                messageColor = 'text-blue-600';
-                } else {
-                message = '復習しましょう。解説を読み直せば大丈夫！';
-                messageColor = 'text-orange-600';
-                }
-
-                return (
-                <div className="min-h-screen bg-indigo-50 p-4 flex flex-col items-center justify-center">
-                    <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden p-8 text-center animate-fade-in-up">
-                    <div className="mb-6 inline-flex p-4 rounded-full bg-slate-100">
-                        {percentage === 100 ? (
-                        <Award className="w-16 h-16 text-yellow-500" />
-                        ) : (
-                        <CheckCircle className="w-16 h-16 text-blue-500" />
-                        )}
-                    </div>
-                    
-                    <h2 className="text-3xl font-bold text-slate-800 mb-2">結果発表</h2>
-                    <div className="text-5xl font-black text-blue-600 mb-4 font-mono">
-                        {score}<span className="text-2xl text-slate-400 font-sans font-normal"> / {QUESTIONS.length}</span>
-                    </div>
-
-                    <p className={`font-bold mb-8 ${messageColor}`}>
-                        {message}
-                    </p>
-
-                    <div className="bg-slate-50 rounded-xl p-4 mb-8 text-left text-sm text-slate-600">
-                        <h4 className="font-bold mb-2 text-slate-800">学習のヒント:</h4>
-                        <ul className="list-disc list-inside space-y-1">
-                        <li>オームの法則の計算(mAの単位変換)</li>
-                        <li>並列回路の合成抵抗の公式</li>
-                        <li>デジタル信号が劣化する理由</li>
-                        </ul>
-                    </div>
-
-                    <button
-                        onClick={startGame}
-                        className="w-full py-4 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
-                    >
-                        <RefreshCw className="w-5 h-5" />
-                        もう一度挑戦する
-                    </button>
-                    </div>
-                </div>
-                );
-            }
-
-            // Playing State
-            return (
-                <div className="min-h-screen bg-slate-100 p-4 md:pt-10 text-slate-800">
-                <div className="max-w-md w-full mx-auto">
-                    {/* Header */}
-                    <div className="flex justify-between items-center mb-4">
-                    <div className="text-sm font-bold text-slate-500">
-                        第 {currentQuestionIndex + 1} 問 <span className="text-slate-300">/ {QUESTIONS.length}</span>
-                    </div>
-                    <div className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
-                        {currentQuestion.category}
-                    </div>
-                    </div>
-
-                    <ProgressBar current={currentQuestionIndex + 1} total={QUESTIONS.length} />
-
-                    {/* Question Card */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
-                    <h2 className="text-lg md:text-xl font-bold leading-relaxed text-slate-900">
-                        {currentQuestion.text}
-                    </h2>
-                    </div>
-
-                    {/* Options */}
-                    {!isAnswered ? (
-                    <div className="space-y-3">
-                        {currentQuestion.options.map((option, index) => (
-                        <button
-                            key={index}
-                            onClick={() => handleAnswer(index)}
-                            className="w-full text-left p-4 rounded-xl bg-white border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all active:scale-98 shadow-sm font-medium text-slate-700"
-                        >
-                            <div className="flex gap-3">
-                            <div className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center text-xs font-bold text-slate-400">
-                                {['A', 'B', 'C', 'D'][index]}
+                    <div className="min-h-screen pb-10">
+                        {/* Hero Header */}
+                        <div className="bg-gradient-to-br from-blue-700 to-indigo-800 text-white p-8 pt-12 rounded-b-[2.5rem] shadow-xl mb-6 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <Zap width={120} height={120} />
                             </div>
-                            <span>{option}</span>
-                            </div>
-                        </button>
-                        ))}
-                    </div>
-                    ) : (
-                    <div className="space-y-4">
-                        {/* Options Visualization */}
-                        <div className="space-y-3 opacity-60 pointer-events-none">
-                        {currentQuestion.options.map((option, index) => {
-                            let styles = "bg-white border-slate-200";
-                            if (index === currentQuestion.correctIndex) styles = "bg-green-100 border-green-500 text-green-900";
-                            else if (index === selectedOption) styles = "bg-red-100 border-red-500 text-red-900";
-                            
-                            return (
-                            <div key={index} className={`w-full text-left p-4 rounded-xl border-2 ${styles} font-medium flex gap-3`}>
-                                <div className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-current flex items-center justify-center text-xs font-bold">
-                                {['A', 'B', 'C', 'D'][index]}
+                            <div className="relative z-10">
+                                <h1 className="text-sm font-bold opacity-80 mb-1">工学院大学 情報学基礎論II</h1>
+                                <h2 className="text-3xl font-extrabold mb-4 leading-tight">電気と数学<br/>完全攻略マスター</h2>
+                                <div className="flex gap-4 text-sm font-medium">
+                                    <div className="bg-white/20 px-3 py-1 rounded-full flex items-center gap-1">
+                                        <Award size={16} /> 攻略数: {stats.completedSets.length}/5
+                                    </div>
+                                    <div className="bg-white/20 px-3 py-1 rounded-full flex items-center gap-1">
+                                        <BookOpen size={16} /> 全25問収録
+                                    </div>
                                 </div>
-                                {option}
                             </div>
-                            )
-                        })}
                         </div>
 
-                        <ResultCard 
-                            isCorrect={selectedOption === currentQuestion.correctIndex} 
-                            explanation={currentQuestion.explanation} 
-                            onNext={handleNext}
-                        />
+                        {/* Exam List */}
+                        <div className="px-4 max-w-md mx-auto space-y-4">
+                            <h3 className="font-bold text-slate-500 ml-2 mb-2">模擬試験コースを選択</h3>
+                            {EXAM_SETS.map((set, idx) => {
+                                const isCompleted = stats.completedSets.includes(set.id);
+                                return (
+                                    <button
+                                        key={set.id}
+                                        onClick={() => startExam(set.id)}
+                                        className="w-full bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all active:scale-98 flex items-center justify-between group"
+                                    >
+                                        <div className="text-left">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className={`text-xs font-bold px-2 py-0.5 rounded ${isCompleted ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                                                    {isCompleted ? '完了' : `第${idx+1}回`}
+                                                </span>
+                                                <span className="text-xs text-slate-400 font-mono tracking-widest">{set.difficulty}</span>
+                                            </div>
+                                            <h4 className="font-bold text-slate-800 text-lg">{set.title.split('：')[1]}</h4>
+                                            <p className="text-xs text-slate-500 mt-1">{set.subtitle}</p>
+                                        </div>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isCompleted ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-blue-600 group-hover:text-white'} transition-colors`}>
+                                            {isCompleted ? <CheckCircle size={20} /> : <Zap size={20} />}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <p className="text-center text-xs text-slate-400 mt-8">全問正解で単位取得を目指そう！</p>
                     </div>
-                    )}
-                </div>
+                );
+            }
+
+            const currentSet = EXAM_SETS.find(s => s.id === selectedSetId);
+            
+            // --- RESULT VIEW ---
+            if (view === 'result') {
+                const percentage = Math.round((score / currentSet.questions.length) * 100);
+                return (
+                    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+                        <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 text-center animate-fade-in-up">
+                            <div className="mb-6 inline-flex p-4 rounded-full bg-slate-50">
+                                {percentage === 100 ? (
+                                    <Award className="w-20 h-20 text-yellow-500 animate-pulse-soft" />
+                                ) : (
+                                    <TrendingUp className="w-20 h-20 text-blue-500" />
+                                )}
+                            </div>
+                            
+                            <h2 className="text-2xl font-bold text-slate-800 mb-2">{currentSet.title.split('：')[1]}</h2>
+                            <p className="text-slate-500 mb-6 text-sm">結果発表</p>
+                            
+                            <div className="text-6xl font-black text-slate-900 mb-2 font-mono tracking-tighter">
+                                {score}<span className="text-2xl text-slate-400 font-sans font-normal">/{currentSet.questions.length}</span>
+                            </div>
+                            
+                            <p className={`font-bold mb-8 ${percentage === 100 ? 'text-green-600' : 'text-blue-600'}`}>
+                                {percentage === 100 ? 'パーフェクト！素晴らしい理解度です。' : 'お疲れ様でした！復習して満点を目指そう。'}
+                            </p>
+
+                            <div className="space-y-3">
+                                <button
+                                    onClick={() => startExam(selectedSetId)}
+                                    className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-200"
+                                >
+                                    もう一度挑戦
+                                </button>
+                                <button
+                                    onClick={goHome}
+                                    className="w-full py-4 bg-white border-2 border-slate-100 text-slate-600 font-bold rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 hover:bg-slate-50"
+                                >
+                                    <Home size={18} />
+                                    ホームに戻る
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // --- PLAYING VIEW ---
+            const question = currentSet.questions[currentQIndex];
+
+            return (
+                <div className="min-h-screen bg-slate-100 md:py-8 font-sans text-slate-800">
+                    <div className="max-w-md mx-auto h-full flex flex-col md:h-auto">
+                        
+                        {/* Header Bar */}
+                        <div className="bg-white p-4 flex items-center justify-between shadow-sm md:rounded-t-2xl z-10">
+                            <button onClick={goHome} className="p-2 -ml-2 text-slate-400 hover:text-slate-600">
+                                <Home size={20} />
+                            </button>
+                            <span className="font-bold text-slate-700 text-sm">{currentSet.title.split('：')[1]}</span>
+                            <div className="text-xs font-bold bg-slate-100 px-2 py-1 rounded text-slate-500">
+                                Q{currentQIndex + 1}/{currentSet.questions.length}
+                            </div>
+                        </div>
+
+                        {/* Progress */}
+                        <div className="h-1 w-full bg-slate-200">
+                            <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${((currentQIndex) / currentSet.questions.length) * 100}%` }}></div>
+                        </div>
+
+                        <div className="p-4 flex-1 flex flex-col">
+                            {/* Question Card */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+                                <span className="inline-block text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded mb-3">
+                                    {question.category}
+                                </span>
+                                <h2 className="text-lg font-bold leading-relaxed text-slate-900">
+                                    {question.text}
+                                </h2>
+                            </div>
+
+                            {/* Options */}
+                            <div className="flex-1">
+                                {!isAnswered ? (
+                                    <div className="space-y-3">
+                                        {question.options.map((option, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => handleAnswer(index)}
+                                                className="w-full text-left p-4 rounded-xl bg-white border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all active:scale-98 shadow-sm font-medium text-slate-700 flex gap-3 items-start group"
+                                            >
+                                                <div className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-slate-300 group-hover:border-blue-400 flex items-center justify-center text-xs font-bold text-slate-400 group-hover:text-blue-500 mt-0.5">
+                                                    {['A', 'B', 'C', 'D'][index]}
+                                                </div>
+                                                <span className="leading-tight">{option}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4 animate-fade-in-up">
+                                        {/* Result Visualization */}
+                                        <div className="space-y-2 opacity-70 pointer-events-none">
+                                            {question.options.map((option, index) => {
+                                                let styles = "bg-white border-slate-200 text-slate-400";
+                                                if (index === question.correctIndex) styles = "bg-green-50 border-green-500 text-green-900 font-bold";
+                                                else if (index === selectedOption) styles = "bg-red-50 border-red-500 text-red-900";
+                                                
+                                                return (
+                                                    <div key={index} className={`w-full text-left p-3 rounded-lg border ${styles} text-sm flex gap-3`}>
+                                                        {index === question.correctIndex && <CheckCircle size={16} className="mt-0.5" />}
+                                                        {index !== question.correctIndex && index === selectedOption && <XCircle size={16} className="mt-0.5" />}
+                                                        {index !== question.correctIndex && index !== selectedOption && <div className="w-4" />}
+                                                        {option}
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+
+                                        <ResultCard 
+                                            isCorrect={selectedOption === question.correctIndex} 
+                                            explanation={question.explanation} 
+                                            onNext={handleNext}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             );
         }
