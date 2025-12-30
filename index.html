@@ -1,0 +1,387 @@
+import React, { useState, useEffect } from 'react';
+import { BookOpen, CheckCircle, XCircle, Award, RefreshCw, Zap, TrendingUp, Clock } from 'lucide-react';
+
+// --- Types ---
+type Question = {
+  id: number;
+  category: string;
+  text: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+};
+
+type StudyStats = {
+  totalAnswered: number;
+  totalCorrect: number;
+  streakDays: number;
+  lastStudyDate: string | null;
+  bestScore: number;
+};
+
+// --- Data: 講義資料に基づいた5つの予想問題 ---
+const QUESTIONS: Question[] = [
+  {
+    id: 1,
+    category: 'アナログとデジタル',
+    text: 'デジタル情報の「劣化」に関する説明として、講義資料の内容に即して最も適切なものはどれですか？',
+    options: [
+      'デジタル情報は数値データなので、どのような環境でも絶対に劣化しない',
+      '現実のデジタル情報は物理的な状態（電圧や磁気など）で保存されるため、ノイズや経年劣化の影響を受ける',
+      'CDなどの光ディスクは物理的な凹凸で記録するため、傷がついても読み取りエラーは発生しない',
+      'デジタル信号はアナログ信号と異なり、コピーしても物理的な保存媒体が必要ないため劣化しない'
+    ],
+    correctIndex: 1,
+    explanation: '講義資料(Slide 4-6)によると、理論上のデジタル値は劣化しませんが、現実は物理的な状態（電荷、磁気、凹凸）で保存・処理されるため、熱や経年劣化、ノイズの影響を受けます。'
+  },
+  {
+    id: 2,
+    category: '電気の基礎',
+    text: '電流と電子の流れの向きについての説明で、正しいものはどれですか？',
+    options: [
+      '電流の向きと電子の流れる向きは「同じ」である',
+      '電流の向きと電子の流れる向きは「逆」である',
+      '電流はプラスからマイナスへ、電子もプラスからマイナスへ流れる',
+      '電子はマイナスからプラスへ流れるが、電流の向きは定義されていない'
+    ],
+    correctIndex: 1,
+    explanation: '講義資料(Slide 11)によると、電流は正極(+)から負極(-)へ流れると定義されていますが、実体である電子は負極(-)から正極(+)へ流れるため、その向きは「逆」になります。'
+  },
+  {
+    id: 3,
+    category: 'オームの法則',
+    text: '電圧12Vの電池に500Ωの抵抗が接続されているとき、流れる電流は何mAですか？',
+    options: [
+      '2.4 mA',
+      '24 mA',
+      '60 mA',
+      '240 mA'
+    ],
+    correctIndex: 1,
+    explanation: 'オームの法則 I = V / R より、I = 12 / 500 = 0.024 [A] です。これをmAに換算すると 24 mA となります。(Slide 16の例題)'
+  },
+  {
+    id: 4,
+    category: '回路計算',
+    text: '12Ωの抵抗と4Ωの抵抗を「並列」に接続した部分の合成抵抗はいくらになりますか？',
+    options: [
+      '3 Ω',
+      '8 Ω',
+      '16 Ω',
+      '48 Ω'
+    ],
+    correctIndex: 0,
+    explanation: '和分の積、または逆数の和で計算します。1/R = 1/12 + 1/4 = 1/12 + 3/12 = 4/12 = 1/3 なので、R = 3[Ω] です。(Slide 22の問題解説より)'
+  },
+  {
+    id: 5,
+    category: '直列回路の性質',
+    text: '直列回路における電圧降下についての説明で、正しいものはどれですか？',
+    options: [
+      '各抵抗での電圧降下の和は、電源電圧と等しくなる',
+      '各抵抗での電圧降下は、抵抗値に関わらず全て同じ値になる',
+      '回路のどこで測定しても、電圧降下の値は電流値と同じになる',
+      '抵抗が大きいほど、その部分での電圧降下は小さくなる'
+    ],
+    correctIndex: 0,
+    explanation: '直列回路では電流が一定で、各抵抗での電圧降下(V=IR)の総和は電源電圧と等しくなります（キルヒホッフの第2法則）。(Slide 17-18)'
+  }
+];
+
+// --- Components ---
+
+const ProgressBar = ({ current, total }: { current: number; total: number }) => (
+  <div className="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+    <div
+      className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+      style={{ width: `${(current / total) * 100}%` }}
+    ></div>
+  </div>
+);
+
+const ResultCard = ({ isCorrect, explanation, onNext }: { isCorrect: boolean; explanation: string; onNext: () => void }) => (
+  <div className="animate-fade-in-up bg-white p-6 rounded-xl shadow-lg border border-slate-100">
+    <div className="flex items-center gap-3 mb-4">
+      {isCorrect ? (
+        <CheckCircle className="w-8 h-8 text-green-500" />
+      ) : (
+        <XCircle className="w-8 h-8 text-red-500" />
+      )}
+      <h3 className={`text-xl font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+        {isCorrect ? '正解！' : '不正解...'}
+      </h3>
+    </div>
+    
+    <div className="bg-slate-50 p-4 rounded-lg mb-6 text-slate-700 leading-relaxed text-sm md:text-base">
+      <span className="font-bold block mb-1 text-slate-900">解説:</span>
+      {explanation}
+    </div>
+
+    <button
+      onClick={onNext}
+      className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+    >
+      次へ進む
+      <TrendingUp className="w-5 h-5" />
+    </button>
+  </div>
+);
+
+// --- Main App Component ---
+
+export default function StudyApp() {
+  const [gameState, setGameState] = useState<'start' | 'playing' | 'result'>('start');
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [score, setScore] = useState(0);
+  const [stats, setStats] = useState<StudyStats>({
+    totalAnswered: 0,
+    totalCorrect: 0,
+    streakDays: 0,
+    lastStudyDate: null,
+    bestScore: 0
+  });
+
+  // Load stats from localStorage on mount
+  useEffect(() => {
+    const savedStats = localStorage.getItem('elec_math_stats');
+    if (savedStats) {
+      setStats(JSON.parse(savedStats));
+    }
+  }, []);
+
+  // Update stats helper
+  const updateStats = (currentScore: number) => {
+    const today = new Date().toDateString();
+    const newStats = { ...stats };
+
+    // Update streak
+    if (newStats.lastStudyDate !== today) {
+      if (newStats.lastStudyDate === new Date(Date.now() - 86400000).toDateString()) {
+        newStats.streakDays += 1;
+      } else {
+        newStats.streakDays = 1;
+      }
+      newStats.lastStudyDate = today;
+    }
+
+    newStats.totalAnswered += QUESTIONS.length;
+    newStats.totalCorrect += currentScore;
+    newStats.bestScore = Math.max(newStats.bestScore, currentScore);
+
+    setStats(newStats);
+    localStorage.setItem('elec_math_stats', JSON.stringify(newStats));
+  };
+
+  const startGame = () => {
+    setGameState('playing');
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setIsAnswered(false);
+    setSelectedOption(null);
+  };
+
+  const handleAnswer = (index: number) => {
+    if (isAnswered) return;
+    
+    setSelectedOption(index);
+    setIsAnswered(true);
+    
+    if (index === QUESTIONS[currentQuestionIndex].correctIndex) {
+      setScore(s => s + 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentQuestionIndex < QUESTIONS.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+      setIsAnswered(false);
+      setSelectedOption(null);
+    } else {
+      updateStats(score + (selectedOption === QUESTIONS[currentQuestionIndex].correctIndex ? 1 : 0));
+      setGameState('result');
+    }
+  };
+
+  const currentQuestion = QUESTIONS[currentQuestionIndex];
+
+  // --- Render Views ---
+
+  if (gameState === 'start') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100 p-4 flex flex-col items-center justify-center font-sans text-slate-800">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-blue-600 p-8 text-center">
+            <Zap className="w-16 h-16 text-yellow-300 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-white mb-2">情報学基礎論II</h1>
+            <h2 className="text-xl font-bold text-blue-100">電気と数学 マスター</h2>
+          </div>
+          
+          <div className="p-6">
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="bg-indigo-50 p-4 rounded-xl flex flex-col items-center">
+                <span className="text-indigo-600 mb-1"><Award className="w-6 h-6" /></span>
+                <span className="text-sm text-slate-500">最高スコア</span>
+                <span className="text-xl font-bold text-slate-800">{stats.bestScore}/{QUESTIONS.length}</span>
+              </div>
+              <div className="bg-orange-50 p-4 rounded-xl flex flex-col items-center">
+                <span className="text-orange-500 mb-1"><TrendingUp className="w-6 h-6" /></span>
+                <span className="text-sm text-slate-500">連続学習</span>
+                <span className="text-xl font-bold text-slate-800">{stats.streakDays}日</span>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-8">
+              <div className="flex items-center gap-3 text-slate-600 text-sm">
+                <BookOpen className="w-4 h-4" />
+                <span>全5問の予想問題で実力チェック</span>
+              </div>
+              <div className="flex items-center gap-3 text-slate-600 text-sm">
+                <Clock className="w-4 h-4" />
+                <span>スキマ時間の1-2分で完了</span>
+              </div>
+            </div>
+
+            <button
+              onClick={startGame}
+              className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg transition-transform active:scale-95 text-lg"
+            >
+              テスト対策を始める
+            </button>
+          </div>
+        </div>
+        <p className="mt-6 text-xs text-slate-500">工学院大学 情報学基礎論II 2025対応</p>
+      </div>
+    );
+  }
+
+  if (gameState === 'result') {
+    const percentage = Math.round((score / QUESTIONS.length) * 100);
+    let message = '';
+    let messageColor = '';
+
+    if (percentage === 100) {
+      message = '完璧です！定期テストも安心ですね！';
+      messageColor = 'text-green-600';
+    } else if (percentage >= 80) {
+      message = '素晴らしい！あと少しで満点です。';
+      messageColor = 'text-blue-600';
+    } else {
+      message = '復習しましょう。解説を読み直せば大丈夫！';
+      messageColor = 'text-orange-600';
+    }
+
+    return (
+      <div className="min-h-screen bg-indigo-50 p-4 flex flex-col items-center justify-center font-sans">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden p-8 text-center animate-fade-in-up">
+          <div className="mb-6 inline-flex p-4 rounded-full bg-slate-100">
+            {percentage === 100 ? (
+               <Award className="w-16 h-16 text-yellow-500" />
+            ) : (
+               <CheckCircle className="w-16 h-16 text-blue-500" />
+            )}
+          </div>
+          
+          <h2 className="text-3xl font-bold text-slate-800 mb-2">結果発表</h2>
+          <div className="text-5xl font-black text-blue-600 mb-4 font-mono">
+            {score}<span className="text-2xl text-slate-400 font-sans font-normal"> / {QUESTIONS.length}</span>
+          </div>
+
+          <p className={`font-bold mb-8 ${messageColor}`}>
+            {message}
+          </p>
+
+          <div className="bg-slate-50 rounded-xl p-4 mb-8 text-left text-sm text-slate-600">
+            <h4 className="font-bold mb-2 text-slate-800">学習のヒント:</h4>
+            <ul className="list-disc list-inside space-y-1">
+              <li>オームの法則の計算(mAの単位変換)</li>
+              <li>並列回路の合成抵抗の公式</li>
+              <li>デジタル信号が劣化する理由</li>
+            </ul>
+          </div>
+
+          <button
+            onClick={startGame}
+            className="w-full py-4 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+          >
+            <RefreshCw className="w-5 h-5" />
+            もう一度挑戦する
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Playing State
+  return (
+    <div className="min-h-screen bg-slate-100 p-4 md:pt-10 font-sans text-slate-800">
+      <div className="max-w-md w-full mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-sm font-bold text-slate-500">
+            第 {currentQuestionIndex + 1} 問 <span className="text-slate-300">/ {QUESTIONS.length}</span>
+          </div>
+          <div className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
+            {currentQuestion.category}
+          </div>
+        </div>
+
+        <ProgressBar current={currentQuestionIndex + 1} total={QUESTIONS.length} />
+
+        {/* Question Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+          <h2 className="text-lg md:text-xl font-bold leading-relaxed text-slate-900">
+            {currentQuestion.text}
+          </h2>
+        </div>
+
+        {/* Options */}
+        {!isAnswered ? (
+          <div className="space-y-3">
+            {currentQuestion.options.map((option, index) => (
+              <button
+                key={index}
+                onClick={() => handleAnswer(index)}
+                className="w-full text-left p-4 rounded-xl bg-white border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all active:scale-98 shadow-sm font-medium text-slate-700"
+              >
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center text-xs font-bold text-slate-400">
+                    {['A', 'B', 'C', 'D'][index]}
+                  </div>
+                  <span>{option}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+             {/* Show selected and correct options visualization (Optional, simplified to ResultCard) */}
+             <div className="space-y-3 opacity-60 pointer-events-none">
+              {currentQuestion.options.map((option, index) => {
+                let styles = "bg-white border-slate-200";
+                if (index === currentQuestion.correctIndex) styles = "bg-green-100 border-green-500 text-green-900";
+                else if (index === selectedOption) styles = "bg-red-100 border-red-500 text-red-900";
+                
+                return (
+                  <div key={index} className={`w-full text-left p-4 rounded-xl border-2 ${styles} font-medium flex gap-3`}>
+                     <div className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-current flex items-center justify-center text-xs font-bold">
+                      {['A', 'B', 'C', 'D'][index]}
+                    </div>
+                    {option}
+                  </div>
+                )
+              })}
+             </div>
+
+             <ResultCard 
+                isCorrect={selectedOption === currentQuestion.correctIndex} 
+                explanation={currentQuestion.explanation} 
+                onNext={handleNext}
+             />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
