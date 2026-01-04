@@ -3,33 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basic English II Full Learning App</title>
+    <title>English Master - Basic English II</title>
+    
+    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap');
         body {
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
-            background-color: #f8fafc;
-            overscroll-behavior-y: none;
+            background-color: #f3f4f6; /* gray-100 */
         }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #111827; /* gray-900 */
+            }
         }
-        .animate-slide-up {
-            animation: slideUp 0.3s ease-out forwards;
+        /* Custom Scrollbar for hidden look */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
         }
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        /* Blobs animation */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
     </style>
 </head>
 <body>
@@ -37,565 +62,877 @@
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
+        const { motion, AnimatePresence } = window.Motion;
 
+        // --- Icons (Inline SVGs) ---
         const Icons = {
+            ChevronRight: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m9 18 6-6-6-6"/></svg>,
             BookOpen: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-            CheckCircle: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
-            XCircle: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>,
-            Star: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
-            Trophy: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17"/><path d="M14 14.66V17"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/><path d="M8.5 22v-2.14A10 10 0 0 1 3.35 15.6C3 15 3 14.35 3 13.75V13a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v.75c0 .6 0 1.25-.35 1.85A10 10 0 0 1 15.5 19.86V22"/></svg>,
-            ArrowLeft: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>,
-            Play: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            CheckCircle: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>,
+            XCircle: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>,
+            Trophy: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>,
+            Home: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+            RotateCcw: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"/><path d="M3 5v7h7"/></svg>,
+            ArrowLeft: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>,
+            Star: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         };
 
-        const APP_DATA = [
+        // --- Data ---
+        // Added unique IDs to every question to track mastery status
+        const quizData = [
             {
-                id: "L1",
-                title: "Lesson 1: Part 5 動詞(1)",
-                sections: [
-                    {
-                        id: "L1_TARGET",
-                        title: "TODAY'S TARGET TEST",
-                        type: "grammar",
-                        questions: [
-                            { text: "The film Out in Space received mostly positive reviews and was highly _______ for its brilliant visual effects.", options: ["praise", "praised", "praises", "praising"], correct: 1, explanation: "受動態の文です。「be動詞(was) + highly + 過去分詞」の形になります。praised（賞賛された）が正解です。" },
-                            { text: "Warmly _______ by the employees in the Overton branch, the president felt glad he had come all the way despite his busy schedule.", options: ["welcome", "welcomed", "welcomes", "welcoming"], correct: 1, explanation: "分詞構文です。「（従業員によって）温かく迎えられたので」という受動の意味になるため、過去分詞の Welcomed が適切です。" },
-                            { text: "Gina Carson could not give a prompt reply when _______ a managerial position at a rival company.", options: ["offer", "offered", "offering", "offers"], correct: 1, explanation: "接続詞(when)の後の分詞構文です。「オファーされた時」という受動の意味なので offered が正解です。" },
-                            { text: "Three people were randomly _______ from the audience and brought up on stage to try a new computer game.", options: ["select", "selected", "selecting", "selects"], correct: 1, explanation: "受動態「were + 過去分詞」の形です。選ばれたので selected が正解です。" },
-                            { text: "_______ as the project leader, Scott Thorne delegated various tasks to his team members at the meeting.", options: ["Being chosen", "Choose", "Choosing", "Chose"], correct: 0, explanation: "文脈判断です。リーダーとして「選ばれて（Being chosen）」が文法的に最も自然です。" },
-                            { text: "The lawyer argued in court that his client _______ illegally in prison and should be released right away.", options: ["held", "holds", "is being held", "is holding"], correct: 2, explanation: "「不当に拘束されている（現在進行形の受動態）」という意味にする必要があります。is being held が正解です。" },
-                            { text: "The sales director proposed that the campaign materials _______ printed in English as well as in Japanese.", options: ["are", "be", "were", "would be"], correct: 1, explanation: "提案・要求を表す動詞(propose)に続くthat節内では、動詞の原形を用います（仮定法現在）。したがって be が正解です。" },
-                            { text: "After all the applications are reviewed, qualified candidates will _______ to schedule an interview.", options: ["be called", "call", "called", "calling"], correct: 0, explanation: "候補者は「呼ばれる」側なので、受動態の will be called が正解です。" },
-                            { text: "The Chinese automaker's latest model comes _______ with a remote control to park the car in tight spots.", options: ["equip", "equipped", "equipping", "equips"], correct: 1, explanation: "come equipped with で「～が装備されている」という慣用表現です。" },
-                            { text: "The meeting will be _______ by a reception where light refreshments will be served.", options: ["follow", "followed", "following", "follows"], correct: 1, explanation: "受動態「will be followed by...」（～の後に...が続く）の形です。" },
-                            { text: "The excellent works from the annual art competition _______ at Oakland City Museum through March.", options: ["are being displayed", "are displaying", "display", "displayed"], correct: 0, explanation: "作品は「展示されている」最中なので、現在進行形の受動態 are being displayed が正解です。" },
-                            { text: "Fedelico's, _______ in the heart of River City, has been a popular restaurant in the city for over 50 years.", options: ["situate", "situated", "situating", "to situate"], correct: 1, explanation: "分詞の後置修飾（または挿入句）です。「～に位置する」は situated を使います。" },
-                            { text: "_______ for her best-selling nature photography books, Naomi Ward opens a photography school next month.", options: ["Know", "Knowing", "Known", "To know"], correct: 2, explanation: "分詞構文です。「～で知られている」という意味なので、過去分詞 Known で文を始めます。" },
-                            { text: "Because his report was due today, Chad Anderson had his colleague _______ him with it.", options: ["help", "helped", "helping", "to help"], correct: 0, explanation: "使役動詞 have + 人 + 原形不定詞（人に～してもらう）の形です。help が正解です。" },
-                            { text: "A suspect was injured in a police chase and taken to a hospital, according to a statement _______ from Gale County sheriff.", options: ["write", "written", "writing", "wrote"], correct: 1, explanation: "statement（声明）を修飾します。「書かれた」声明なので過去分詞 written が正解です。" },
-                            { text: "There is no cancellation fee, _______ that it is requested more than 60 days before the departure of the tour.", options: ["provide", "provided", "provides", "to provide"], correct: 1, explanation: "provided that ... で「～という条件で」「もし～ならば」という接続詞的な働きをします。" }
-                        ]
+                id: 1,
+                title: "Lesson 1",
+                subtitle: "Part 5: 動詞 (1)",
+                advice: "文脈から適切な動詞の形や時制を判断しましょう。",
+                targetTest: [
+                    { id: "L1_T_1", q: "The film Out in Space received mostly positive reviews and was highly ------- for its brilliant visual effects.", o: ["praise", "praised", "praises", "praising"], a: 1 },
+                    { id: "L1_T_2", q: "Warmly ------- by the employees in the Overton branch, the president felt glad he had come all the way despite his busy schedule.", o: ["welcome", "welcomed", "welcomes", "welcoming"], a: 1 },
+                    { id: "L1_T_3", q: "Gina Carson could not give a prompt reply when ------- a managerial position at a rival company.", o: ["offer", "offered", "offering", "offers"], a: 2 },
+                    { id: "L1_T_4", q: "Three people were randomly ------- from the audience and brought up on stage to try a new computer game.", o: ["select", "selected", "selecting", "selects"], a: 1 },
+                    { id: "L1_T_5", q: "------- project leader, Scott Thorne delegated various tasks to his team members at the meeting.", o: ["Being chosen", "Choose", "Choosing", "Chose"], a: 0 },
+                    { id: "L1_T_6", q: "The lawyer argued in court that his client ------- illegally in prison and should be released right away.", o: ["held", "holds", "is being held", "is holding"], a: 2 },
+                    { id: "L1_T_7", q: "The sales director proposed that the campaign materials ------- printed in English as well as in Japanese.", o: ["are", "be", "were", "would be"], a: 1 },
+                    { id: "L1_T_8", q: "After all the applications are reviewed, qualified candidates will ------- to schedule an interview.", o: ["be called", "call", "called", "calling"], a: 0 },
+                    { id: "L1_T_9", q: "The Chinese automaker's latest model comes with a remote control to park the car in tight spots.", o: ["equip", "equipped", "equipping", "equips"], a: 1 },
+                    { id: "L1_T_10", q: "The meeting will be ------- by a reception where light refreshments will be served.", o: ["follow", "followed", "following", "follows"], a: 1 },
+                    { id: "L1_T_11", q: "The excellent works from the annual art competition ------- at Oakland City Museum through March.", o: ["are being displayed", "are displaying", "display", "displayed"], a: 0 },
+                    { id: "L1_T_12", q: "Fedelico's, ------- in the heart of River City, has been a popular restaurant in the city for over 50 years.", o: ["situate", "situated", "situating", "to situate"], a: 1 },
+                    { id: "L1_T_13", q: "------- for her best-selling nature photography books, Naomi Ward opens a photography school next month.", o: ["Know", "Knowing", "Known", "To know"], a: 2 },
+                    { id: "L1_T_14", q: "Because his report was due today, Chad Anderson had his colleague ------- him with it.", o: ["help", "helped", "helping", "to help"], a: 0 },
+                    { id: "L1_T_15", q: "A suspect was injured in a police chase and taken to a hospital, according to a statement ------- from Gale County sheriff.", o: ["write", "written", "writing", "wrote"], a: 1 },
+                    { id: "L1_T_16", q: "There is no cancellation fee, ------- that it is requested more than 60 days before the departure of the tour.", o: ["provide", "provided", "provides", "to provide"], a: 1 }
+                ],
+                reviewQuiz: [
+                    { id: "L1_R_1", q: "Marie Chang was ------- to accompany the president just two days before the business trip.", o: ["assign", "assigned", "assigning", "to assign"], a: 1 },
+                    { id: "L1_R_2", q: "It is strongly suggested that smoking and drinking ------- avoided during pregnancy.", o: ["are", "be", "were", "will be"], a: 1 },
+                    { id: "L1_R_3", q: "Lea Johnson was extremely proud to have her design ------- for the new building.", o: ["choose", "choosing", "chose", "chosen"], a: 3 },
+                    { id: "L1_R_4", q: "Due to mechanical difficulties, the FER flight was ------- by three hours.", o: ["delay", "delayed", "delaying", "delays"], a: 1 },
+                    { id: "L1_R_5", q: "The advisory panel agreed the new guidelines will ------- tentatively for two years, followed by a review.", o: ["be implemented", "be implementing", "have implemented", "implement"], a: 0 },
+                    { id: "L1_R_6", q: "In order to combat the heat, employees ------- to dress more casually and drink plenty of fluids.", o: ["are encouraged", "encourage", "encouraged", "encouraging"], a: 0 },
+                    { id: "L1_R_7", q: "Customers responded very positively to the newly ------- website and print catalog.", o: ["design", "designed", "designing", "to design"], a: 1 },
+                    { id: "L1_R_8", q: "If a sofa bed -------, then there will be an additional charge of $25 per night.", o: ["is required", "is requiring", "require", "requires"], a: 0 }
+                ]
+            },
+            {
+                id: 2,
+                title: "Lesson 2",
+                subtitle: "Part 6: 動詞 (2)",
+                advice: "長文問題です。前後の文脈から動詞の意味や時制を補いましょう。",
+                targetTest: [
+                    { 
+                        id: "L2_T_1",
+                        passage: "Please be informed that effective September 1, all requests for vacation or sick leave must be filed through the company intranet site. (1) Click on 'Leave Request' to access the form you (2). All paper forms currently (3) will be collected by supervisors and managers for recycling.\n\nSocial responsibility is part of our company's mission statement, and this is one way to put into practice what we believe. Please join us in our promotion of a paperless environment in this company, a small effort (4) the global environment.",
+                        q: "(1) Select the best sentence.", o: ["No vacation days will be granted until the project is finished.", "Please check on Order, then fill out the Payment information.", "There is a new category for vacation/sick leave on the home menu.", "There will be a training session about the new retirement benefits soon."], a: 2 
                     },
-                    {
-                        id: "L1_REVIEW",
-                        title: "Review Quiz",
-                        type: "grammar",
-                        questions: [
-                            { text: "Marie Chang was _______ to accompany the president just two days before the business trip.", options: ["assign", "assigned", "assigning", "to assign"], correct: 1, explanation: "「任命された」という受動態です。assigned が正解です。" },
-                            { text: "It is strongly suggested that smoking and drinking _______ avoided during pregnancy.", options: ["are", "be", "were", "will be"], correct: 1, explanation: "提案(suggest)の後のthat節内なので、動詞の原形 be を使います。" },
-                            { text: "Lea Johnson was extremely proud to have her design _______ for the new building.", options: ["choose", "choosing", "chose", "chosen"], correct: 3, explanation: "have + 目的語 + 過去分詞（～してもらう／される）。デザインが「選ばれた」ので chosen です。" },
-                            { text: "Due to mechanical difficulties, the FER flight was _______ by three hours.", options: ["delay", "delayed", "delaying", "delays"], correct: 1, explanation: "受動態「遅延した」です。delayed が正解です。" },
-                            { text: "The advisory panel agreed the new guidelines will _______ tentatively for two years, followed by a review.", options: ["be implemented", "be implementing", "have implemented", "implement"], correct: 0, explanation: "ガイドラインは「実施される」ものなので、受動態の be implemented が正解です。" },
-                            { text: "In order to combat the heat, employees _______ to dress more casually and drink plenty of fluids.", options: ["are encouraged", "encourage", "encouraged", "encouraging"], correct: 0, explanation: "従業員は「推奨されている」ので、受動態の are encouraged です。" },
-                            { text: "Customers responded very positively to the newly _______ website and print catalog.", options: ["design", "designed", "designing", "to design"], correct: 1, explanation: "「新しくデザインされた」ウェブサイト。過去分詞 designed が形容詞的に働きます。" },
-                            { text: "If a sofa bed _______, then there will be an additional charge of $25 per night.", options: ["is required", "is requiring", "require", "requires"], correct: 0, explanation: "「もしソファベッドが必要とされるなら」という受動の意味。is required が正解です。" }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: "L2",
-                title: "Lesson 2: Part 6 動詞(2)",
-                sections: [
-                    {
-                        id: "L2_TARGET",
-                        title: "TODAY'S TARGET TEST",
-                        type: "reading",
-                        content: "Please be informed that effective September 1, all requests for vacation or sick leave must be filed through the company intranet site. Click on 'Leave Request' to access the form you [1]. All paper forms currently [2] will be collected by supervisors and managers for recycling.\n\nSocial responsibility is part of our company's mission statement, and this is one way to put into practice what we believe. Please join us in our promotion of a paperless environment in this company, a small effort [3] the global environment.",
-                        questions: [
-                            { text: "[1] Select the best answer.", options: ["need", "needed", "needing", "needs"], correct: 0, explanation: "関係代名詞が省略されています。the form (that) you need（あなたが必要とするフォーム）。現在形の文脈なので need です。" },
-                            { text: "[2] Select the best answer.", options: ["being used", "to be used", "use", "using"], correct: 0, explanation: "「現在使われている」すべての紙のフォーム。currently being used（現在進行形の受動態の分詞用法）が適切です。" },
-                            { text: "[3] Select the best answer.", options: ["help", "helped", "helping", "to help"], correct: 3, explanation: "「地球環境を助けるための」小さな努力。不定詞の形容詞的用法 to help が適切です。" }
-                        ]
+                    { id: "L2_T_2", passage: "Same passage as above.", q: "(2)", o: ["need", "needed", "needing", "needs"], a: 0 },
+                    { id: "L2_T_3", passage: "Same passage as above.", q: "(3)", o: ["being used", "to be used", "use", "using"], a: 0 },
+                    { id: "L2_T_4", passage: "Same passage as above.", q: "(4)", o: ["help", "helped", "helping", "to help"], a: 3 },
+                    { 
+                        id: "L2_T_5",
+                        passage: "Allways Airlines to add nonstop Bayville-Soda Springs flight\n\nBayville is getting a nonstop flight to Soda Springs once a week, Allways Airlines announced yesterday. The airline spokesperson said it (5) Saturday-only nonstop flights between Bayville and Soda Springs Regional Airport on May 16. (6)\n\nAllways schedule calls for Bering 737s (7) Bayville at 11:50 a.m. and arrive at 1:10 p.m. Return flights will leave Soda Springs at 10:30 a.m. and arrive in Bayville at 12:10 p.m.\n\nAllways lists one-way fares (8) at $128. The airline also flies to Oak Brook, St. Ignacio, and Denton from Bayville.",
+                        q: "(5)", o: ["began", "beginning", "has begun", "would begin"], a: 3 
                     },
+                    { id: "L2_T_6", passage: "Same passage as above.", q: "(6) Select the best sentence.", o: ["Allways has been having financial trouble for several months.", "Free gifts will be given to all passengers flying on that day.", "Residents are happy to have express train service to Soda Springs.", "The Soda Springs Regional Airport will open in mid-June."], a: 1 }, 
+                    { id: "L2_T_7", passage: "Same passage as above.", q: "(7)", o: ["leaves", "leaving", "left", "to leave"], a: 3 },
+                    { id: "L2_T_8", passage: "Same passage as above.", q: "(8)", o: ["start", "started", "starting", "to start"], a: 2 }
+                ],
+                reviewQuiz: [
                     {
-                        id: "L2_REVIEW",
-                        title: "Review Quiz",
-                        type: "reading",
-                        content: "Jasper Enterprises [1] yesterday that as of November 18, the new chief of operations will be Veronica Holmes. Ms. Holmes comes to Jasper from Monroe Group, where she has served as marketing vice president for the past five years. Ms. Holmes will be concentrating on domestic operations, [2] up Michael Roberts, the company's owner, to concentrate on public relations and his new project tentatively [3] as Jasper Global Initiatives.",
-                        questions: [
-                            { text: "[1] Select the best answer.", options: ["announce", "announced", "announces", "announcing"], correct: 1, explanation: "yesterday（昨日）があるので過去形 announced が正解です。" },
-                            { text: "[2] Select the best answer.", options: ["free", "freed", "freeing", "frees"], correct: 2, explanation: "分詞構文です。「Michael Robertsを自由にさせる（解放する）ことで」。能動の意味なので freeing です。" },
-                            { text: "[3] Select the best answer.", options: ["knew", "know", "knowing", "known"], correct: 3, explanation: "「～として知られている」プロジェクト。過去分詞 known が正解です。" }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: "L3",
-                title: "Lesson 3: Part 5 形容詞・副詞",
-                sections: [
-                    {
-                        id: "L3_TARGET",
-                        title: "TARGET TEST",
-                        type: "grammar",
-                        questions: [
-                            { text: "Mr. Henderson finished the project _______ before the deadline.", options: ["quick", "quickly", "quickest", "quickness"], correct: 1, explanation: "動詞を修飾するのは副詞です。" },
-                            { text: "The new software is _______ user-friendly than the previous version.", options: ["much", "more", "most", "very"], correct: 1, explanation: "比較対象がある場合は比較級を使います。" }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: "L4",
-                title: "Lesson 4: Part 5 名詞・代名詞",
-                sections: [
-                    {
-                        id: "L4_TARGET",
-                        title: "TARGET TEST",
-                        type: "grammar",
-                        questions: [
-                            { text: "The security guard reminded the visitors that _______ must wear badges.", options: ["they", "their", "them", "theirs"], correct: 0, explanation: "主語となる代名詞が必要です。" }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: "L5",
-                title: "Lesson 5: Part 5 前置詞",
-                sections: [
-                    {
-                        id: "L5_TARGET",
-                        title: "TARGET TEST",
-                        type: "grammar",
-                        questions: [
-                            { text: "The store will be closed _______ Monday for inventory.", options: ["in", "at", "on", "to"], correct: 2, explanation: "特定の曜日には on を使います。" }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: "L6",
-                title: "Lesson 6: Part 5 接続詞",
-                sections: [
-                    {
-                        id: "L6_TARGET",
-                        title: "TARGET TEST",
-                        type: "grammar",
-                        questions: [
-                            { text: "The shipment was delayed _______ there was a problem.", options: ["because", "due to", "so", "although"], correct: 0, explanation: "節が続く場合は接続詞を使います。" }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: "L7",
-                title: "Lesson 7: Part 5 関係詞(1)",
-                sections: [
-                    {
-                        id: "L7_TARGET",
-                        title: "TODAY'S TARGET TEST",
-                        type: "grammar",
-                        questions: [
-                            { text: "According to a recent study, those _______ regularly read food labels tend to be healthier.", options: ["what", "when", "where", "who"], correct: 3, explanation: "those who ... で「～する人々」という定番表現です。" },
-                            { text: "_______ today's board meeting ends, Ms. Kane will have her staff clean the conference room.", options: ["When", "Which", "Who", "Why"], correct: 0, explanation: "「～する時」という接続詞 When が適切です。" },
-                            { text: "Ava Watson has a large collection of rare stamps, some of _______ were issued about 100 years ago.", options: ["that", "what", "which", "whom"], correct: 2, explanation: "「some of + 関係代名詞」の形。先行詞がスタンプ（物）なので which を使います。" },
-                            { text: "Although Kate Takeda recommended the latest digital camera, the customer wanted a camera _______ lens is detachable.", options: ["that", "which", "whose", "what"], correct: 2, explanation: "「そのレンズが」取り外し可能なカメラ。所有格の関係代名詞 whose が正解です。" },
-                            { text: "The branch manager decided to conduct a survey to find out _______ the employees think of the updated intranet.", options: ["that", "what", "which", "whose"], correct: 1, explanation: "find outの目的語となる間接疑問文。「従業員が何を考えているか」なので what です。" },
-                            { text: "According to the social media marketer, this artificial intelligence program allows you to monitor _______ people are interested in.", options: ["that", "what", "which", "whose"], correct: 1, explanation: "monitorの目的語。「人々が何に興味を持っているか（人々が興味を持っていること）」なので what が正解です。" },
-                            { text: "Five companies are nominated for this year's Global Business of the Year award, none of _______ have ever won in the past.", options: ["that", "them", "what", "which"], correct: 3, explanation: "継続用法の関係代名詞。先行詞が会社（物・組織）で、前置詞 of の後なので which が正解です。" },
-                            { text: "The Ubermaster 9X is the likeliest product _______ Techstar, Inc. can get back into the black the next year.", options: ["how", "when", "whereby", "why"], correct: 2, explanation: "「それによって～できる」という手段を表す関係副詞的用法。whereby（＝by which）が文脈に合います。" },
-                            { text: "Any revisions to the regulations shall be given to the parties concerned _______ may object to such modifications if they wish.", options: ["which", "who", "whom", "whose"], correct: 1, explanation: "先行詞は parties concerned（関係者たち）なので、人を指す主格の関係代名詞 who が正解です。" },
-                            { text: "After the division manager's lengthy small talk, the meeting finally came to the point _______ the real agenda was discussed.", options: ["what", "when", "where", "which"], correct: 2, explanation: "point（時点・段階）を先行詞とし、「その段階で」議題が話し合われたので、場所・状況を表す where が適切です。" },
-                            { text: "After long consideration, the personnel chief chose the candidate _______ major was electrical engineering.", options: ["that", "which", "whom", "whose"], correct: 3, explanation: "「その専攻が」電気工学である候補者。所有格 whose が正解です。" },
-                            { text: "Despite being married for over 50 years, Mr. Hunter still remembered vividly the moment _______ he first saw his wife.", options: ["when", "where", "which", "whose"], correct: 0, explanation: "moment（瞬間）という時を表す先行詞を受ける関係副詞 when が正解です。" },
-                            { text: "For the first time, Ms. Hathaway was in a situation _______ her potential client hesitated to close the deal.", options: ["how", "when", "where", "why"], correct: 2, explanation: "situation（状況）を受ける関係副詞は where が一般的です。" },
-                            { text: "Because of the last-minute venue change, the promoter had to contact all the attendees _______ had registered for the event.", options: ["that", "what", "which", "whom"], correct: 0, explanation: "attendees（出席者・人）を先行詞とする主格の関係代名詞。who がないため that を使います。" },
-                            { text: "The chairperson had to choose the idea _______ she liked best, but none of them really appealed to her.", options: ["that", "what", "where", "whose"], correct: 0, explanation: "idea（物）を先行詞とする目的格の関係代名詞。which か that ですが、選択肢にある that が正解です。" },
-                            { text: "This afternoon, Benjamin Lucas ran across one of his business contacts _______ he had known for a long time.", options: ["what", "which", "whom", "whose"], correct: 2, explanation: "contacts（連絡先・知人）という人を指す先行詞で、目的格（彼を知っていた）なので whom が正解です。" }
-                        ]
+                        id: "L2_R_1",
+                        passage: "Jasper Enterprises (1) yesterday that as of November 18, the new chief of operations will be Veronica Holmes. Ms. Holmes comes to Jasper from Monroe Group, where she has served as marketing vice president for the past five years. Ms. Holmes will be concentrating on domestic operations, (2) up Michael Roberts, the company's owner, to concentrate on public relations and his new project tentatively (3) as Jasper Global Initiatives. (4)",
+                        q: "(1)", o: ["announce", "announced", "announces", "announcing"], a: 1
                     },
-                    {
-                        id: "L7_REVIEW",
-                        title: "Review Quiz",
-                        type: "grammar",
-                        questions: [
-                            { text: "Nobody knew _______ Theo Cain had done for a living before joining our company.", options: ["as", "that", "what", "which"], correct: 2, explanation: "knewの目的語。「何をして生計を立てていたか」なので what です。" },
-                            { text: "Amelia Kowalski is the most competent and caring secretary _______ I have ever worked with.", options: ["that", "where", "which", "whose"], correct: 0, explanation: "最上級(the most...)を含む先行詞の場合、関係代名詞は that が好まれます。" },
-                            { text: "The hotels and restaurants in Huntsfield get busy in winter _______ lots of foreign tourists come.", options: ["when", "where", "which", "whose"], correct: 0, explanation: "winter（時）を説明する関係副詞 when が正解です。" },
-                            { text: "The house _______ the famous artist grew up was turned into a local tourist attraction.", options: ["for which", "in which", "of whom", "whenever"], correct: 1, explanation: "「その家の中で(in the house)」育ったので、in which (=where) が正解です。" },
-                            { text: "A special bonus will be given to the managers _______ departments or branches achieve their goals this year.", options: ["that", "which", "whom", "whose"], correct: 3, explanation: "「その（マネージャーの）部署が」目標を達成した。所有格 whose が正解です。" },
-                            { text: "Today Times features an interview of Razak Wan, a high school dropout _______ turned into a successful businessman.", options: ["which", "who", "whom", "whose"], correct: 1, explanation: "先行詞は dropout（人）。主格の関係代名詞 who が正解です。" },
-                            { text: "Gabriel Dupont didn't realize that his new client is a woman _______ he met at a business seminar last year.", options: ["which", "who", "whom", "whose"], correct: 2, explanation: "先行詞は woman。彼が「会った(met)」相手なので目的格の whom です。" },
-                            { text: "The prominent author wrote a new novel, _______ is rumored to be based on her childhood in China.", options: ["what", "which", "whose", "why"], correct: 1, explanation: "先行詞は novel。カンマがあるので非制限用法。which が正解です。" }
-                        ]
-                    }
+                    { id: "L2_R_2", passage: "Same passage as above.", q: "(2)", o: ["free", "freed", "freeing", "frees"], a: 2 },
+                    { id: "L2_R_3", passage: "Same passage as above.", q: "(3)", o: ["knew", "know", "knowing", "known"], a: 3 },
+                    { id: "L2_R_4", passage: "Same passage as above.", q: "(4) Select the best sentence.", o: ["Jasper Enterprises was struggling for many months before it closed.", "Mr. Roberts was hired ten months ago to help with the transition.", "The launch of Jasper Global Initiatives will formally be announced on November 29.", "The product launch will be overseen by the marketing team and Mr. Roberts."], a: 2 }
                 ]
             },
             {
-                id: "L8",
-                title: "Lesson 8: Part 5 関係詞(2)",
-                sections: [
+                id: 3,
+                title: "Lesson 3",
+                subtitle: "Part 7: 概要理解問題",
+                advice: "読解問題です。手紙や記事の目的、対象読者などの要点を掴みましょう。",
+                targetTest: [
                     {
-                        id: "L8_TARGET",
-                        title: "TARGET TEST",
-                        type: "grammar",
-                        questions: [
-                            { text: "This is the city _______ the annual technology conference is held.", options: ["which", "where", "when", "how"], correct: 1, explanation: "場所を先行詞とする関係副詞です。" }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: "L9",
-                title: "Lesson 9: Part 5 比較表現",
-                sections: [
-                    {
-                        id: "L9_TARGET",
-                        title: "TARGET TEST",
-                        type: "grammar",
-                        questions: [
-                            { text: "This laptop is just as _______ as the more expensive models.", options: ["powerful", "powerfully", "more powerful", "most powerful"], correct: 0, explanation: "asとasの間には原級が来ます。" }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: "L10",
-                title: "Lesson 10: Part 5 文と文のつながり(1)",
-                sections: [
-                    {
-                        id: "L10_TARGET",
-                        title: "TODAY'S TARGET TEST",
-                        type: "grammar",
-                        questions: [
-                            { text: "Aquaman The Ride has been a popular attraction in the amusement park _______ it opened last year.", options: ["as", "because", "since", "when"], correct: 2, explanation: "現在完了形(has been)と一緒に使われ、「～以来」を表す since が正解です。" },
-                            { text: "_______ the budget for the new city hall is limited, it will not be very difficult or expensive to find a decent builder.", options: ["As long as", "Even if", "In case", "So that"], correct: 1, explanation: "文脈的に逆接。「予算が限られているとしても、見つけるのは難しくない」となるため Even if（たとえ～でも）が正解です。" },
-                            { text: "_______ he is inexperienced as a lecturer, the doctor had the ability to speak clearly in public and connect with listeners.", options: ["Although", "If", "Whether", "When"], correct: 0, explanation: "「経験不足であるにもかかわらず」。逆接の接続詞 Although が正解です。" },
-                            { text: "The technician's explanation of the new system was way too complicated, _______ it had to be rewritten in simpler words.", options: ["and", "but", "if", "or"], correct: 0, explanation: "「複雑すぎた、そして（だから）書き直さなければならなかった」。順接の and が自然です。" },
-                            { text: "Under the new policy, the telecom giant, XYZ Wires will have to consult with communities _______ they build a new tower.", options: ["across", "before", "beyond", "until"], correct: 1, explanation: "「新しい塔を建てる前に」。時を表す接続詞 before が正解です。" },
-                            { text: "_______ the students arrived at the station, the express had just left and they had to wait 20 minutes for the next one.", options: ["Because", "If", "When", "While"], correct: 2, explanation: "「駅に着いた時」。When が正解です。" },
-                            { text: "The brother patiently taught his sister how to solve the equation _______ she completely understood it.", options: ["since", "until", "when", "whether"], correct: 1, explanation: "「完全に理解するまで」。継続の終点を表す until が正解です。" },
-                            { text: "John Berg went to his office to talk with his boss _______ he returned from his overseas business trip.", options: ["as far as", "once", "so that", "whereas"], correct: 1, explanation: "「戻ったらすぐに」。once（いったん～すると、～するとすぐに）が正解です。" },
-                            { text: "According to your résumé, you have sufficient experience in web design; _______ we would like to set up an interview with you.", options: ["likewise", "otherwise", "therefore", "yet"], correct: 2, explanation: "「十分な経験がある。したがって(therefore)、面接を設定したい」。" },
-                            { text: "_______ you agree with our Privacy Policy and Terms of Use, please click 'I ACCEPT' below.", options: ["Unless", "When", "If", "Whether"], correct: 2, explanation: "「もし同意するなら」。条件を表す If が正解です。" },
-                            { text: "_______ he was exhausted and wanted to go home, Mark Gordon went for a drink with his colleague to keep him company.", options: ["As for", "Because", "During", "Even though"], correct: 3, explanation: "「疲れていたにもかかわらず」。譲歩を表す Even though が正解です。" },
-                            { text: "_______ it rains, the event will be held outside from 1:00 to 3:00 on October 24th.", options: ["As long as", "In case", "Since", "Unless"], correct: 3, explanation: "「雨が降らない限り」。Unless（もし～なければ）が文脈に合います。" },
-                            { text: "The CEO was not fully satisfied with the contract terms offered by Livetell, Inc., _______ he signed it anyway.", options: ["and", "but", "or", "unless"], correct: 1, explanation: "「満足していなかったが、サインした」。逆接の but が正解です。" },
-                            { text: "The product development team made a prototype of the new product, but it appears _______ there is a design flaw.", options: ["as though", "even if", "in case", "so that"], correct: 0, explanation: "it appears as though ... で「まるで～のように見える」。" },
-                            { text: "Mike Grant was told that his surgery was successful; _______ he still felt chest pain.", options: ["consequently", "furthermore", "otherwise", "nevertheless"], correct: 3, explanation: "「手術は成功したと言われた。それにもかかわらず(nevertheless)、痛みを感じた」。" },
-                            { text: "_______ the old operating system was quite complicated, the new one is simple and user-friendly.", options: ["As", "If", "When", "Whereas"], correct: 3, explanation: "対比を表す接続詞。Whereas が正解です。" }
-                        ]
+                        id: "L3_T_1",
+                        passage: "Dear Mike,\n\nIf you remember, we met at the recent Business Educators seminar and spoke briefly about my doing some classes at your college. I teach accounting courses at several locations in the city, and I think that I have a course that would be perfect for what you are doing at Business U.\n\n\"Accounting Basics for Entrepreneurs\" is a course I have taught at many different schools. It differs from many courses in that it is designed for people who have no accounting experience, but are running their own businesses. Many small business owners have to do multiple jobs, and this class gives them some additional tools.\n\nI usually teach the course two evenings a week for eight weeks. Right now, I have Monday and Wednesday evenings available. I could also teach the course three evenings a week, but that would run for only five weeks. If you are interested, we can discuss those times and dates later.\n\nPlease feel free to call me at 555-998-8787 if you are interested in offering this course or you have any questions.\n\nThank you very much.\nLinda Chase",
+                        q: "1. What is the reason Ms. Chase wrote this letter?", o: ["To change a current class she teaches", "To correct information on a course", "To enroll in a course", "To propose giving a course"], a: 3
                     },
+                    { id: "L3_T_2", passage: "Same passage as above.", q: "2. Who does Ms. Chase target in her course?", o: ["Accountants", "Business consultants", "Business educators", "Small business owners"], a: 3 },
+                    { id: "L3_T_3", passage: "Same passage as above.", q: "3. According to the letter, how long does \"Accounting Basics for Entrepreneurs\" usually take?", o: ["About one month", "About two months", "Half a year", "A year"], a: 1 },
                     {
-                        id: "L10_REVIEW",
-                        title: "Review Quiz",
-                        type: "grammar",
-                        questions: [
-                            { text: "_______ your résumé shows that you have a good track record in accounting, you unfortunately do not meet all our requirements.", options: ["Although", "Because", "Since", "So"], correct: 0, explanation: "「良い実績があるが」。譲歩の Although が正解です。" },
-                            { text: "Go straight three blocks, _______ you will find the hotel on your right, next to the city park.", options: ["and", "but", "or", "so"], correct: 0, explanation: "「命令文 + and」で「～しなさい、そうすれば...」の形です。" },
-                            { text: "Please refrain from smoking in front of the door _______ it blocks the way of delivery personnel.", options: ["because", "if", "unless", "until"], correct: 0, explanation: "「なぜなら～だから」。理由を表す because が正解です。" },
-                            { text: "Bill Cain had never heard of the up-and-coming company; _______ he could not say anything when his boss asked him about it.", options: ["however", "meanwhile", "nonetheless", "therefore"], correct: 3, explanation: "「聞いたことがなかった。したがって(therefore)」。" },
-                            { text: "_______ you sign up with our service, you can download any movie or show you want.", options: ["As", "Before", "Once", "Though"], correct: 2, explanation: "「いったん登録すれば」。時を表す Once が正解です。" },
-                            { text: "Peter Berg had been afraid of heights ever _______ he was a boy and had fallen out of a tree.", options: ["after", "as", "since", "when"], correct: 2, explanation: "ever since ... 「～以来ずっと」。" },
-                            { text: "_______ the boss said Naomi Watson's idea was interesting, he seemed unenthusiastic.", options: ["As long as", "Due to", "Even though", "Instead of"], correct: 2, explanation: "「面白いと言ったにもかかわらず(Even though)」。" },
-                            { text: "_______ your order is shipped, you will receive an e-mail with shipping details as well as the delivery date.", options: ["Since", "Unless", "When", "While"], correct: 2, explanation: "「発送された時(When)」。" }
-                        ]
-                    }
+                        id: "L3_T_4",
+                        passage: "The local business community gives annual awards for the \"Best Company to Work for in the region\" each year. This year, local bicycle manufacturer Rightway Bicycles received the award for the first time. The company makes lightweight bicycles that are sold in over 20 countries worldwide. They have been in business for over 15 years, and relocated to Harris County last year. In 2005, they decided to move all manufacturing back to the country from overseas factories.\n\nCompanies are awarded based on average salary, vacation time and health benefits. Rightway paid the highest average salary to entry-level workers in the area and scored above average on amount of vacation time and quality of their health care plan. They also received high marks for employee morale, corporate culture and growth potential.\n\nRightway is currently the only bicycle maker doing all of their manufacturing in the country. They do use some parts made overseas, but all final construction is performed here in Harris County.",
+                        q: "4. What is the article mainly about?", o: ["A local firm's change in leadership", "A recent local award winner", "A summary past years' award winners", "An important trade agreement"], a: 1
+                    },
+                    { id: "L3_T_5", passage: "Same passage as above.", q: "5. What was Rightway Bicycles recognized for?", o: ["Their contribution to the county", "Their eco-friendly approach", "Their rapid business growth", "Their treatment of their staff"], a: 3 },
+                    { id: "L3_T_6", passage: "Same passage as above.", q: "6. What is true about Rightway Bicycles?", o: ["They are the leading bicycle maker in the country.", "They are the only company with complete domestic production.", "They don't use parts manufactured in other countries.", "They have been in Harris County for over 15 years."], a: 1 }
+                ],
+                reviewQuiz: [
+                    {
+                        id: "L3_R_1",
+                        passage: "Introducing the Zephyr 900 vacuum cleaner! This is the single most advanced vacuum cleaner ever built. Using patented turbine technology, the Zephyr 900 has more than twice the cleaning power of the leading vacuums on the market. This unit will forever change the way you clean your home or office.\n\nThe 900's technology is taken from our industrial line of vacuums and shop vacuums. These units typically have a much greater airflow than the average home vacuum cleaner. We've created a smaller, more portable vacuum with the same cleaning power as an industrial shop vacuum.\n\nWhat does this mean for you? First, quicker cleaning: more airflow means faster cleaning of each room. Second, deeper cleaning: higher strength means deeper cleaning of carpets, rugs, and upholstery. Finally, more flexibility: a group of useful attachments paired with increased power means you will be able to clean difficult areas like garages and car interiors easily.\n\nEven if you don't need the most powerful vacuum on the market, it's priced to beat our competitors hands down. Stop by your local Zephyr showroom today!",
+                        q: "1. What is this advertisement for?", o: ["A detergent", "A household appliance", "A laundry service", "An electronics store"], a: 1
+                    },
+                    { id: "L3_R_2", passage: "Same passage as above.", q: "2. What is NOT an advertised feature of the Zephyr 900?", o: ["Compact size", "Improved durability", "Increased suction", "Special accessories"], a: 1 },
+                    { id: "L3_R_3", passage: "Same passage as above.", q: "3. Where did the company get their new technology?", o: ["From a competitor's model", "From customer suggestions", "From engine design", "From their commercial line"], a: 3 }
                 ]
             },
             {
-                id: "L11",
-                title: "Lesson 11: Part 5 文と文のつながり(2)",
-                sections: [
-                    {
-                        id: "L11_TARGET",
-                        title: "TARGET TEST",
-                        type: "grammar",
-                        questions: [
-                            { text: "The company profits have increased; _______, we will hire more staff.", options: ["however", "otherwise", "therefore", "yet"], correct: 2, explanation: "因果関係を示す副詞です。" }
-                        ]
-                    }
+                id: 4,
+                title: "Lesson 4",
+                subtitle: "Part 5: 代名詞 (1)",
+                advice: "代名詞（it, they, them, themselvesなど）の格と指している対象を意識しましょう。",
+                targetTest: [
+                    { id: "L4_T_1", q: "Mark and Sarah reviewed the financial report before submitting ------- to the supervisor.", o: ["it", "its", "themselves", "them"], a: 0 },
+                    { id: "L4_T_2", q: "We usually ask for advice from people ------- trust, such as colleagues, friends, or family members.", o: ["our", "ours", "us", "we"], a: 3 },
+                    { id: "L4_T_3", q: "Research has shown that our sense of balance and movement change as we age, and ------- changes could lead to a higher risk of falling.", o: ["that", "these", "them", "this"], a: 1 },
+                    { id: "L4_T_4", q: "Unless you are a paid subscriber of our magazine, you can only read a summary of the articles, not the actual articles -------.", o: ["it", "itself", "them", "themselves"], a: 3 },
+                    { id: "L4_T_5", q: "The new young physicians have shown remarkable efficiency in adapting to the environment where ------- practice.", o: ["they", "their", "them", "theirs"], a: 0 },
+                    { id: "L4_T_6", q: "When the director saw the poster design, she felt ------- was wrong but could not tell exactly what it was.", o: ["anything", "everything", "nothing", "something"], a: 3 },
+                    { id: "L4_T_7", q: "The layout of our official website will be renewed once ------- two years.", o: ["all", "both", "each", "every"], a: 3 },
+                    { id: "L4_T_8", q: "Ms. Yoon asked her assistant to take notes at the meeting and give them to ------- later.", o: ["her", "herself", "hers", "she"], a: 0 },
+                    { id: "L4_T_9", q: "The manager suggested that the two new recruits work on the assignment together so they could inspire -------.", o: ["another", "one another", "other", "the other"], a: 1 },
+                    { id: "L4_T_10", q: "The resignation of the Lime Airlines CEO was a surprise to the public and ------- in his company expected it.", o: ["anyone", "everyone", "no one", "someone"], a: 2 },
+                    { id: "L4_T_11", q: "The teacher saw his students at the park talking with some friends of -------.", o: ["their", "theirs", "them", "they"], a: 1 },
+                    { id: "L4_T_12", q: "The project manager told her staff members to keep up to date on the latest information by reading professional journals -------.", o: ["theirs", "them", "themselves", "they"], a: 2 },
+                    { id: "L4_T_13", q: "Charles tried nearly ------- to calm his manager down, but she continued yelling about the poor sales of their new product.", o: ["anything", "everything", "nothing", "something"], a: 1 },
+                    { id: "L4_T_14", q: "Of all the Indian restaurants in the city, the owner of Spice House says that ------- is most authentic.", o: ["he", "him", "himself", "his"], a: 3 },
+                    { id: "L4_T_15", q: "Although Susan usually preferred to work alone, she found she was enjoying ------- when working with her new team.", o: ["she", "her", "herself", "hers"], a: 2 },
+                    { id: "L4_T_16", q: "The boss got really angry when he found out that neither Ken Huang nor Stephan Becker had finished ------- work on time.", o: ["his", "theirs", "its", "her"], a: 0 }
+                ],
+                reviewQuiz: [
+                    { id: "L4_R_1", q: "The manager spent extra time talking with the new employees to learn about ------- talents, abilities, and skills.", o: ["their", "theirs", "them", "they"], a: 0 },
+                    { id: "L4_R_2", q: "The Green County Library welcomes book requests; please submit your requests ------- in writing or by e-mail.", o: ["also", "both", "either", "neither"], a: 2 },
+                    { id: "L4_R_3", q: "The parents took their daughter to a city park and let ------- play on the jungle gym.", o: ["her", "hers", "herself", "she"], a: 0 },
+                    { id: "L4_R_4", q: "They all say that Mr. Palermo has a great passion for learning, not only for his students, but also for -------.", o: ["himself", "his", "them", "themselves"], a: 0 },
+                    { id: "L4_R_5", q: "Michelle Williamson was surprised when the CEO ------- called and congratulated her on her promotion to marketing manager.", o: ["he", "him", "himself", "his"], a: 2 },
+                    { id: "L4_R_6", q: "For ------- who are interested in starting up their own business, please click the button below to find out about our seminar.", o: ["that", "these", "this", "those"], a: 3 },
+                    { id: "L4_R_7", q: "John gave his cell-phone number to the woman he met at the party, but she didn't give ------- to him.", o: ["her", "hers", "herself", "she"], a: 1 },
+                    { id: "L4_R_8", q: "Kenny Hudson left his umbrella on the train going to work, and he had to buy another ------- at the end of the day.", o: ["it", "one", "that", "this"], a: 1 }
                 ]
             },
             {
-                id: "L12",
-                title: "Lesson 12: Part 5 語彙(1)",
-                sections: [
+                id: 5,
+                title: "Lesson 5",
+                subtitle: "Part 6: 代名詞 (2)",
+                advice: "代名詞の問題です。文脈から誰の・何の・どういうものを指しているかを読み取りましょう。",
+                targetTest: [
                     {
-                        id: "L12_TARGET",
-                        title: "TARGET TEST",
-                        type: "grammar",
-                        questions: [
-                            { text: "The board will _______ the new budget proposal.", options: ["review", "remind", "retain", "relate"], correct: 0, explanation: "提案を検討するという意味です。" }
-                        ]
-                    }
+                        id: "L5_T_1",
+                        passage: "To: Cynthia Holmes <holmes@goldenyears.net>\nFrom: Shunsuke Takahashi <stakahashi@homehealth.net>\nRe: Your opinion about HomeCare 2016\n\nDear Cynthia,\n\n(1) was nice seeing you last week at the seminar. Thanks for leading our discussion group. I gained some valuable insights into marketing and promoting our products while listening to everyone's ideas.\n\nSpeaking of marketing, there's been a lot of discussion in (2) department about participating in HomeCare 2016. Everyone seems enthusiastic about displaying our new products there, but I have some reservations and would like to know your opinion. Do you think we are ready to do something big like that? I value (3) input since you went to a similar show last year.\n\nThanks in advance for your time.\n\nShunsuke",
+                        q: "(1)", o: ["I", "It", "That", "This"], a: 1
+                    },
+                    { id: "L5_T_2", passage: "Same passage as above.", q: "(2)", o: ["his", "my", "their", "your"], a: 1 },
+                    { id: "L5_T_3", passage: "Same passage as above.", q: "(3)", o: ["you", "your", "yours", "yourself"], a: 1 },
+                    {
+                        id: "L5_T_4",
+                        passage: "On Saturday, October 19, Headlands Sports Club is holding (4) annual Open Day, from 1:30 p.m. to 4:30 p.m. Regardless of your ability or age, our staff is looking forward to meeting you and giving you a tour of our facilities. (5) will also get a chance to try out our exercise equipment and take a short aerobics class, Warren Vickers, (6) Youth Activities manager, will provide your kids with fun activities from 3:30 p.m. to 4:30 p.m.\n\nThere's also a special Junior Open Day the following Saturday, October 26, from 4:00 p.m. to 7:00 p.m.",
+                        q: "(4)", o: ["it", "its", "them", "they"], a: 1
+                    },
+                    { id: "L5_T_5", passage: "Same passage as above.", q: "(5)", o: ["I", "They", "We", "You"], a: 3 },
+                    { id: "L5_T_6", passage: "Same passage as above.", q: "(6)", o: ["our", "ours", "us", "we"], a: 0 },
+                    {
+                        id: "L5_T_7",
+                        passage: "Save big Saturday only!\n\nEddie's Home Center is having a blowout sale this Saturday only. Have you been putting off your home improvement jobs? Well, now is the time to start (7), and with Eddie's great prices, you'll save a bundle.\n\nWe've got everything from wallpaper to gardening tools, kitchen fixtures to window shades and all of (8) is on sale. If you're not exactly a do-it-yourselfer, ask about (9) professional installation service. It's a lot more affordable than you think.\n\nEddie's Home Center is located on the corner of King Blvd. and 19th Avenue. Come see us soon.",
+                        q: "(7)", o: ["their", "theirs", "them", "they"], a: 2
+                    },
+                    { id: "L5_T_8", passage: "Same passage as above.", q: "(8)", o: ["it", "that", "these", "yours"], a: 0 },
+                    { id: "L5_T_9", passage: "Same passage as above.", q: "(9)", o: ["our", "ours", "us", "we"], a: 0 }
+                ],
+                reviewQuiz: [
+                    {
+                        id: "L5_R_1",
+                        passage: "Dear Ms. Patchett,\n\nThank you for your inquiry about (1) award-winning video series Out and About in Nature. (2) enclosing a sample video for your review.\n\nWe developed the Out and About series to provide educators with a comprehensive and effective means of transmitting information and to help modernize educational methods. That children are highly receptive and stimulated to learn through the use of audio-visual material is widely accepted by educators across all fields of study.\n\nAfter you have watched the video, we would appreciate hearing (3) comments. We look forward to answering any questions you have about our products.\n\nSincerely,\n\nRobert Hanlon",
+                        q: "(1)", o: ["our", "ours", "us", "we"], a: 0
+                    },
+                    { id: "L5_R_2", passage: "Same passage as above.", q: "(2)", o: ["He is", "I am", "It is", "They are"], a: 1 },
+                    { id: "L5_R_3", passage: "Same passage as above.", q: "(3)", o: ["you", "your", "yours", "yourself"], a: 1 },
+                    {
+                        id: "L5_R_4",
+                        passage: "Dear Mr. Atkinson,\n\n(4) was a pleasure to meet with you the other day. I was interested to learn more about your firm and its plans for expansion. I particularly liked your approach to training new employees and your internship program.\n\nIt was a tough decision, but I have accepted an offer from Bleecker and Associates. I discovered Bleecker specializes in marketing products I have a keen interest in, so it made sense for (5) to go with them.\n\nI truly appreciate the opportunity to have met with you and sincerely wish you and (6) firm the very best in the future.\n\nSincerely,\n\nTony Martinez",
+                        q: "(4)", o: ["I", "It", "That", "This"], a: 1
+                    },
+                    { id: "L5_R_5", passage: "Same passage as above.", q: "(5)", o: ["I", "me", "mine", "my"], a: 1 },
+                    { id: "L5_R_6", passage: "Same passage as above.", q: "(6)", o: ["you", "your", "yours", "yourself"], a: 1 }
                 ]
             },
             {
-                id: "L13",
-                title: "Lesson 13: Part 5 語彙(2)",
-                sections: [
+                id: 6,
+                title: "Lesson 6",
+                subtitle: "Part 7: 概要推測問題",
+                advice: "お知らせや手紙の「目的」や「結論」を素早く読み取る練習をしましょう。",
+                targetTest: [
                     {
-                        id: "L13_TARGET",
-                        title: "TODAY'S TARGET TEST",
-                        type: "grammar",
-                        questions: [
-                            { text: "We may disclose your medical records to doctors, nurses or other hospital _______ who are involved in your care.", options: ["colonel", "model", "panel", "personnel"], correct: 3, explanation: "病院の「職員」なので personnel が正解です。" },
-                            { text: "The Purple Dawn is a classic musical which has also made a great _______ to popular music.", options: ["adaptation", "contribution", "donation", "evolution"], correct: 1, explanation: "make a contribution to ... で「～に貢献する」。" },
-                            { text: "We will not be responsible for any _______ or malfunction that is caused as a result of product misuse.", options: ["defect", "effect", "insect", "neglect"], correct: 0, explanation: "製品の「欠陥」。defect が正解です。" },
-                            { text: "At the stockholders' meeting, the CEO thanked _______ for trusting him and helping him to grow his business.", options: ["ambassadors", "investors", "predecessors", "vendors"], correct: 1, explanation: "株主総会での話なので、感謝する相手は「投資家たち(investors)」です。" },
-                            { text: "The _______ conducted by the research firm showed that the number of smartphone users is much lower than expected.", options: ["convention", "survey", "vote", "workshop"], correct: 1, explanation: "調査会社によって行われた「調査」。survey が正解です。" },
-                            { text: "As part of cost _______ measures, the company had to let go 200 employees including long serving ones.", options: ["elimination", "introduction", "prediction", "reduction"], correct: 3, explanation: "コスト「削減」策。reduction が正解です。" },
-                            { text: "The company's regulations require that thorough equipment _______ be performed at all the factories every 60 days.", options: ["indications", "infections", "inspections", "invitations"], correct: 2, explanation: "機器の「点検」。inspections が正解です。" },
-                            { text: "The shepherd has a habit of counting his sheep every night to make sure that _______ all there.", options: ["it", "it's", "their", "they're"], correct: 3, explanation: "sheep（複数）を受ける代名詞。「彼らがそこにいる」＝ they are (they're) が正解です。" },
-                            { text: "This fall, Plasma Tech Inc. is offering a new line of digital metering products that are compact, _______ and reasonably priced.", options: ["consistent", "convenient", "insistent", "present"], correct: 1, explanation: "製品の特徴として「便利な(convenient)」が適切です。" },
-                            { text: "Due to her enthusiasm and pleasant personality, Monica Keen has become a _______ member of the sales team.", options: ["durable", "portable", "stable", "valuable"], correct: 3, explanation: "「貴重な(valuable)」メンバー。" },
-                            { text: "All employees are required to go to Conference Room A for their _______ checkup by 5:00 p.m. today.", options: ["annual", "chronological", "impractical", "temporal"], correct: 0, explanation: "「年一回の(annual)」健康診断。" },
-                            { text: "The boss thought Marian Colton's idea for the new advertisement campaign was _______ but not excellent.", options: ["acceptable", "accessible", "affordable", "available"], correct: 0, explanation: "「悪くはない（許容範囲だ）が、素晴らしくはない」。acceptable が文脈に合います。" },
-                            { text: "Although the train is usually packed, the office worker was fortunate to find an _______ seat this morning.", options: ["unattended", "uncontrolled", "undetermined", "unoccupied"], correct: 3, explanation: "「空いている(unoccupied)」席。" },
-                            { text: "It took a whole day for the accountant to compare the previous year's financial statements with those of the _______ year.", options: ["current", "modern", "recent", "updated"], correct: 0, explanation: "前年と比較するのは「今年度(current)」です。" },
-                            { text: "Two _______ phone calls to the police led to the arrest of the suspect in the bank robbery that occurred last week.", options: ["anonymous", "enormous", "synonymous", "unanimous"], correct: 0, explanation: "「匿名の(anonymous)」電話。" },
-                            { text: "We truly believe that our shoes are your best choice for their _______ quality and reasonable price.", options: ["inferior", "major", "senior", "superior"], correct: 3, explanation: "「優れた(superior)」品質。" }
-                        ]
-                    }
+                        id: "L6_T_1",
+                        passage: "Notice for all Lawn Villa Apartments residents\n\nYou may have noticed several trucks and bulldozers parked near the entrance to the apartments recently. The city is doing some renovations to the park on the east side of the building. They are putting in a walking path around the entire park and doing some additional improvements to the park itself.\n\nThis will create some inconvenience for the next few months, but we've been assured they will finish by the end of April or the first week of May at the very latest. There may be some noise from the machinery during the day, and increased truck traffic near the apartments during the project. We regret if this causes problems for any of you, but we really have no control over city construction. They have promised that they will stop work no later than 5:00 p.m. most days.\n\nOn the positive side, when they are finished, our residents will have a great new walking trail right next door and some improved recreational facilities in the park. If you have concerns or problems during the project, the city hot line number is 800-554-9775. You can leave a voice-mail there 24 hours a day with any questions or concerns.",
+                        q: "1. What is the main purpose of the notice?", o: ["To announce that there will be a new park nearby", "To apologize for the noise due to construction", "To give information about public works", "To prohibit illegal parking near the building"], a: 2
+                    },
+                    { id: "L6_T_2", passage: "Same passage as above.", q: "2. According to the notice, how will residents benefit from the construction?", o: ["It will bring new residents to the building.", "It will increase the property values in the area.", "There will be a new exercise option close by.", "There will be more parking for them."], a: 2 },
+                    {
+                        id: "L6_T_3",
+                        passage: "Hillary Johnson\nIndustrial Kitchen Supply\n...\nDear Ms. Johnson,\n\nI am writing to inquire about a project we want to have done here at our facility. We met with one of your designers, Julian Brown, two weeks ago regarding the remodel of our kitchen facilities at the Shady Grove Retirement Home here in Oakfield. He was very helpful with several suggestions regarding appliances, plumbing and electrical upgrades to our rather old kitchen here. However, we have yet to receive an estimate for the cost of making the suggested changes.\n\nWe had planned to start the remodel next month, as many of our residents will be away from the retirement home for a group sightseeing trip during that time. Closing the kitchen while all our residents are here would be a considerable interruption to our routine, so we thought the week of October 15 is the best time for us to undertake such a project.\n\nWe were told that we would receive an estimate roughly one week ago, but have yet to receive any information. If we do not get an estimate from your company by the end of this week, we will be going with estimates from other contractors...",
+                        q: "3. Who gave Mr. Weiss some useful information?", o: ["A designer from Industrial Kitchen Supply", "A staff member at Shady Grove Retirement Home", "A worker at one of Industrial Kitchen Supply's competitors", "Ms. Johnson's supervisor"], a: 0
+                    },
+                    { id: "L6_T_4", passage: "Same passage as above.", q: "4. Why does Mr. Weiss want to remodel in the next month?", o: ["It is the most cost-effective time.", "The residents have requested it.", "They are required to upgrade the facility.", "They will have fewer people to serve then."], a: 3 },
+                    { id: "L6_T_5", passage: "Same passage as above.", q: "5. What should Ms. Johnson do after receiving this letter?", o: ["Check the estimate", "Contact Mr. Weiss", "Look for another contractor", "Visit the retirement home"], a: 1 }
+                ],
+                reviewQuiz: [
+                    {
+                        id: "L6_R_1",
+                        passage: "Handy Tool Rental has everything you need for any project, big or small. Whether you're a contractor or a DIY homeowner, you'll find power tools, heavy machinery and vehicles to make your job go faster and easier.\n\nWith five convenient locations and delivery service, you'll never find yourself without the equipment you need to finish the job. Same-day delivery is available in most areas. We have:\n- Power tools\n- Hand tools\n- Tractors and backhoes\n- Trucks, flatbeds and trailers\n- And much more!\n\nA complete catalog of our equipment is available on our website, along with rates and information: www.Handytool.com. You can also call us at 1-800-777-9000 for estimates and delivery information.\n\nDon't let a lack of proper equipment slow down your next project. Call or click today and finish your job effectively, easily and affordably.",
+                        q: "1. What is this advertisement for?", o: ["Car rental", "Delivery service", "Equipment rental", "Renovations"], a: 2
+                    },
+                    { id: "L6_R_2", passage: "Same passage as above.", q: "2. When can most customers get the equipment they need?", o: ["In a few days", "In a week", "Overnight", "The day they request it"], a: 3 },
+                    { id: "L6_R_3", passage: "Same passage as above.", q: "3. How can customers get rental information?", o: ["By requesting a catalog", "By requesting a consultant visit them", "By visiting the office", "Via the Internet"], a: 3 }
                 ]
             },
             {
-                id: "L14",
-                title: "Lesson 14: Review Test",
-                sections: [
+                id: 7,
+                title: "Lesson 7",
+                subtitle: "Part 5: 関係詞 (1)",
+                advice: "関係代名詞・関係副詞の選択問題です。先行詞の種類（人か物か）と、関係詞節内での役割（主語・目的語・所有格）を確認しましょう。",
+                targetTest: [
+                    { id: "L7_T_1", q: "According to a recent study, those ------- regularly read food labels tend to be healthier.", o: ["what", "when", "where", "who"], a: 3 },
+                    { id: "L7_T_2", q: "------- today's board meeting ends, Ms. Kane will have her staff clean the conference room.", o: ["When", "Which", "Who", "Why"], a: 0 },
+                    { id: "L7_T_3", q: "Ava Watson has a large collection of rare stamps, some of ------- were issued about 100 years ago.", o: ["that", "what", "which", "whom"], a: 2 },
+                    { id: "L7_T_4", q: "Although Kate Takeda recommended the latest digital camera, the customer wanted a camera ------- lens is detachable.", o: ["that", "which", "whose", "what"], a: 2 },
+                    { id: "L7_T_5", q: "The branch manager decided to conduct a survey to find out ------- the employees think of the updated intranet.", o: ["that", "what", "which", "whose"], a: 1 },
+                    { id: "L7_T_6", q: "According to the social media marketer, this artificial intelligence program allows you to monitor ------- people are interested in.", o: ["that", "what", "which", "whose"], a: 1 },
+                    { id: "L7_T_7", q: "Five companies are nominated for this year's Global Business of the Year award, none of ------- have ever won in the past.", o: ["that", "them", "what", "which"], a: 1 },
+                    { id: "L7_T_8", q: "The Ubermaster 9X is the likeliest product ------- Techstar, Inc. can get back into the black the next year.", o: ["how", "when", "whereby", "why"], a: 2 },
+                    { id: "L7_T_9", q: "Any revisions to the regulations shall be given to the parties concerned ------- may object to such modifications if they wish.", o: ["which", "who", "whom", "whose"], a: 1 },
+                    { id: "L7_T_10", q: "After the division manager's lengthy small talk, the meeting finally came to the point ------- the real agenda was discussed.", o: ["what", "when", "where", "which"], a: 2 },
+                    { id: "L7_T_11", q: "After long consideration, the personnel chief chose the candidate ------- major was electrical engineering.", o: ["that", "which", "whom", "whose"], a: 3 },
+                    { id: "L7_T_12", q: "Despite being married for over 50 years, Mr. Hunter still remembered vividly the moment ------- he first saw his wife.", o: ["when", "where", "which", "whose"], a: 0 },
+                    { id: "L7_T_13", q: "For the first time, Ms. Hathaway was in a situation ------- her potential client hesitated to close the deal.", o: ["how", "when", "where", "why"], a: 2 },
+                    { id: "L7_T_14", q: "Because of the last-minute venue change, the promoter had to contact all the attendees ------- had registered for the event.", o: ["that", "what", "which", "whom"], a: 0 },
+                    { id: "L7_T_15", q: "The chairperson had to choose the idea ------- she liked best, but none of them really appealed to her.", o: ["that", "what", "where", "whose"], a: 0 },
+                    { id: "L7_T_16", q: "This afternoon, Benjamin Lucas ran across one of his business contacts ------- he had known for a long time.", o: ["what", "which", "whom", "whose"], a: 2 }
+                ],
+                reviewQuiz: [
+                    { id: "L7_R_1", q: "Nobody knew ------- Theo Cain had done for a living before joining our company.", o: ["as", "that", "what", "which"], a: 2 },
+                    { id: "L7_R_2", q: "Amelia Kowalski is the most competent and caring secretary ------- I have ever worked with.", o: ["that", "where", "which", "whose"], a: 0 },
+                    { id: "L7_R_3", q: "The hotels and restaurants in Huntsfield get lots of foreign tourists ------- busy in winter come.", o: ["when", "where", "which", "whose"], a: 0 },
+                    { id: "L7_R_4", q: "The house ------- the famous artist grew up was turned into a local tourist attraction.", o: ["for which", "in which", "of whom", "whenever"], a: 1 },
+                    { id: "L7_R_5", q: "A special bonus will be given to the managers ------- departments or branches achieve their goals this year.", o: ["that", "which", "whom", "whose"], a: 3 },
+                    { id: "L7_R_6", q: "Today Times features an interview of Razak Wan, a high school dropout ------- turned into a successful businessman.", o: ["which", "who", "whom", "whose"], a: 1 },
+                    { id: "L7_R_7", q: "Gabriel Dupont didn't realize that his new client is a woman ------- he met at a business seminar last year.", o: ["which", "who", "whom", "whose"], a: 2 },
+                    { id: "L7_R_8", q: "The prominent author wrote a new novel, ------- is rumored to be based on her childhood in China.", o: ["what", "which", "whose", "why"], a: 1 }
+                ]
+            },
+            {
+                id: 8,
+                title: "Lesson 8",
+                subtitle: "Part 6: 関係詞 (2)",
+                advice: "文脈の中での関係詞の使い分けです。前の文や節とのつながりを意識しましょう。",
+                targetTest: [
                     {
-                        id: "L14_REVIEW",
-                        title: "PART 5 & 6 & 7 総復習",
-                        type: "grammar",
-                        questions: [
-                            { text: "_______ as the project leader, Scott Thorne delegated various tasks to his team members at the meeting.", options: ["Being chosen", "Choose", "Choosing", "Chose"], correct: 0, explanation: "Part 5復習: (A) Being chosen が正解です。" },
-                            { text: "Under the new policy, the telecom giant, XYZ Wires will have to consult with neighboring communities _______ they build a new tower.", options: ["across", "before", "beyond", "until"], correct: 1, explanation: "Part 5復習: 建てる「前に」。(B) before が正解です。" },
-                            { text: "Gina Carson could not give a prompt reply when _______ a managerial position at a rival company.", options: ["offer", "offered", "offering", "offers"], correct: 1, explanation: "Part 5復習: オファーされた時。(B) offered が正解です。" },
-                            { text: "The layout of our official website will be renewed once _______ two years.", options: ["all", "both", "each", "every"], correct: 3, explanation: "Part 5復習: every two years で「2年ごとに」。(D) every が正解です。" },
-                            { text: "The teacher saw his students at the park talking with some friends of _______.", options: ["their", "theirs", "them", "they"], correct: 1, explanation: "Part 5復習: friends of theirs（彼らの友人）。(B) theirs が正解です。" },
-                            { text: "_______ he was exhausted and wanted to go home, Mark Gordon went for a drink with his colleague to keep him company.", options: ["As for", "Because", "During", "Even though"], correct: 3, explanation: "Part 5復習: 逆接。(D) Even though が正解です。" },
-                            { text: "John Berg went to his office to talk with his boss _______ he returned from his overseas business trip.", options: ["as far as", "once", "so that", "whereas"], correct: 1, explanation: "Part 5復習: 戻ったらすぐに。(B) once が正解です。" },
-                            { text: "The prominent author wrote a new novel, _______ is rumored to be based on her childhood in China.", options: ["what", "which", "whose", "why"], correct: 1, explanation: "Part 5復習: 非制限用法の関係代名詞。(B) which が正解です。" },
-                            { text: "The Purple Dawn is a classic musical which has also made a great _______ to popular music.", options: ["adaptation", "contribution", "donation", "evolution"], correct: 1, explanation: "Part 5復習: 貢献。(B) contribution が正解です。" },
-                            { text: "For _______ who are interested in starting up their own business, please click the button below.", options: ["that", "these", "this", "those"], correct: 3, explanation: "Part 5復習: those who（～する人々）。(D) those が正解です。" },
-                            { text: "Mike Grant was told that his surgery was successful; _______ he still felt chest pain.", options: ["consequently", "furthermore", "otherwise", "nevertheless"], correct: 3, explanation: "Part 5復習: それにもかかわらず。(D) nevertheless が正解です。" },
-                            { text: "All employees are required to go to Conference Room A for their _______ checkup by 5:00 p.m. today.", options: ["annual", "chronological", "impractical", "temporal"], correct: 0, explanation: "Part 5復習: 年次の。(A) annual が正解です。" },
-                            { text: "Mr. Jang, recognizing the importance of the project, offered to organize and lead the task force team _______.", options: ["he", "him", "himself", "his"], correct: 2, explanation: "Part 5復習: 彼自身で。(C) himself が正解です。" },
-                            { text: "Bill Cain had never heard of the company; _______ he could not say anything when his boss asked him about it.", options: ["however", "meanwhile", "nonetheless", "therefore"], correct: 3, explanation: "Part 5復習: したがって。(D) therefore が正解です。" },
-                            { text: "After long consideration, the personnel chief chose the candidate _______ major was electrical engineering.", options: ["that", "which", "whom", "whose"], correct: 3, explanation: "Part 5復習: 所有格。(D) whose が正解です。" },
-                            { text: "As part of cost _______ measures, the company had to let go 200 employees including long serving ones.", options: ["elimination", "introduction", "prediction", "reduction"], correct: 3, explanation: "Part 5復習: コスト削減。(D) reduction が正解です。" }
-                        ]
-                    }
+                        id: "L8_T_1",
+                        passage: "To: Conrad van Mansum\nFrom: Customer Service\nSubject: re: your query\n\nDear Mr. van Mansum,\n\nThank you for your recent query regarding our personal concierge service. I have attached a brochure with the information (1) you requested. As you can see, we offer a variety of options to choose from. I think the \"Gold\" package would best fit your requirements—(2) gives you 24-hour access to our service and since you regularly travel abroad I think this would be beneficial to you. If you have any further questions about our service (3) can work for you, please feel free to reach out to me at any time.\n\nYours,\nShelley Cooper\n(4)",
+                        q: "(1)", o: ["that", "what", "where", "whom"], a: 0
+                    },
+                    { id: "L8_T_2", passage: "Same passage as above.", q: "(2)", o: ["how", "when", "which", "whom"], a: 2 },
+                    { id: "L8_T_3", passage: "Same passage as above.", q: "(3)", o: ["how", "which", "whoever", "why"], a: 0 },
+                    { id: "L8_T_4", passage: "Same passage as above.", q: "(4) Select the sentence.", o: ["Please send an e-mail to our customer service department...", "The balance must be paid in full...", "The Gold service is only available...", "You can call the dedicated hotline wherever you are..."], a: 3 },
+                    {
+                        id: "L8_T_5",
+                        passage: "Charity Fun Run\n\nDust off your running shoes and get ready to raise some money for charity! We're excited to announce that Farmington Foods will take part in the annual Charity Fun Run to raise funds for two great local charities. The first is Mercy Food Bank, (5) they do great work providing food and other essentials to local residents in need. The second is Kennel Friends Animal Shelter, (6) needs no explanation of course! The event will take place on the 30th at the outdoor sports arena, (7) you can choose from a 2K, 5K or 10K race. What are you waiting for? Get training!\n\n(8)",
+                        q: "(5)", o: ["how", "that", "what", "where"], a: 3 
+                    },
+                    { id: "L8_T_6", passage: "Same passage as above.", q: "(6)", o: ["which", "whom", "whose", "why"], a: 0 },
+                    { id: "L8_T_7", passage: "Same passage as above.", q: "(7)", o: ["which", "whom", "where", "how"], a: 2 },
+                    { id: "L8_T_8", passage: "Same passage as above.", q: "(8) Select the sentence.", o: ["Please remove your running shoes before entering...", "The money raised will be used for a company party.", "To sign up, simply write your name in the table below.", "You must be a pro athlete to take part in this event."], a: 2 }
+                ],
+                reviewQuiz: [
+                    {
+                        id: "L8_R_1",
+                        passage: "To all staff:\n\nAs you are aware, our offices will undergo extensive renovation next week. We understand this will cause considerable inconvenience to our workers, but we ask for your understanding at this time.\n\nWe kindly request that all staff clear their personal belongings from their desks, lockers, and the break room by the end of the day on Friday. Cardboard boxes, (1) are available in the storeroom, can be used for this purpose. These will be transported to our temporary office. If you have chosen to work from home, please take all essential items with you. (2). During this period of upheaval, we hope that you will continue to communicate with your colleagues and maintain your usual excellent standards of work. For those (3) have chosen to work from home, please adhere to our confidentiality guidelines. Thank you.\n\n(4)",
+                        q: "(1)", o: ["how", "that", "what", "which"], a: 3
+                    },
+                    { id: "L8_R_2", passage: "Same passage as above.", q: "(2) Select the sentence.", o: ["Mr. Naylor's leaving party will take place...", "Personal belongings such as mobile phones...", "The train reservation has been confirmed...", "You will not be able to access the office for the next two weeks..."], a: 3 },
+                    { id: "L8_R_3", passage: "Same passage as above.", q: "(3)", o: ["what", "who", "whoever", "whom"], a: 1 },
+                    { id: "L8_R_4", passage: "Same passage as above.", q: "(4) *Question missing context*", o: ["what", "who", "whoever", "whom"], a: 1 } 
+                ]
+            },
+            {
+                id: 12,
+                title: "Lesson 12",
+                subtitle: "Part 7: 詳細推測問題",
+                advice: "詳細情報を問う問題です。本文中の日付、数字、場所などの固有名詞に注意して読みましょう。",
+                targetTest: [
+                    {
+                        id: "L12_T_1",
+                        passage: "Williams County Public Library renovation is under way!\n\nThe three branches of the Williams County Public Library are undergoing a major renovation this fall. From September 30th until October 31st, the libraries will be undergoing some remodeling and expansion to better serve county residents.\n\nThe largest expansion will be at the 1st Avenue branch, where an additional 2,000 square feet of space will be added to the facility. All branches will be upgrading their computer terminals, adding additional shelf space and undergoing general cosmetic upgrades. This is the first renovation to the Library system in over 15 years, and planning began last summer.\n\nSome branches will be closed at times during the process. Please see the WCLS website for details. We regret any inconvenience that this may cause. All classes usually held at the library branches have been transferred to the Community Center at Bell Street for the month of October. They are expected to return to their respective branches after the project is completed.",
+                        q: "1. What is suggested about the 1st Avenue branch?", o: ["It is located near Bell Street.", "It is the largest library in the city.", "It was built 15 years ago.", "It will be closed for a month."], a: 1 
+                    },
+                    { id: "L12_T_2", passage: "Same passage as above.", q: "2. Why should some people go to the Community Center in October?", o: ["To learn about the new library system", "To listen to the library renovation plans", "To return books they borrowed from a library", "To take classes the libraries offer"], a: 3 },
+                    {
+                        id: "L12_T_3",
+                        passage: "To: Jane Hamilton <Jane@css.com>\nFrom: Mike Kipling <MK@commercenews.com>\nRe: Membership Renewal\n\nDear Ms. Hamilton,\n\nThank you for renewing your membership with Commerce News. We hope that our weekly e-mail newsletters continue to be useful for you in your business. As you know, we provide insight into various business trends, analysis and expert advice on a weekly basis to over one million subscribers.\n\nFor our returning customers, we now have some additional features that you might want to make use of. We are offering a monthly video seminar on our website featuring business experts from many fields. You can access these videos using your member ID and login information on our \"videos\" page. We also have a Question and Answer forum where members can post questions for a panel of business leaders and interact with other subscribers. As a returning member, you are able to participate in this forum at no additional cost.\n\nThank you again for being a member of Commerce News.",
+                        q: "3. What is the main purpose of this e-mail?", o: ["To announce membership rate changes", "To ask a subscriber for a renewal", "To introduce a publication", "To show appreciation to a customer"], a: 3
+                    },
+                    { id: "L12_T_4", passage: "Same passage as above.", q: "4. Who is eligible to receive the new features from Commerce News for free?", o: ["All members", "New subscribers", "Renewing subscribers", "The general public"], a: 2 },
+                    { id: "L12_T_5", passage: "Same passage as above.", q: "5. What should one do to see a business talk?", o: ["Ask for a DVD", "Go to a business center", "Log in to certain areas of the website", "Upgrade their membership"], a: 2 }
+                ],
+                reviewQuiz: [
+                    {
+                        id: "L12_R_1",
+                        passage: "Choose Foster Catering!\n\nFoster Catering has over twelve years' experience in providing corporate customers in Central Valley and all over the state with the highest quality food and service. Foster Catering specializes in catering breakfast, lunch, box lunches, hors d'oeuvres, dinners, company picnics, holiday parties and all other special corporate events. From formal events to daily meetings, we are the one-stop shop for all your corporate catering needs!\n\nFoster Catering offers flexible menu options to fit your tastes, dietary restrictions and budgetary requirements. Additionally, we can create custom menus for those events that call for a little culinary and financial creativity.\n\nFrom a small interview where you might need two box lunches to a product release for 5,000 - Foster Catering has done it all. Check us out online today! www.fostercatering.net\n\n- Special discounts for regular customers!\n- Special rates for our best-selling items!\n- Delivery, setup and cleanup always included!",
+                        q: "1. Who would most likely be interested in Foster Catering service?", o: ["A group planning a picnic for local children", "Companies arranging a business meeting", "Couples who are planning a wedding reception", "People who are having a private party"], a: 1
+                    },
+                    { id: "L12_R_2", passage: "Same passage as above.", q: "2. What is NOT stated as a feature of Foster Catering?", o: ["Diverse choices", "Individualized selections", "Quick delivery and setup", "Reasonable fees"], a: 2 },
+                    { id: "L12_R_3", passage: "Same passage as above.", q: "3. What should a potential customer do to get more information?", o: ["Call Foster Catering", "Go to the Foster Catering website", "Send an e-mail to Foster Catering", "Visit Foster Catering"], a: 1 }
+                ]
+            },
+            {
+                id: 13,
+                title: "Lesson 13",
+                subtitle: "Part 5: 語彙 (2)",
+                advice: "語彙問題です。似たような意味や形の単語に惑わされないように注意しましょう。",
+                targetTest: [
+                    { id: "L13_T_1", q: "We may disclose your medical records to doctors, nurses or other hospital ------- who are involved in your care.", o: ["colonel", "model", "panel", "personnel"], a: 3 },
+                    { id: "L13_T_2", q: "The Purple Dawn is a classic musical which has also made a great ------- to popular music.", o: ["adaptation", "contribution", "donation", "evolution"], a: 1 },
+                    { id: "L13_T_3", q: "We will not be responsible for any ------- or malfunction that is caused as a result of product misuse.", o: ["defect", "effect", "insect", "neglect"], a: 0 },
+                    { id: "L13_T_4", q: "At the stockholders' meeting, the CEO thanked ------- for trusting him and helping him to grow his business.", o: ["ambassadors", "investors", "predecessors", "vendors"], a: 1 },
+                    { id: "L13_T_5", q: "The ------- conducted by the research firm showed that the number of smartphone users is much lower than expected.", o: ["convention", "survey", "vote", "workshop"], a: 1 },
+                    { id: "L13_T_6", q: "As part of cost ------- measures, the company had to let go 200 employees including long serving ones.", o: ["elimination", "introduction", "prediction", "reduction"], a: 3 },
+                    { id: "L13_T_7", q: "The company's regulations require that thorough equipment ------- be performed at all the factories every 60 days.", o: ["indications", "infections", "inspections", "invitations"], a: 2 },
+                    { id: "L13_T_8", q: "The shepherd has a habit of counting his sheep every night to make sure that ------- all there.", o: ["it", "it's", "their", "they're"], a: 3 },
+                    { id: "L13_T_9", q: "This fall, Plasma Tech Inc. is offering a new line of digital metering products that are compact, ------- and reasonably priced.", o: ["consistent", "convenient", "insistent", "present"], a: 1 },
+                    { id: "L13_T_10", q: "Due to her enthusiasm and pleasant personality, Monica Keen has become a ------- member of the sales team.", o: ["durable", "portable", "stable", "valuable"], a: 3 },
+                    { id: "L13_T_11", q: "All employees are required to go to Conference Room A for their ------- checkup by 5:00 p.m. today.", o: ["annual", "chronological", "impractical", "temporal"], a: 0 },
+                    { id: "L13_T_12", q: "The boss thought Marian Colton's idea for the new advertisement campaign was ------- but not excellent.", o: ["acceptable", "accessible", "affordable", "available"], a: 0 },
+                    { id: "L13_T_13", q: "Although the train is usually packed, the office worker was fortunate to find an ------- seat this morning.", o: ["unattended", "uncontrolled", "undetermined", "unoccupied"], a: 3 },
+                    { id: "L13_T_14", q: "It took a whole day for the accountant to compare the previous year's financial statements with those of the ------- year.", o: ["current", "modern", "recent", "updated"], a: 0 },
+                    { id: "L13_T_15", q: "Two phone calls to the police led to the arrest of the suspect in the bank robbery that occurred last week.", o: ["anonymous", "enormous", "synonymous", "unanimous"], a: 0 },
+                    { id: "L13_T_16", q: "We truly believe that our shoes are your best choice for their ------- quality and reasonable price.", o: ["inferior", "major", "senior", "superior"], a: 3 }
+                ],
+                reviewQuiz: []
+            },
+            {
+                id: 14,
+                title: "Lesson 14",
+                subtitle: "総復習",
+                advice: "これまでの総復習です。あらゆる文法・語彙の知識を総動員しましょう。",
+                targetTest: [
+                    { id: "L14_T_1", q: "------- as the project leader, Scott Thorne delegated various tasks to his team members at the meeting.", o: ["Being chosen", "Choose", "Choosing", "Chose"], a: 0 },
+                    { id: "L14_T_2", q: "Under the new policy, the telecom giant, XYZ Wires will have to consult with neighboring communities ------- they build a new tower.", o: ["across", "before", "beyond", "until"], a: 1 },
+                    { id: "L14_T_3", q: "Gina Carson could not give a prompt reply when ------- a managerial position at a rival company.", o: ["offer", "offered", "offering", "offers"], a: 1 },
+                    { id: "L14_T_4", q: "The layout of our official website will be renewed once ------- two years.", o: ["all", "both", "each", "every"], a: 3 },
+                    { id: "L14_T_5", q: "The teacher saw his students at the park talking with some friends of -------.", o: ["their", "theirs", "them", "they"], a: 1 },
+                    { id: "L14_T_6", q: "------- he was exhausted and wanted to go home, Mark Gordon went for a drink with his colleague to keep him company.", o: ["As for", "Because", "During", "Even though"], a: 3 },
+                    { id: "L14_T_7", q: "John Berg went to his office to talk with his boss ------- he returned from his overseas business trip.", o: ["as far as", "once", "so that", "whereas"], a: 1 },
+                    { id: "L14_T_8", q: "The prominent author wrote a new novel, ------- is rumored to be based on her childhood in China.", o: ["what", "which", "whose", "why"], a: 1 },
+                    { id: "L14_T_9", q: "The Purple Dawn is a classic musical which has also made a great ------- to popular music.", o: ["adaptation", "contribution", "donation", "evolution"], a: 1 },
+                    { id: "L14_T_10", q: "For ------- who are interested in starting up their own business, please click the button below to find out about our seminar.", o: ["that", "these", "this", "those"], a: 3 },
+                    { id: "L14_T_11", q: "Mike Grant was told that his surgery was successful; ------- he still felt chest pain.", o: ["consequently", "furthermore", "otherwise", "nevertheless"], a: 3 },
+                    { id: "L14_T_12", q: "All employees are required to go to Conference Room A for their ------- checkup by 5:00 p.m. today.", o: ["annual", "chronological", "impractical", "temporal"], a: 0 },
+                    { id: "L14_T_13", q: "Mr. Jang, recognizing the importance of the project, offered to organize and lead the task force team -------.", o: ["he", "him", "himself", "his"], a: 2 },
+                    { id: "L14_T_14", q: "Bill Cain had never heard of the company; ------- he could not say anything when his boss asked him about it.", o: ["however", "meanwhile", "nonetheless", "therefore"], a: 3 },
+                    { id: "L14_T_15", q: "After long consideration, the personnel chief chose the candidate ------- major was electrical engineering.", o: ["that", "which", "whom", "whose"], a: 3 },
+                    { id: "L14_T_16", q: "As part of cost ------- measures, the company had to let go 200 employees including long serving ones.", o: ["elimination", "introduction", "prediction", "reduction"], a: 3 }
+                ],
+                reviewQuiz: [
+                    {
+                        id: "L14_R_1",
+                        passage: "To all staff:\n\nAs you are aware, our offices will undergo extensive renovation next week. We understand (21) this will cause considerable inconvenience to our workers, but we ask for your understanding at this time.\n\nWe kindly request that all staff clear their personal belongings from their desks, lockers, and the break room by the end of the day on Friday. Cardboard boxes, (22) are available in the storeroom, can be used for this purpose. These will be transported to our temporary office. If you have chosen to work from home, please take all essential items with you. (23). During this period of upheaval, we hope that you will continue to communicate with your colleagues and maintain your usual excellent standards of work. For those (24) have chosen to work from home, please adhere to our confidentiality guidelines. Thank you.",
+                        q: "(21)", o: ["how", "that", "what", "which"], a: 1
+                    },
+                    { id: "L14_R_2", passage: "Same passage as above.", q: "(22)", o: ["how", "that", "what", "which"], a: 3 },
+                    { id: "L14_R_3", passage: "Same passage as above.", q: "(23) Select the best sentence.", o: ["Mr. Naylor's leaving party...", "Personal belongings...", "The train reservation...", "You will not be able to access the office for the next two weeks..."], a: 3 },
+                    { id: "L14_R_4", passage: "Same passage as above.", q: "(24)", o: ["what", "who", "whoever", "whom"], a: 1 },
+                    {
+                        id: "L14_R_5",
+                        passage: "To: Heidi Wyatt <HWyatt@ProSoft.com>\nFrom: Jan Johnson <JJohnson@ProSoft.com>\nSubject: Team meeting site\n\nHeidi,\n\nYou asked me last week if I had any ideas for a location for the team meeting you have to schedule for October. I really didn't have any great ideas until I happened to see an ad for this place called High Point Retreat. It's up in the High Point Valley, about a half-hour outside of town.\n\nIt looks like it could be a great location for the meeting. They can accommodate a group twice the size of our team, so space won't be a problem. They also offer great amenities and all of the equipment we would probably need. They even run a shuttle service from downtown for people who have to be back in town by evening.\n\nI asked a friend at another software company about it and she said that her company has a weekend vacation there every year. They love it and she said that the rates are really reasonable. I know it's a bit far from the city, but it might be a good way to get people to look at office issues differently when they are a little more relaxed.\n\nI'll forward you a link to their website. Let me know if I can do anything to help you plan.\n\nJan Johnson",
+                        q: "25. Why did Ms. Johnson write to Ms. Wyatt?", o: ["She found an error in their ad.", "She got an idea for their project.", "She had a good time at the retreat.", "She has a suggestion about a meeting."], a: 3
+                    },
+                    { id: "L14_R_6", passage: "Same passage as above.", q: "26. What is indicated about High Point Retreat?", o: ["It has meeting equipment.", "It is located near a station.", "It offers various entertainment.", "It will open a new wing in October."], a: 0 },
+                    { id: "L14_R_7", passage: "Same passage as above.", q: "27. What is NOT true about Ms. Johnson?", o: ["She got the hotel information from a friend.", "She has visited High Point Retreat every year.", "She works at a software company.", "She works with Ms. Wyatt."], a: 1 }
                 ]
             }
         ];
 
-        // --- COMPONENTS ---
+        // --- Components ---
 
-        function App() {
-            const [view, setView] = useState('menu');
-            const [activeLessonId, setActiveLessonId] = useState(null);
-            const [completedQuestions, setCompletedQuestions] = useState({}); 
-            const [quizQueue, setQuizQueue] = useState([]);
-            const [currentQIndex, setCurrentQIndex] = useState(0);
-            const [stats, setStats] = useState({ correct: 0, wrong: 0 });
-            const [feedback, setFeedback] = useState(null);
+        const LessonCard = ({ lesson, onSelect, index, masteredCount, totalCount }) => {
+            const isCompleted = masteredCount === totalCount && totalCount > 0;
+            const progress = totalCount > 0 ? (masteredCount / totalCount) * 100 : 0;
 
-            const getQId = (text) => text.substring(0, 15) + text.length;
+            return (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    onClick={() => onSelect(lesson)}
+                    className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all border border-gray-100 dark:border-gray-700 relative overflow-hidden group"
+                >
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-100 dark:bg-blue-900 rounded-bl-full -mr-4 -mt-4 opacity-50 group-hover:scale-110 transition-transform"></div>
+                    <div className="flex justify-between items-start relative z-10">
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-1">{lesson.title}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{lesson.subtitle}</p>
+                        </div>
+                        {isCompleted && <div className="bg-yellow-100 text-yellow-600 p-1 rounded-full"><Icons.Star className="w-6 h-6 fill-current" /></div>}
+                    </div>
+                    
+                    <div className="mt-4">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div className="bg-blue-600 h-2 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1 text-right">{masteredCount} / {totalCount} Cleared</p>
+                    </div>
 
-            const startSection = (lessonId, sectionId) => {
-                const lesson = APP_DATA.find(l => l.id === lessonId);
-                const section = lesson.sections.find(s => s.id === sectionId);
-                const queue = section.questions.map(q => ({
-                    ...q,
-                    content: section.content, // Pass content (reading passage) to question
-                    id: getQId(q.text)
-                }));
-                setActiveLessonId(lessonId);
-                setQuizQueue(queue);
-                setCurrentQIndex(0);
-                setStats({ correct: 0, wrong: 0 });
-                setView('quiz');
+                    <div className="mt-2 flex items-center text-blue-600 dark:text-blue-400 font-medium relative z-10">
+                        Start Lesson <Icons.ChevronRight className="w-4 h-4 ml-1" />
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const ModeSelection = ({ onSelectMode, onBack }) => (
+            <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="flex flex-col h-full justify-center space-y-6 px-4"
+            >
+                <button onClick={onBack} className="absolute top-4 left-4 p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full z-20">
+                    <Icons.ArrowLeft />
+                </button>
+                
+                <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white mb-8">Select Mode</h2>
+                
+                <button 
+                    onClick={() => onSelectMode('targetTest')}
+                    className="p-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg text-white text-left relative overflow-hidden group hover:shadow-2xl transition-all"
+                >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-bl-full -mr-8 -mt-8 group-hover:scale-110 transition-transform"></div>
+                    <Icons.Trophy className="w-10 h-10 mb-4 text-indigo-200" />
+                    <h3 className="text-2xl font-bold">TARGET TEST</h3>
+                    <p className="text-indigo-100 mt-2">基本問題をマスターしましょう。</p>
+                </button>
+
+                <button 
+                    onClick={() => onSelectMode('reviewQuiz')}
+                    className="p-8 bg-gradient-to-br from-teal-400 to-emerald-600 rounded-2xl shadow-lg text-white text-left relative overflow-hidden group hover:shadow-2xl transition-all"
+                >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-bl-full -mr-8 -mt-8 group-hover:scale-110 transition-transform"></div>
+                    <Icons.RotateCcw className="w-10 h-10 mb-4 text-teal-100" />
+                    <h3 className="text-2xl font-bold">REVIEW QUIZ</h3>
+                    <p className="text-teal-100 mt-2">復習問題にチャレンジ。</p>
+                </button>
+            </motion.div>
+        );
+
+        const ExplanationModal = ({ isCorrect, correctAnswer, userAnswer, explanation, onClose }) => {
+             if (isCorrect === null) return null;
+
+             return (
+                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                     <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+                     >
+                        <div className={`p-6 text-center ${isCorrect ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+                            {isCorrect ? (
+                                <Icons.CheckCircle className="w-16 h-16 mx-auto text-green-500 mb-2" />
+                            ) : (
+                                <Icons.XCircle className="w-16 h-16 mx-auto text-red-500 mb-2" />
+                            )}
+                            <h2 className={`text-2xl font-bold ${isCorrect ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
+                                {isCorrect ? "正解！" : "残念..."}
+                            </h2>
+                        </div>
+                        
+                        <div className="p-6 space-y-4">
+                            {!isCorrect && (
+                                <div className="text-center">
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">正解は...</p>
+                                    <p className="text-xl font-bold text-gray-800 dark:text-white">{correctAnswer}</p>
+                                </div>
+                            )}
+                            
+                            <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl text-sm text-gray-700 dark:text-gray-300">
+                                <span className="font-bold block mb-1">💡 One Point Advice:</span>
+                                {explanation}
+                            </div>
+                            
+                            <button 
+                                onClick={onClose}
+                                className={`w-full py-3 rounded-xl font-bold text-white transition-colors ${isCorrect ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}`}
+                            >
+                                {isCorrect ? "Next Question" : "Try to Remember"}
+                            </button>
+                        </div>
+                     </motion.div>
+                 </div>
+             );
+        };
+
+        const QuizGame = ({ questions, lessonAdvice, onComplete, onExit, onMasterQuestion }) => {
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [selectedOption, setSelectedOption] = useState(null);
+            const [modalState, setModalState] = useState({ show: false, isCorrect: false });
+            const [score, setScore] = useState(0);
+            const [showPassage, setShowPassage] = useState(false);
+            const [results, setResults] = useState([]);
+
+            const currentQ = questions[currentIndex];
+            const hasPassage = !!currentQ.passage;
+
+            if (!currentQ) return <div className="p-10 text-center">Loading...</div>;
+
+            const handleOptionClick = (optionIndex) => {
+                if (selectedOption !== null) return; 
+
+                const correct = optionIndex === currentQ.a;
+                setSelectedOption(optionIndex);
+                
+                // Show modal immediately
+                setModalState({ show: true, isCorrect: correct });
+                
+                if (correct) {
+                    setScore(s => s + 1);
+                    onMasterQuestion(currentQ.id); // Mark as mastered
+                }
+                
+                setResults([...results, { q: currentQ, selected: optionIndex, correct }]);
             };
 
-            const handleAnswer = (selectedIndex) => {
-                const currentQ = quizQueue[currentQIndex];
-                const isCorrect = selectedIndex === currentQ.correct;
-                setFeedback({
-                    type: isCorrect ? 'correct' : 'wrong',
-                    explanation: currentQ.explanation
-                });
-            };
+            const handleNext = () => {
+                setModalState({ show: false, isCorrect: false });
+                setSelectedOption(null);
+                setShowPassage(false);
 
-            const nextQuestion = () => {
-                const currentQ = quizQueue[currentQIndex];
-                const isCorrect = feedback.type === 'correct';
-                setFeedback(null);
-                if (isCorrect) {
-                    setCompletedQuestions(prev => ({ ...prev, [currentQ.id]: true }));
-                    setStats(prev => ({ ...prev, correct: prev.correct + 1 }));
-                    if (currentQIndex >= quizQueue.length - 1) {
-                        setView('result');
-                    } else {
-                        setCurrentQIndex(prev => prev + 1);
-                    }
+                if (currentIndex < questions.length - 1) {
+                    setCurrentIndex(c => c + 1);
                 } else {
-                    setStats(prev => ({ ...prev, wrong: prev.wrong + 1 }));
-                    setQuizQueue(prev => [...prev, currentQ]);
-                    setCurrentQIndex(prev => prev + 1);
+                    onComplete(score + (modalState.isCorrect ? 0 : 0), questions.length); // Score already updated
                 }
             };
 
-            if (view === 'menu') return <MenuView data={APP_DATA} onSelectLesson={(id) => { setActiveLessonId(id); setView('lesson'); }} completedMap={completedQuestions} getQId={getQId} />;
-            if (view === 'lesson') return <LessonView lesson={APP_DATA.find(l => l.id === activeLessonId)} onBack={() => setView('menu')} onStartSection={startSection} completedMap={completedQuestions} getQId={getQId} />;
-            if (view === 'quiz') return <QuizView question={quizQueue[currentQIndex]} total={quizQueue.length} current={currentQIndex + 1} onAnswer={handleAnswer} feedback={feedback} onNext={nextQuestion} onExit={() => setView('lesson')} />;
-            if (view === 'result') return <ResultView stats={stats} onBack={() => setView('lesson')} />;
-            return null;
-        }
+            // Calculate progress bar
+            const progress = ((currentIndex + 1) / questions.length) * 100;
 
-        const MenuView = ({ data, onSelectLesson, completedMap, getQId }) => (
-            <div className="max-w-md mx-auto min-h-screen pb-10">
-                <header className="bg-white p-6 shadow-sm sticky top-0 z-10">
-                    <div className="flex justify-between items-center">
-                        <h1 className="text-2xl font-black text-slate-800 tracking-tighter italic uppercase">English Master</h1>
-                        <Icons.Trophy className="text-yellow-500 w-6 h-6" />
-                    </div>
-                    <p className="text-slate-500 text-[10px] font-black uppercase mt-1 tracking-widest">Basic English II • Lessons 1-14</p>
-                </header>
-                <div className="p-4 space-y-3">
-                    {data.map((lesson, idx) => {
-                        const totalQ = lesson.sections.reduce((acc, s) => acc + s.questions.length, 0);
-                        const doneQ = lesson.sections.reduce((acc, s) => acc + s.questions.filter(q => completedMap[getQId(q.text)]).length, 0);
-                        const progress = totalQ > 0 ? Math.round((doneQ / totalQ) * 100) : 0;
-                        return (
-                            <button key={lesson.id} onClick={() => onSelectLesson(lesson.id)} className="w-full bg-white p-4 rounded-2xl shadow-sm border border-slate-100 active:scale-95 transition-all text-left group">
-                                <div className="flex justify-between items-center mb-1">
-                                    <span className="text-[10px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-widest">Unit {idx + 1}</span>
-                                    {progress === 100 && <Icons.Star className="w-4 h-4 text-yellow-400 fill-current" />}
-                                </div>
-                                <h3 className="text-sm font-bold text-slate-700 leading-snug mb-3">{lesson.title}</h3>
-                                <div className="flex items-center gap-3">
-                                    <div className="flex-1 bg-slate-100 h-1 rounded-full overflow-hidden">
-                                        <div className={`h-full ${progress === 100 ? 'bg-green-500' : 'bg-indigo-500'} transition-all duration-700`} style={{ width: `${progress}%` }}></div>
-                                    </div>
-                                    <span className="text-[10px] font-bold text-slate-400">{progress}%</span>
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-        );
+            // Determine generic explanation string
+            const correctOptionLabel = String.fromCharCode(65 + currentQ.a);
+            const correctOptionText = currentQ.o[currentQ.a];
+            const displayCorrectAnswer = `(${correctOptionLabel}) ${correctOptionText}`;
 
-        const LessonView = ({ lesson, onBack, onStartSection, completedMap, getQId }) => (
-            <div className="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col">
-                <header className="bg-white p-4 shadow-sm flex items-center gap-3 sticky top-0 z-10">
-                    <button onClick={onBack} className="p-2 hover:bg-slate-100 rounded-full"><Icons.ArrowLeft className="w-5 h-5 text-slate-600" /></button>
-                    <h2 className="text-sm font-black text-slate-800 truncate">{lesson.title}</h2>
-                </header>
-                <div className="p-4 space-y-4">
-                    {lesson.sections.map(section => {
-                        const total = section.questions.length;
-                        const done = section.questions.filter(q => completedMap[getQId(q.text)]).length;
-                        const isComplete = total === done && total > 0;
-                        return (
-                            <button key={section.id} onClick={() => onStartSection(lesson.id, section.id)} className={`w-full p-6 rounded-3xl text-left border-2 transition-all shadow-sm active:scale-95 relative overflow-hidden bg-white ${isComplete ? 'border-green-100' : 'border-slate-100'}`}>
-                                <div className="absolute top-0 right-0 p-3 text-[9px] font-black uppercase tracking-widest text-slate-300">
-                                    {section.type}
-                                </div>
-                                <h3 className="text-lg font-black text-slate-800 mb-2">{section.title}</h3>
-                                <div className={`flex items-center gap-2 font-bold text-xs px-3 py-1.5 rounded-lg w-fit ${isComplete ? 'bg-green-50 text-green-600' : 'bg-indigo-50 text-indigo-600'}`}>
-                                    {isComplete ? <Icons.CheckCircle className="w-4 h-4" /> : <Icons.Play className="w-4 h-4 fill-current" />}
-                                    {isComplete ? 'Mastered' : `${total - done} Questions`}
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-        );
-
-        const QuizView = ({ question, total, current, onAnswer, feedback, onNext, onExit }) => (
-            <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col relative">
-                <div className="px-4 py-4 flex items-center justify-between border-b border-slate-100">
-                    <button onClick={onExit}><Icons.XCircle className="w-6 h-6 text-slate-300" /></button>
-                    <div className="flex-1 mx-6 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-indigo-500 transition-all duration-300" style={{ width: `${(current / total) * 100}%` }}></div>
-                    </div>
-                    <span className="text-[10px] font-black text-slate-400">{current}/{total}</span>
-                </div>
-                <div className="flex-1 overflow-y-auto p-6 pb-32">
-                    {question.content && (
-                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-6 text-sm leading-relaxed text-slate-600 font-serif whitespace-pre-wrap">
-                            <div className="flex items-center gap-2 mb-3 text-indigo-500 font-black text-[10px] uppercase tracking-tighter"><Icons.BookOpen className="w-3 h-3" /> Reading Passage</div>
-                            {question.content}
+            return (
+                <div className="h-full flex flex-col relative overflow-hidden">
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 z-20">
+                        <button onClick={onExit} className="p-2 -ml-2 text-gray-500 hover:text-gray-700 dark:hover:text-white">
+                            <Icons.XCircle className="w-6 h-6" />
+                        </button>
+                        <div className="flex-1 mx-4">
+                            <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                <motion.div 
+                                    className="h-full bg-blue-500"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${progress}%` }}
+                                    transition={{ duration: 0.5 }}
+                                />
+                            </div>
                         </div>
+                        <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
+                            {currentIndex + 1}/{questions.length}
+                        </span>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto p-4 pb-24 relative">
+                        <AnimatePresence mode="wait">
+                            <motion.div 
+                                key={currentQ.id}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="max-w-xl mx-auto"
+                            >
+                                {/* Passage Toggle */}
+                                {hasPassage && (
+                                    <button 
+                                        onClick={() => setShowPassage(!showPassage)}
+                                        className="w-full mb-6 flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-lg border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
+                                    >
+                                        <span className="font-semibold flex items-center"><Icons.BookOpen className="w-5 h-5 mr-2" /> {showPassage ? "本文を隠す" : "本文を読む"}</span>
+                                        <Icons.ChevronRight className={`transform transition-transform ${showPassage ? 'rotate-90' : ''}`} />
+                                    </button>
+                                )}
+
+                                <AnimatePresence>
+                                    {showPassage && hasPassage && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="overflow-hidden mb-6"
+                                        >
+                                            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm leading-relaxed text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 whitespace-pre-line shadow-inner">
+                                                {currentQ.passage}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                {/* Question */}
+                                <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-8 leading-relaxed">
+                                    {currentQ.q}
+                                </h2>
+
+                                {/* Options */}
+                                <div className="space-y-3">
+                                    {currentQ.o.map((option, idx) => (
+                                        <motion.button
+                                            key={idx}
+                                            onClick={() => handleOptionClick(idx)}
+                                            disabled={selectedOption !== null}
+                                            whileTap={{ scale: 0.98 }}
+                                            className={`w-full p-4 text-left border-2 rounded-xl transition-all duration-200 flex items-center justify-between group 
+                                                ${selectedOption !== null 
+                                                    ? (idx === currentQ.a 
+                                                        ? "bg-green-100 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-300" 
+                                                        : (idx === selectedOption 
+                                                            ? "bg-red-100 dark:bg-red-900/30 border-red-500 text-red-700 dark:text-red-300"
+                                                            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 opacity-50"))
+                                                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400"
+                                                }`}
+                                        >
+                                            <span className="font-medium mr-2 flex items-center">
+                                                <span className="inline-block w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 text-center leading-8 text-xs mr-3 text-gray-500 dark:text-gray-300 group-hover:bg-blue-100 dark:group-hover:bg-blue-900 transition-colors">
+                                                    {String.fromCharCode(65 + idx)}
+                                                </span>
+                                                {option}
+                                            </span>
+                                        </motion.button>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Feedback Modal */}
+                    {modalState.show && (
+                        <ExplanationModal 
+                            isCorrect={modalState.isCorrect}
+                            correctAnswer={displayCorrectAnswer}
+                            explanation={lessonAdvice}
+                            onClose={handleNext}
+                        />
                     )}
-                    <div className="mb-8">
-                        <span className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-500 text-[9px] font-black mb-4 uppercase tracking-widest">Question</span>
-                        <h3 className="text-lg font-bold text-slate-800 leading-relaxed">
-                            {question.text.split('_______').map((part, i, arr) => (
-                                <span key={i}>{part}{i < arr.length - 1 && <span className="inline-block border-b-2 border-indigo-500 w-16 mx-1"></span>}</span>
-                            ))}
-                        </h3>
-                    </div>
-                    <div className="space-y-3">
-                        {question.options.map((opt, i) => (
-                            <button key={i} onClick={() => !feedback && onAnswer(i)} disabled={!!feedback}
-                                className={`w-full p-4 rounded-2xl border-2 text-left font-bold transition-all flex items-center gap-4
-                                    ${feedback 
-                                        ? i === question.correct ? 'bg-green-50 border-green-500 text-green-700' : 'bg-white border-slate-100 text-slate-300'
-                                        : 'bg-white border-slate-100 hover:border-indigo-200'
-                                    }
-                                `}>
-                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black border-2 transition-colors
-                                    ${feedback && i === question.correct ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-slate-200 text-slate-400'}
-                                `}>
-                                    {String.fromCharCode(65 + i)}
-                                </div>
-                                <span className="text-sm">{opt}</span>
-                            </button>
-                        ))}
-                    </div>
                 </div>
-                {feedback && (
-                    <div className="fixed inset-0 z-50 flex items-end justify-center p-4 bg-slate-900/10 backdrop-blur-sm">
-                        <div className={`w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl animate-slide-up border-t-8 ${feedback.type === 'correct' ? 'border-green-500' : 'border-red-500'}`}>
-                            <div className="flex items-center gap-3 mb-4">
-                                {feedback.type === 'correct' ? <Icons.CheckCircle className="w-8 h-8 text-green-500" /> : <Icons.XCircle className="w-8 h-8 text-red-500" />}
-                                <h3 className={`text-2xl font-black ${feedback.type === 'correct' ? 'text-green-600' : 'text-red-600'}`}>
-                                    {feedback.type === 'correct' ? 'Correct!' : 'Keep Learning'}
-                                </h3>
-                            </div>
-                            <div className="bg-slate-50 p-4 rounded-2xl mb-6">
-                                <p className="text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Explanation</p>
-                                <p className="text-slate-700 text-sm leading-relaxed font-medium">{feedback.explanation}</p>
-                            </div>
-                            <button onClick={onNext} className={`w-full py-4 rounded-2xl font-black text-white shadow-xl active:scale-95 transition-all ${feedback.type === 'correct' ? 'bg-green-500 shadow-green-200' : 'bg-slate-800 shadow-slate-200'}`}>
-                                {feedback.type === 'correct' ? 'NEXT' : 'GOT IT'}
-                            </button>
-                        </div>
+            );
+        };
+
+        const ResultScreen = ({ score, total, onRestart, onHome }) => {
+            const percentage = Math.round((score / total) * 100);
+            
+            return (
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center justify-center h-full p-6 text-center"
+                >
+                    <div className="w-32 h-32 mb-6 rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
+                        <Icons.Trophy className="w-16 h-16 text-white" />
                     </div>
-                )}
+                    
+                    <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Quiz Complete!</h2>
+                    <p className="text-gray-500 dark:text-gray-400 mb-8">今回の成績</p>
+                    
+                    <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
+                        {score}/{total}
+                    </div>
+                    <div className="text-sm font-medium text-gray-400 mb-12">正答率: {percentage}%</div>
+                    
+                    <div className="flex gap-4 w-full max-w-sm">
+                        <button 
+                            onClick={onHome}
+                            className="flex-1 py-3 px-6 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+                        >
+                            <Icons.Home className="w-4 h-4 mr-2" /> Home
+                        </button>
+                        <button 
+                            onClick={onRestart}
+                            className="flex-1 py-3 px-6 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center"
+                        >
+                            <Icons.RotateCcw className="w-4 h-4 mr-2" /> Retry
+                        </button>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const AllMasteredScreen = ({ onHome }) => (
+            <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+                <Icons.CheckCircle className="w-24 h-24 text-green-500 mb-6" />
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Complete!</h2>
+                <p className="text-gray-600 dark:text-gray-300 mb-8">
+                    このセクションの問題はすべて正解しました！<br/>
+                    素晴らしい学習成果です。
+                </p>
+                <button 
+                    onClick={onHome}
+                    className="py-3 px-8 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-lg"
+                >
+                    他のレッスンへ進む
+                </button>
             </div>
         );
 
-        const ResultView = ({ stats, onBack }) => (
-            <div className="max-w-md mx-auto min-h-screen bg-indigo-600 flex flex-col items-center justify-center p-6 text-center">
-                <div className="bg-white p-8 rounded-[40px] w-full max-w-sm shadow-2xl animate-slide-up">
-                    <div className="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Icons.Trophy className="w-10 h-10 text-yellow-500" />
+        // --- Main App ---
+
+        function App() {
+            const [currentScreen, setCurrentScreen] = useState('home'); 
+            const [selectedLesson, setSelectedLesson] = useState(null);
+            const [selectedMode, setSelectedMode] = useState(null);
+            const [scoreData, setScoreData] = useState({ score: 0, total: 0 });
+            
+            // Persistent State for Mastered Questions
+            const [masteredQuestions, setMasteredQuestions] = useState(() => {
+                const saved = localStorage.getItem('english_master_progress');
+                return saved ? JSON.parse(saved) : [];
+            });
+
+            // Save mastery progress whenever it changes
+            useEffect(() => {
+                localStorage.setItem('english_master_progress', JSON.stringify(masteredQuestions));
+            }, [masteredQuestions]);
+
+            const handleMasterQuestion = (questionId) => {
+                if (!masteredQuestions.includes(questionId)) {
+                    setMasteredQuestions(prev => [...prev, questionId]);
+                }
+            };
+
+            const handleLessonSelect = (lesson) => {
+                setSelectedLesson(lesson);
+                setCurrentScreen('modeSelect');
+            };
+
+            const handleModeSelect = (mode) => {
+                setSelectedMode(mode);
+                setCurrentScreen('quiz');
+            };
+
+            const handleQuizComplete = (score, total) => {
+                setScoreData({ score, total });
+                setCurrentScreen('result');
+            };
+
+            const handleHome = () => {
+                setCurrentScreen('home');
+                setSelectedLesson(null);
+                setSelectedMode(null);
+            };
+
+            const handleRetry = () => {
+                setCurrentScreen('quiz');
+            };
+
+            // Filter questions for the quiz
+            const activeQuestions = useMemo(() => {
+                if (!selectedLesson || !selectedMode) return [];
+                const allQuestions = selectedLesson[selectedMode];
+                // Filter out mastered questions
+                return allQuestions.filter(q => !masteredQuestions.includes(q.id));
+            }, [selectedLesson, selectedMode, masteredQuestions]);
+
+            return (
+                <div className="max-w-md mx-auto h-screen bg-white dark:bg-gray-900 shadow-2xl overflow-hidden flex flex-col relative border-x border-gray-100 dark:border-gray-800">
+                    
+                    {/* Decorative Background Blobs */}
+                    <div className="absolute top-0 left-0 w-64 h-64 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob pointer-events-none"></div>
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000 pointer-events-none"></div>
+                    <div className="absolute -bottom-8 left-20 w-64 h-64 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000 pointer-events-none"></div>
+
+                    <div className="relative z-10 h-full">
+                        <AnimatePresence mode="wait">
+                            
+                            {/* HOME SCREEN */}
+                            {currentScreen === 'home' && (
+                                <motion.div 
+                                    key="home"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    className="h-full flex flex-col"
+                                >
+                                    <div className="p-6 pt-12 pb-4">
+                                        <h1 className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                                            English Master
+                                        </h1>
+                                        <p className="text-gray-500 dark:text-gray-400 mt-1">Basic English II</p>
+                                    </div>
+                                    
+                                    <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4 scrollbar-hide">
+                                        {quizData.map((lesson, idx) => {
+                                            // Calculate mastery for this lesson
+                                            const allIds = [...lesson.targetTest, ...lesson.reviewQuiz].map(q => q.id);
+                                            const masteredInLesson = allIds.filter(id => masteredQuestions.includes(id)).length;
+                                            
+                                            return (
+                                                <LessonCard 
+                                                    key={lesson.id} 
+                                                    lesson={lesson} 
+                                                    index={idx} 
+                                                    onSelect={handleLessonSelect} 
+                                                    masteredCount={masteredInLesson}
+                                                    totalCount={allIds.length}
+                                                />
+                                            );
+                                        })}
+                                        <div className="h-12"></div>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* MODE SELECTION SCREEN */}
+                            {currentScreen === 'modeSelect' && (
+                                <ModeSelection 
+                                    key="modeSelect"
+                                    onSelectMode={handleModeSelect} 
+                                    onBack={handleHome} 
+                                />
+                            )}
+
+                            {/* QUIZ SCREEN */}
+                            {currentScreen === 'quiz' && selectedLesson && selectedMode && (
+                                activeQuestions.length > 0 ? (
+                                    <QuizGame 
+                                        key="quiz"
+                                        questions={activeQuestions} 
+                                        lessonAdvice={selectedLesson.advice}
+                                        onComplete={handleQuizComplete}
+                                        onExit={handleHome}
+                                        onMasterQuestion={handleMasterQuestion}
+                                    />
+                                ) : (
+                                    <AllMasteredScreen key="all-mastered" onHome={handleHome} />
+                                )
+                            )}
+
+                            {/* RESULT SCREEN */}
+                            {currentScreen === 'result' && (
+                                <ResultScreen 
+                                    key="result"
+                                    score={scoreData.score}
+                                    total={scoreData.total}
+                                    onRestart={handleRetry}
+                                    onHome={handleHome}
+                                />
+                            )}
+
+                        </AnimatePresence>
                     </div>
-                    <h2 className="text-3xl font-black text-slate-800 mb-2">Well Done!</h2>
-                    <p className="text-slate-400 text-sm font-bold mb-8">Lesson Completed</p>
-                    <div className="grid grid-cols-2 gap-3 mb-8">
-                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                            <div className="text-2xl font-black text-indigo-600">{stats.correct}</div>
-                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Correct</div>
-                        </div>
-                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                            <div className="text-2xl font-black text-slate-400">{stats.wrong}</div>
-                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Mistakes</div>
-                        </div>
-                    </div>
-                    <button onClick={onBack} className="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 active:scale-95 transition-all">
-                        BACK TO MENU
-                    </button>
                 </div>
-            </div>
-        );
+            );
+        }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
