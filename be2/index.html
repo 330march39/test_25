@@ -908,7 +908,7 @@
                 
                 if (correct) {
                     setScore(s => s + 1);
-                    onMasterQuestion(currentQ.id); 
+                    setTimeout(() => onMasterQuestion(currentQ.id), 500);  // 遅延追加 
                 }
             };
 
