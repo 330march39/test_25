@@ -908,6 +908,9 @@
                 
                 if (correct) {
                     setScore(s => s + 1);
+                    if (onMasterQuestion) {
+                        onMasterQuestion(currentQ.id);
+                    }
                 }
             };
 
@@ -1044,6 +1047,36 @@
             );
         };
 
+        // --- 手順1: ここに ResetModal を追加 ---
+        const ResetModal = ({ isOpen, onClose, onConfirm, title }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <motion.div 
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center border border-gray-100 dark:border-gray-700"
+                    >
+                        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Icons.RotateCcw className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">復習しますか？</h3>
+                        <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
+                            「{title}」はすべてクリア済みです。<br/>学習履歴をリセットして最初からやり直しますか？
+                        </p>
+                        <div className="flex gap-3">
+                            <button onClick={onClose} className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold hover:bg-gray-200 transition-colors">
+                                キャンセル
+                            </button>
+                            <button onClick={onConfirm} className="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-colors">
+                                リセットする
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            );
+        };
+
         const ModeSelection = ({ onSelectMode, onBack }) => (
             <motion.div 
                 initial={{ opacity: 0, x: 20 }}
@@ -1141,13 +1174,21 @@
             </div>
         );
 
+        // --- 手順3: Appコンポーネントを以下に差し替え ---
         function App() {
             const [currentScreen, setCurrentScreen] = useState('home'); 
             const [selectedLesson, setSelectedLesson] = useState(null);
             const [selectedMode, setSelectedMode] = useState(null);
             const [scoreData, setScoreData] = useState({ score: 0, total: 0 });
             
-            // Persistent State
+            // クイズ中の問題リストを固定するためのState
+            const [sessionQuestions, setSessionQuestions] = useState([]);
+            
+            // リセットモーダル用State
+            const [showResetModal, setShowResetModal] = useState(false);
+            const [pendingLesson, setPendingLesson] = useState(null);
+
+            // Persistent State (学習履歴)
             const [masteredQuestions, setMasteredQuestions] = useState(() => {
                 const saved = localStorage.getItem('english_master_progress_v2'); 
                 return saved ? JSON.parse(saved) : [];
@@ -1163,13 +1204,45 @@
                 }
             };
 
+            // レッスン選択時の処理（全問正解ならリセットポップアップを出す）
             const handleLessonSelect = (lesson) => {
-                setSelectedLesson(lesson);
-                setCurrentScreen('modeSelect');
+                const allIds = [...(lesson.targetTest || []), ...(lesson.reviewQuiz || [])].map(q => q.id);
+                const isAllMastered = allIds.length > 0 && allIds.every(id => masteredQuestions.includes(id));
+
+                if (isAllMastered) {
+                    setPendingLesson(lesson);
+                    setShowResetModal(true);
+                } else {
+                    setSelectedLesson(lesson);
+                    setCurrentScreen('modeSelect');
+                }
+            };
+
+            // リセット実行処理
+            const executeReset = () => {
+                if (pendingLesson) {
+                    const idsToReset = [...(pendingLesson.targetTest || []), ...(pendingLesson.reviewQuiz || [])].map(q => q.id);
+                    setMasteredQuestions(prev => prev.filter(id => !idsToReset.includes(id)));
+                    
+                    // リセット後、そのままレッスン選択画面へ進むか、一度閉じるか。
+                    // ここではリセット完了後にモード選択へ進むようにします。
+                    setSelectedLesson(pendingLesson);
+                    setCurrentScreen('modeSelect');
+                    
+                    setPendingLesson(null);
+                    setShowResetModal(false);
+                }
             };
 
             const handleModeSelect = (mode) => {
                 setSelectedMode(mode);
+                
+                // ★重要: モード選択の瞬間に「未回答の問題」だけを抽出して固定する
+                // これにより、クイズ中に正解しても問題が消えたりスキップされたりしない
+                const allQuestions = selectedLesson[mode];
+                const filtered = allQuestions.filter(q => !masteredQuestions.includes(q.id));
+                setSessionQuestions(filtered);
+
                 setCurrentScreen('quiz');
             };
 
@@ -1182,21 +1255,27 @@
                 setCurrentScreen('home');
                 setSelectedLesson(null);
                 setSelectedMode(null);
+                setSessionQuestions([]);
             };
 
             const handleRetry = () => {
+                // リトライ時は再度フィルタリングを行って開始
+                const allQuestions = selectedLesson[selectedMode];
+                const filtered = allQuestions.filter(q => !masteredQuestions.includes(q.id));
+                setSessionQuestions(filtered);
                 setCurrentScreen('quiz');
             };
 
-            // Filter questions
-            const activeQuestions = useMemo(() => {
-                if (!selectedLesson || !selectedMode) return [];
-                const allQuestions = selectedLesson[selectedMode];
-                return allQuestions.filter(q => !masteredQuestions.includes(q.id));
-            }, [selectedLesson, selectedMode, masteredQuestions]);
-
             return (
                 <div className="max-w-md mx-auto h-screen bg-white dark:bg-gray-900 shadow-2xl overflow-hidden flex flex-col relative border-x border-gray-100 dark:border-gray-800">
+                    {/* リセット確認モーダル */}
+                    <ResetModal 
+                        isOpen={showResetModal} 
+                        onClose={() => setShowResetModal(false)}
+                        onConfirm={executeReset}
+                        title={pendingLesson?.title}
+                    />
+
                     <div className="relative z-10 h-full">
                         <AnimatePresence mode="wait">
                             
@@ -1245,10 +1324,10 @@
                             )}
 
                             {currentScreen === 'quiz' && selectedLesson && selectedMode && (
-                                activeQuestions.length > 0 ? (
+                                sessionQuestions.length > 0 ? (
                                     <QuizGame 
                                         key="quiz"
-                                        questions={activeQuestions} 
+                                        questions={sessionQuestions} // 計算済みのリストを渡す
                                         lessonAdvice={selectedLesson.advice}
                                         onComplete={handleQuizComplete}
                                         onExit={handleHome}
