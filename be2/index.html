@@ -298,13 +298,40 @@
                     { id: "L8_T_1", passage: Passages.L8_Target_Conrad, q: "(1)", o: ["that", "what", "where", "whom"], a: 0, explanation: "先行詞が 'information' なので、関係代名詞 'that'（またはwhich）が適切です。" },
                     { id: "L8_T_2", passage: Passages.L8_Target_Conrad, q: "(2)", o: ["how", "when", "which", "whom"], a: 2, explanation: "前の文の内容（Goldパッケージが要件に合うこと）を受けて補足説明するため、非制限用法の 'which' を使います。" },
                     { id: "L8_T_3", passage: Passages.L8_Target_Conrad, q: "(3)", o: ["how", "which", "whoever", "why"], a: 0, explanation: "「サービスが『どのように』役立つか」という意味で、'how' が適切です。" },
+                    {
+  id: "L8_T_4",
+  passage: Passages.L8_Target_Conrad,
+  q: "(4)",
+  o: ["how", "that", "what", "which"],
+  a: 3,
+  explanation: "\"how our service can work for you\" となり、直前の文脈と自然につながります。"
+},
+
                     { id: "L8_T_5", passage: Passages.L8_Target_FunRun, q: "(5)", o: ["how", "that", "what", "where"], a: 3, explanation: "先行詞が 'Mercy Food Bank'（場所・組織）で、そこで彼らが活動しているという文脈なので、関係副詞 'where' が適切です。" },
                     { id: "L8_T_6", passage: Passages.L8_Target_FunRun, q: "(6)", o: ["which", "whom", "whose", "why"], a: 0, explanation: "先行詞 'Kennel Friends Animal Shelter'（物・事）を受けて、「それは説明不要ですが」と続けるため、関係代名詞 'which' を使います。" },
                     { id: "L8_T_7", passage: Passages.L8_Target_FunRun, q: "(7)", o: ["which", "whom", "where", "how"], a: 2, explanation: "先行詞が 'outdoor sports arena'（場所）で、そこでレースを選べるという意味なので、関係副詞 'where' が正解です。" }
                 ],
                 reviewQuiz: [
                     { id: "L8_R_1", passage: Passages.L8_Review_Renovation, q: "(1)", o: ["how", "that", "what", "which"], a: 3, explanation: "非制限用法の関係代名詞です。先行詞が 'Cardboard boxes'（物）なので、カンマの後ろでは 'which' を使います（thatは不可）。" },
+                    {
+  id: "L8_R_2",
+  passage: Passages.L8_Review_Renovation,
+  q: "(2)",
+  o: ["how", "that", "what", "which"],
+  a: 3,
+  explanation: "\"Cardboard boxes, which are available in the storeroom, ...\" となり、関係代名詞の用法として正しい形になります。"
+},
+
                     { id: "L8_R_3", passage: Passages.L8_Review_Renovation, q: "(3)", o: ["what", "who", "whoever", "whom"], a: 1, explanation: "「自宅勤務を選んだ人々」という意味で、those who... の形を作ります。" }
+                    {
+  id: "L8_R_4",
+  passage: Passages.L8_Review_Renovation,
+  q: "(4)",
+  o: ["what", "who", "whoever", "whom"],
+  a: 1,
+  explanation: "\"For those who have chosen to work from home\" となり、人を受ける主格の関係代名詞として自然です。"
+},
+                
                 ]
             },
             {
@@ -364,14 +391,56 @@
                 subtitle: "Part 6: 文と文のつながり (2)",
                 targetTest: [
                     { id: "L11_T_1", passage: Passages.L11_Target_Hasse, q: "(1)", o: ["as", "but", "if", "though"], a: 0, explanation: "「期限が過ぎた『ので』(as)」という理由を表します。" },
+                    {
+  id: "L11_T_2",
+  passage: Passages.L11_Target_Hasse,
+  q: "(2)",
+  o: [
+    "We are forming a committee to decide on a candidate.",
+    "We are pleased to inform you that you have won the bid.",
+    "We will be happy to answer any questions you may have.",
+    "We will make a decision within two to three weeks."
+  ],
+  a: 3,
+  explanation: "提案書を審査している期間について述べる文脈なので、\"We will make a decision within two to three weeks.\" が最適です。"
+},
+
                     { id: "L11_T_3", passage: Passages.L11_Target_Hasse, q: "(3)", o: ["before", "once", "since", "while"], a: 1, explanation: "「選ばれたらすぐに(once)」通知する、です。" },
                     { id: "L11_T_4", passage: Passages.L11_Target_Hasse, q: "(4)", o: ["because", "if so", "in case", "whether"], a: 2, explanation: "「～の場合に備えて(in case)」保管しておく、です。" },
+                    {
+  id: "L11_T_5",
+  passage: Passages.L11_Target_Homedecor,
+  q: "(5)",
+  o: [
+    "We are sorry our products did not match your expectations.",
+    "We have been told the supplier no longer carries your item.",
+    "We hope that you are enjoying the items you ordered.",
+    "We sincerely apologize for the delay in your order."
+  ],
+  a: 3,
+  explanation: "在庫切れによる発送遅延のお詫びメールなので、注文の遅れを謝罪する (D) が文脈に合います。"
+},
+
                     { id: "L11_T_6", passage: Passages.L11_Target_Homedecor, q: "(6)", o: ["before", "providing", "that", "when"], a: 2, explanation: "unaware that...（～ということに気づいていない）という接続詞thatです。" },
                     { id: "L11_T_7", passage: Passages.L11_Target_Homedecor, q: "(7)", o: ["as a result", "but", "or", "so"], a: 3, explanation: "文脈的に「明日届く『ので』(so)追加料金はない」...いや、逆です。「明日届くし(and)、追加料金はない」。選択肢確認: Source 1217-1224. A) As a result, B) By the way? No wait. The options in Source are messed up. Let's look at text. \"you should receive it tomorrow, [blank] there was no extra charge\". Options in Source 1217: A) As a result, B) for, C) or, D) so. Wait, correct option logic: \"receive it tomorrow, [and] there was no charge\". None fit perfectly except maybe 'for' (理由)? No. Looking at Source 1221 'or', 1222 'D) On the contrary'. The options list is confusing. Let's guess 'and' or 'so'. Actually, let's assume standard linkers. 'and' fits best." },
                     { id: "L11_T_8", passage: Passages.L11_Target_Homedecor, q: "(8)", o: ["but", "for", "or", "so"], a: 0, explanation: "「誇りに思っているが、しかし(but)今回は遅延が避けられなかった」という逆接です。" }
                 ],
                 reviewQuiz: [
                     { id: "L11_R_1", passage: Passages.L11_Review_Internship, q: "(1)", o: ["because", "if", "that", "while"], a: 2, explanation: "inform you that...（～ということを知らせる）です。" },
+                    {
+  id: "L11_R_3",
+  passage: Passages.L11_Review_Internship,
+  q: "(3)",
+  o: [
+    "We at B G Design are proud of our internship program.",
+    "We expect you to do better in your work from now on.",
+    "You will also need to bring records from your doctor.",
+    "You will be reporting on the recent local business closures."
+  ],
+  a: 0,
+  explanation: "インターン採用通知の締めとして、会社側が自社のインターン制度を誇りに思っているという (A) が自然です。"
+},
+
                     { id: "L11_R_2", passage: Passages.L11_Review_Internship, q: "(2)", o: ["and", "but", "for", "so"], a: 0, explanation: "期間の説明に加えて、給与の説明をしているので並列の 'and' です。" },
                     { id: "L11_R_4", passage: Passages.L11_Review_Internship, q: "(4)", o: ["although", "before", "once", "since"], a: 3, explanation: "「プログラムを開始して以来(since)」です。" }
                 ]
@@ -441,10 +510,38 @@
                 ],
                 reviewQuiz: [
                     { id: "L14_R_17", passage: Passages.L11_Target_Hasse, q: "(17)", o: ["as", "but", "if", "though"], a: 0, explanation: "「期限が過ぎた『ので』(as)」という理由を表す接続詞 'as' が適切です。" },
+                    {
+  id: "L14_R_18",
+  passage: Passages.L11_Target_Hasse,
+  q: "(18)",
+  o: [
+    "We are forming a committee to decide on a candidate.",
+    "We are pleased to inform you that you have won the bid.",
+    "We will be happy to answer any questions you may have.",
+    "We will make a decision within two to three weeks."
+  ],
+  a: 3,
+  explanation: "入札の締切後に「2〜3週間以内に決定する」という流れが最も自然なので (D) です。"
+},
+
                     { id: "L14_R_19", passage: Passages.L11_Target_Hasse, q: "(19)", o: ["before", "once", "since", "while"], a: 1, explanation: "「業者が選ばれたらすぐに(once...)」通知する、という条件・時の接続詞です。" },
                     { id: "L14_R_20", passage: Passages.L11_Target_Hasse, q: "(20)", o: ["because", "if so", "in case", "whether"], a: 2, explanation: "「～の場合に備えて(in case)」提案書を保管しておく、という意味です。" },
                     { id: "L14_R_21", passage: Passages.L8_Review_Renovation, q: "(21)", o: ["how", "that", "what", "which"], a: 1, explanation: "We understand that... (～ということを理解している)。" },
                     { id: "L14_R_22", passage: Passages.L8_Review_Renovation, q: "(22)", o: ["how", "that", "what", "which"], a: 3, explanation: "Cardboard boxes, which are available... (非制限用法)。" },
+                    {
+  id: "L14_R_23",
+  passage: Passages.L8_Review_Renovation,
+  q: "(23)",
+  o: [
+    "Mr. Naylor's leaving party will take place at 6:00 p.m. on Friday, in the conference room on the third floor.",
+    "Personal belongings such as mobile phones are not permitted while working, please put them in your locker before your shift begins.",
+    "The train reservation has been confirmed, and everyone should meet at the station at 9:00 a.m.",
+    "You will not be able to access the office for the next two weeks, so please do not leave any essential items behind."
+  ],
+  a: 3,
+  explanation: "改装でオフィスに入れなくなることを伝えるメモなので、\"You will not be able to access the office...\" が文脈に最も合います。"
+},
+
                     { id: "L14_R_24", passage: Passages.L8_Review_Renovation, q: "(24)", o: ["what", "who", "whoever", "whom"], a: 3, explanation: "For those whom? No, wait. \"For those [who] have chosen\". 主格が必要です。選択肢(Source 1604-1606): A) what, B) who, C) whoever, D) whom. 正解は B (who)。" },
                     { id: "L14_R_25", passage: Passages.L9_Target_Team, q: "25. Why did Ms. Johnson write to Ms. Wyatt?", o: ["She found an error in their ad", "She got an idea for their project", "She had a good time at the retreat", "She has a suggestion about a meeting"], a: 3, explanation: "チームミーティングの場所について提案(suggestion)があるためメールを書いています。" },
                     { id: "L14_R_26", passage: Passages.L9_Target_Team, q: "26. What is indicated about High Point Retreat?", o: ["It has meeting equipment", "It is located near a station", "It offers various entertainment", "It will open a new wing in October"], a: 0, explanation: "第2段落に \"all of the equipment we would probably need\" とあり、設備が整っていることが示されています。" },
