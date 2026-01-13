@@ -1003,6 +1003,25 @@
                                 <div className={`w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-300 ${settings.randomOrder ? 'translate-x-6' : ''}`} />
                             </button>
                         </div>
+
+                        {settings.randomOrder && (
+                                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                                    <label className="flex items-center space-x-3 cursor-pointer">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={settings.noShufflePassages}
+                                            onChange={(e) => onUpdateSettings({ ...settings, noShufflePassages: e.target.checked })}
+                                            className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            長文問題はシャッフルしない
+                                        </span>
+                                    </label>
+                                    <p className="text-xs text-gray-400 mt-1 ml-8">
+                                        Part 6/7などの長文問題は収録順のまま出題されます
+                                    </p>
+                                </div>
+                            )}
                     </div>
                 </motion.div>
             );
@@ -1043,7 +1062,7 @@
             // ▼▼▼ 設定用のStateを追加 ▼▼▼
             const [settings, setSettings] = useState(() => {
                 const saved = localStorage.getItem('english_master_settings');
-                return saved ? JSON.parse(saved) : { questionCount: 'all', trainingMode: false, randomOrder: false };
+                return saved ? JSON.parse(saved) : { questionCount: 'all', trainingMode: false, randomOrder: false, noShufflePassages: false };
             });
 
             // 設定保存用
@@ -1114,7 +1133,7 @@
                 }
             };
 
-            // ▼▼▼ 出題ロジック（フィルタリング・シャッフル・件数制限） ▼▼▼
+            // ▼▼▼ 出題ロジック（フィルタリング・シャッフル・件数制限）修正版 ▼▼▼
             const handleModeSelect = (mode) => {
                 setSelectedMode(mode);
                 
@@ -1124,11 +1143,29 @@
                 // 1. 未習得の問題に絞る
                 candidates = candidates.filter(q => (masteredQuestions[q.id] || 0) < threshold);
 
-                // 2. ランダム出題 (Fisher-Yates Shuffle)
+                // 2. ランダム出題の処理
                 if (settings.randomOrder) {
-                    for (let i = candidates.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+                    if (settings.noShufflePassages) {
+                        // A: 「長文以外」と「長文」に分ける
+                        const normalQuestions = candidates.filter(q => !q.passage);
+                        const passageQuestions = candidates.filter(q => q.passage);
+
+                        // B: 「長文以外」だけシャッフル
+                        for (let i = normalQuestions.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [normalQuestions[i], normalQuestions[j]] = [normalQuestions[j], normalQuestions[i]];
+                        }
+
+                        // C: 結合（シャッフルされた単発問題 + 固定順の長文問題）
+                        // ※学習の流れとして、単発問題を先に解いてから長文に取り組む構成になります
+                        candidates = [...normalQuestions, ...passageQuestions];
+
+                    } else {
+                        // 通常の全シャッフル
+                        for (let i = candidates.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+                        }
                     }
                 }
 
