@@ -683,31 +683,37 @@
             }, [currentIndex]);
 
             useEffect(() => {
-    // scrollContainerRef.current と feedbackRef.current の両方が存在することを確認
+    // コンテナと解説ボックスの両方が存在することを確認
     if (showFeedback && scrollContainerRef.current && feedbackRef.current) {
-        // ▼ 変更点1: 待ち時間を短くして、サッと動き出すようにする (150 -> 50)
+        // ▼ 変更点1: アニメーション完了まで待つ時間を延ばす (50 -> 300)
+        // 300ms待つことで、ボックスが完全に開いた後の正しい高さを取得できます
         setTimeout(() => {
             const container = scrollContainerRef.current;
-            const element = feedbackRef.current; // 修正済みの定義
+            const element = feedbackRef.current;
 
             if (element) {
                 const rect = element.getBoundingClientRect();
                 
-                // 解説ボックスの一番下（＝Nextボタンの位置）の絶対座標を算出
-                const elementBottomAbsolute = container.scrollTop + rect.top + rect.height;
+                // ▼ 変更点2: 計算式を「現在のズレ」を修正する形に変更
+                // 1. 解説ボックスの下端が、画面上のどこにあるか (rect.bottom)
+                const currentBottom = rect.bottom;
+                
+                // 2. 目標とする位置 (画面の上から70% = 親指の位置)
+                const targetBottom = window.innerHeight * 0.7;
 
-                // ▼ 変更点2: 「要素の底」が「画面の上から70%の位置（親指エリア）」に来るように計算
-                // ※ 数値(0.7)を大きくするとボタンは下に行き、小さくすると上に行きます
-                const targetPosition = elementBottomAbsolute - (window.innerHeight * 0.7);
+                // 3. その差分（足りない距離）を算出
+                const scrollAmount = currentBottom - targetBottom;
 
+                // 4. 現在のスクロール量に差分を足してスクロール
                 container.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth' 
+                    top: container.scrollTop + scrollAmount,
+                    behavior: 'smooth'
                 });
             }
-        }, 50); // ← ここを50msに変更
+        }, 300); // ← ここを300に変更
     }
 }, [showFeedback]);
+            
             if (!currentQ) return <div className="p-10 text-center text-white">Loading...</div>;
 
             const handleOptionClick = (optionIndex) => {
