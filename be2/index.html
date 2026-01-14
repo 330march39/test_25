@@ -683,19 +683,24 @@
             }, [currentIndex]);
 
             useEffect(() => {
-                if (showFeedback && scrollContainerRef.current) {
-                    // 解説が表示されるアニメーションを少し待ってからスクロール実行
-                    setTimeout(() => {
-                        const container = scrollContainerRef.current;
-                        const rect = element.getBoundingClientRect();  // これを追加
-                        // コンテナの一番下（scrollHeight）までスムーズにスクロール
-                        container.scrollTo({
-                            top: scrollContainerRef.current.scrollTop + rect.top - window.innerHeight * 0.67,  // 下1/3（67%）位置
-      behavior: 'auto'  // 即時スクロール（smooth削除）
-                        });
-                    }, 150); // アニメーションに合わせて少し時間を調整
-                }
-            }, [showFeedback]);
+    // scrollContainerRef.current と feedbackRef.current の両方が存在することを確認
+    if (showFeedback && scrollContainerRef.current && feedbackRef.current) {
+        setTimeout(() => {
+            const container = scrollContainerRef.current;
+            const element = feedbackRef.current; // ★ここを追加（参照を取得）
+
+            if (element) { // elementが存在する場合のみ実行
+                const rect = element.getBoundingClientRect();
+                
+                container.scrollTo({
+                    // 解説ボックスが画面の下の方（約2/3の位置）に来るようにスクロール調整
+                    top: container.scrollTop + rect.top - window.innerHeight * 0.67, 
+                    behavior: 'smooth' // 'auto' から 'smooth' にするとより滑らかになります
+                });
+            }
+        }, 150);
+    }
+}, [showFeedback]);
 
             if (!currentQ) return <div className="p-10 text-center text-white">Loading...</div>;
 
