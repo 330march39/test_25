@@ -611,11 +611,7 @@
 
         const ExplanationBox = ({ isCorrect, correctAnswer, explanation, onNext }) => {
             return (
-                <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className={`mt-6 rounded-2xl overflow-hidden shadow-lg border-2 ${isCorrect ? 'border-green-100 dark:border-green-900 bg-green-50 dark:bg-green-900/10' : 'border-red-100 dark:border-red-900 bg-red-50 dark:bg-red-900/10'}`}
-                >
+                <div className={`mt-6 rounded-2xl overflow-hidden shadow-lg border-2 ${isCorrect ? 'border-green-100 dark:border-green-900 bg-green-50 dark:bg-green-900/10' : 'border-red-100 dark:border-red-900 bg-red-50 dark:bg-red-900/10'}`}>
                     <div className="p-5">
                         <div className="flex items-center gap-3 mb-3">
                             {isCorrect ? (
@@ -685,8 +681,8 @@
             useEffect(() => {
     // コンテナと解説ボックスの両方が存在することを確認
     if (showFeedback && scrollContainerRef.current && feedbackRef.current) {
-        // ▼ 変更点1: アニメーション完了まで待つ時間を延ばす (50 -> 300)
-        // 300ms待つことで、ボックスが完全に開いた後の正しい高さを取得できます
+        // ▼ 変更点: 待ち時間を「10ms」に短縮
+        // アニメーションが無いため、描画された直後（ほぼ一瞬）にスクロールを開始できます
         setTimeout(() => {
             const container = scrollContainerRef.current;
             const element = feedbackRef.current;
@@ -694,23 +690,22 @@
             if (element) {
                 const rect = element.getBoundingClientRect();
                 
-                // ▼ 変更点2: 計算式を「現在のズレ」を修正する形に変更
-                // 1. 解説ボックスの下端が、画面上のどこにあるか (rect.bottom)
+                // 解説ボックスの下端（Nextボタンの下）の位置
                 const currentBottom = rect.bottom;
                 
-                // 2. 目標とする位置 (画面の上から70% = 親指の位置)
+                // 目標位置（画面の上から70% = 親指の位置）
                 const targetBottom = window.innerHeight * 0.7;
 
-                // 3. その差分（足りない距離）を算出
+                // 現在位置と目標位置のズレ
                 const scrollAmount = currentBottom - targetBottom;
 
-                // 4. 現在のスクロール量に差分を足してスクロール
+                // 即座にスクロール開始
                 container.scrollTo({
                     top: container.scrollTop + scrollAmount,
                     behavior: 'smooth'
                 });
             }
-        }, 300); // ← ここを300に変更
+        }, 10); // ← 300から10に変更（Reactの描画反映待ちとしてわずかに残します）
     }
 }, [showFeedback]);
             
