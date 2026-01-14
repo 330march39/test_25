@@ -687,6 +687,7 @@
                     // 解説が表示されるアニメーションを少し待ってからスクロール実行
                     setTimeout(() => {
                         const container = scrollContainerRef.current;
+                        const rect = element.getBoundingClientRect();  // これを追加
                         // コンテナの一番下（scrollHeight）までスムーズにスクロール
                         container.scrollTo({
                             top: scrollContainerRef.current.scrollTop + rect.top - window.innerHeight * 0.67,  // 下1/3（67%）位置
