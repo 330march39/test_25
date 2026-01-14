@@ -681,31 +681,27 @@
             useEffect(() => {
     // コンテナと解説ボックスの両方が存在することを確認
     if (showFeedback && scrollContainerRef.current && feedbackRef.current) {
-        // ▼ 変更点: 待ち時間を「10ms」に短縮
-        // アニメーションが無いため、描画された直後（ほぼ一瞬）にスクロールを開始できます
-        setTimeout(() => {
-            const container = scrollContainerRef.current;
-            const element = feedbackRef.current;
+        // ★ setTimeout を削除し、即座に計算・実行します
+        const container = scrollContainerRef.current;
+        const element = feedbackRef.current;
 
-            if (element) {
-                const rect = element.getBoundingClientRect();
-                
-                // 解説ボックスの下端（Nextボタンの下）の位置
-                const currentBottom = rect.bottom;
-                
-                // 目標位置（画面の上から70% = 親指の位置）
-                const targetBottom = window.innerHeight * 0.7;
+        // 要素のサイズと位置を取得
+        const rect = element.getBoundingClientRect();
+        
+        // 解説ボックスの下端（Nextボタンの下）の位置
+        const currentBottom = rect.bottom;
+        
+        // 目標位置（画面の上から70% = 親指の位置）
+        const targetBottom = window.innerHeight * 0.7;
 
-                // 現在位置と目標位置のズレ
-                const scrollAmount = currentBottom - targetBottom;
+        // 現在位置と目標位置のズレを計算
+        const scrollAmount = currentBottom - targetBottom;
 
-                // 即座にスクロール開始
-                container.scrollTo({
-                    top: container.scrollTop + scrollAmount,
-                    behavior: 'smooth'
-                });
-            }
-        }, 10); // ← 300から10に変更（Reactの描画反映待ちとしてわずかに残します）
+        // 即座にスクロール開始
+        container.scrollTo({
+            top: container.scrollTop + scrollAmount,
+            behavior: 'smooth' // スッと移動するアニメーション
+        });
     }
 }, [showFeedback]);
             
