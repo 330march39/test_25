@@ -663,6 +663,7 @@
             
             // Ref to scroll to feedback
             const scrollContainerRef = useRef(null);
+            const feedbackRef = useRef(null);  // これを追加
 
             const currentQ = questions[currentIndex];
             const hasPassage = !!currentQ.passage;
