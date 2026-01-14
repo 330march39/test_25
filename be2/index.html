@@ -753,6 +753,8 @@
             const correctOptionText = currentQ.o[currentQ.a];
             const displayCorrectAnswer = `(${correctOptionLabel}) ${correctOptionText}`;
             const explanationText = currentQ.explanation || lessonAdvice || "文脈と文法ルールを確認しましょう。";
+            // 直前の問題と同じ長文かどうかを判定
+const isSamePassage = currentIndex > 0 && questions[currentIndex - 1].passage === currentQ.passage;
 
             return (
                 <div className="h-full flex flex-col relative overflow-hidden bg-gray-50 dark:bg-gray-900">
@@ -799,11 +801,12 @@
                                         <AnimatePresence>
                                             {showPassage && (
                                                 <motion.div
-                                                    initial={{ height: 0, opacity: 0 }}
-                                                    animate={{ height: 'auto', opacity: 1 }}
-                                                    exit={{ height: 0, opacity: 0 }}
-                                                    className="overflow-hidden"
-                                                >
+    // ★ 同じ長文なら「最初から開いた状態」、違うなら「閉じた状態」からスタート
+    initial={isSamePassage ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
+    animate={{ height: 'auto', opacity: 1 }}
+    exit={{ height: 0, opacity: 0 }}
+    className="overflow-hidden"
+>
                                                     <div className="mt-2 p-5 bg-white dark:bg-gray-800 rounded-xl text-sm leading-relaxed text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 whitespace-pre-wrap shadow-inner">
                                                         {currentQ.passage}
                                                     </div>
