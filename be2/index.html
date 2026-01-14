@@ -685,23 +685,29 @@
             useEffect(() => {
     // scrollContainerRef.current と feedbackRef.current の両方が存在することを確認
     if (showFeedback && scrollContainerRef.current && feedbackRef.current) {
+        // ▼ 変更点1: 待ち時間を短くして、サッと動き出すようにする (150 -> 50)
         setTimeout(() => {
             const container = scrollContainerRef.current;
-            const element = feedbackRef.current; // ★ここを追加（参照を取得）
+            const element = feedbackRef.current; // 修正済みの定義
 
-            if (element) { // elementが存在する場合のみ実行
+            if (element) {
                 const rect = element.getBoundingClientRect();
                 
+                // 解説ボックスの一番下（＝Nextボタンの位置）の絶対座標を算出
+                const elementBottomAbsolute = container.scrollTop + rect.top + rect.height;
+
+                // ▼ 変更点2: 「要素の底」が「画面の上から70%の位置（親指エリア）」に来るように計算
+                // ※ 数値(0.7)を大きくするとボタンは下に行き、小さくすると上に行きます
+                const targetPosition = elementBottomAbsolute - (window.innerHeight * 0.7);
+
                 container.scrollTo({
-                    // 解説ボックスが画面の下の方（約2/3の位置）に来るようにスクロール調整
-                    top: container.scrollTop + rect.top - window.innerHeight * 0.67, 
-                    behavior: 'smooth' // 'auto' から 'smooth' にするとより滑らかになります
+                    top: targetPosition,
+                    behavior: 'smooth' 
                 });
             }
-        }, 150);
+        }, 50); // ← ここを50msに変更
     }
 }, [showFeedback]);
-
             if (!currentQ) return <div className="p-10 text-center text-white">Loading...</div>;
 
             const handleOptionClick = (optionIndex) => {
