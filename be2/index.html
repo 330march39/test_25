@@ -666,17 +666,29 @@
 
             // 初期化: 問題が変わるたびに状態をリセット
             useEffect(() => {
-                setSelectedOption(null);
-                setShowFeedback(false);
-                setIsCorrect(false);
-                // 前の問題と同じpassageでも、ユーザーが意図的に閉じた状態を維持するなどのロジックも可能ですが、
-                // ここでは新しい問題になったら閉じる（または開く）初期状態に戻します。
-                // ユーザーの「前の問題と同じ長文でも省略せずに表示」という要望に対しては、
-                // Passages定数を使ってデータ上は常に全文を持たせています。
-                // UI上では、デフォルトで開いておく方が親切かもしれません。
-                // もしくは、hasPassageなら最初は閉じておき、ユーザーが開く形式（現状維持）。
-                setShowPassage(false); 
-            }, [currentIndex]);
+    // 選択状態などのリセット
+    setSelectedOption(null);
+    setShowFeedback(false);
+    setIsCorrect(false);
+
+    // ▼▼▼ 長文の開閉状態の制御 ▼▼▼
+    const currentQ = questions[currentIndex];
+    const previousQ = questions[currentIndex - 1];
+
+    // 1問目の場合: 長文があればデフォルトで「開く」
+    if (currentIndex === 0) {
+        setShowPassage(!!currentQ.passage);
+    } 
+    // 2問目以降の場合
+    else if (previousQ) {
+        // 「今回の長文」と「前回の長文」が違う場合（新しい長文、または長文なしになった場合）
+        if (currentQ.passage !== previousQ.passage) {
+            // 新しい長文なので、デフォルト状態（開く）にリセット
+            setShowPassage(!!currentQ.passage);
+        }
+        // ★同じ長文の場合（elseの場合）は、何もしない＝前の状態（開いているか閉じているか）を維持する
+    }
+}, [currentIndex, questions]); // questionsを依存配列に追加
 
             useEffect(() => {
     // コンテナと解説ボックスの両方が存在することを確認
