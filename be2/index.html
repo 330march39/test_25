@@ -689,8 +689,8 @@
                         const container = scrollContainerRef.current;
                         // コンテナの一番下（scrollHeight）までスムーズにスクロール
                         container.scrollTo({
-                            top: container.scrollHeight,
-                            behavior: 'smooth'
+                            top: scrollContainerRef.current.scrollTop + rect.top - window.innerHeight * 0.67,  // 下1/3（67%）位置
+      behavior: 'auto'  // 即時スクロール（smooth削除）
                         });
                     }, 150); // アニメーションに合わせて少し時間を調整
                 }
