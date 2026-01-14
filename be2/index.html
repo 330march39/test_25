@@ -681,26 +681,31 @@
             useEffect(() => {
     // コンテナと解説ボックスの両方が存在することを確認
     if (showFeedback && scrollContainerRef.current && feedbackRef.current) {
-        // ★ setTimeout を削除し、即座に計算・実行します
-        const container = scrollContainerRef.current;
-        const element = feedbackRef.current;
+        // ★ requestAnimationFrame を使います
+        // これにより、ブラウザが画面を描画した直後の「最短」のタイミングで実行されます
+        requestAnimationFrame(() => {
+            const container = scrollContainerRef.current;
+            const element = feedbackRef.current;
 
-        // 要素のサイズと位置を取得
-        const rect = element.getBoundingClientRect();
-        
-        // 解説ボックスの下端（Nextボタンの下）の位置
-        const currentBottom = rect.bottom;
-        
-        // 目標位置（画面の上から70% = 親指の位置）
-        const targetBottom = window.innerHeight * 0.7;
+            if (element) {
+                // 要素のサイズと位置を取得
+                const rect = element.getBoundingClientRect();
+                
+                // 解説ボックスの下端（Nextボタンの下）の位置
+                const currentBottom = rect.bottom;
+                
+                // 目標位置（画面の上から70% = 親指の位置）
+                const targetBottom = window.innerHeight * 0.7;
 
-        // 現在位置と目標位置のズレを計算
-        const scrollAmount = currentBottom - targetBottom;
+                // 現在位置と目標位置のズレを計算
+                const scrollAmount = currentBottom - targetBottom;
 
-        // 即座にスクロール開始
-        container.scrollTo({
-            top: container.scrollTop + scrollAmount,
-            behavior: 'smooth' // スッと移動するアニメーション
+                // スクロール実行
+                container.scrollTo({
+                    top: container.scrollTop + scrollAmount,
+                    behavior: 'smooth'
+                });
+            }
         });
     }
 }, [showFeedback]);
