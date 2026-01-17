@@ -146,6 +146,29 @@
             text-anchor: middle;
         }
         .dark .percentage { fill: #fff; }
+
+        /* --- 紙吹雪のアニメーション --- */
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(110vh) rotate(720deg) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        .confetti-piece {
+            position: absolute;
+            top: -5%; /* 画面外の上からスタート */
+            width: 10px;
+            height: 10px;
+            opacity: 0.9;
+            animation: confetti-fall 4s linear infinite; /* アニメーションを適用 */
+            pointer-events: none; /* 操作を妨げないようにする */
+            z-index: 50; /* コンテンツの前面に表示する */
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 theme-transition h-screen w-screen overflow-hidden">
