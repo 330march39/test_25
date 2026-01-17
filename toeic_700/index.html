@@ -376,30 +376,92 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
 ];
 
         // ==========================================
-        // UTILS
+        // UTILS (音声機能の強化版)
         // ==========================================
-        const speak = (text) => {
-            if ('speechSynthesis' in window) {
+        const speak = (text, onEnd) => {
+            if (!('speechSynthesis' in window)) {
+                if (onEnd) onEnd();
+                return;
+            }
+
+            // 既存の音声をキャンセル
+            window.speechSynthesis.cancel();
+
+            // テキストを行ごとに分割し、M: W: のタグを処理する
+            // 空行を除去し、各行をオブジェクト化
+            const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+            const utterances = [];
+            
+            // 声の候補を取得（ブラウザによって取得タイミングが異なるため再取得）
+            const voices = window.speechSynthesis.getVoices();
+            
+            // 声の割り当てロジック（簡易版）
+            // 名前や言語設定から男女っぽい声を探す、なければピッチで調整
+            const getVoiceConfig = (type) => {
+                let voice = voices.find(v => v.lang === 'en-US'); // デフォルト
+                let pitch = 1.0;
+                let rate = 0.9; // 少しゆっくり
+
+                if (type === 'M') {
+                    // 男性声を探す試み
+                    const maleVoice = voices.find(v => v.lang === 'en-US' && (v.name.includes('Male') || v.name.includes('David') || v.name.includes('Google US English')));
+                    if (maleVoice) voice = maleVoice;
+                    else pitch = 0.9; // 声が見つからない場合はピッチを下げる
+                } else if (type === 'W') {
+                    // 女性声を探す試み
+                    const femaleVoice = voices.find(v => v.lang === 'en-US' && (v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Samantha')));
+                    if (femaleVoice) voice = femaleVoice;
+                    else pitch = 1.1; // 声が見つからない場合はピッチを上げる
+                }
+                return { voice, pitch, rate };
+            };
+
+            // 各行をUtterance（発話データ）に変換
+            lines.forEach((line, index) => {
+                let cleanText = line;
+                let type = 'N'; // Narration
+
+                if (line.trim().startsWith('M:') || line.trim().startsWith('M ')) {
+                    type = 'M';
+                    cleanText = line.replace(/^[Mm][: ]\s*/, ''); // "M: "を削除
+                } else if (line.trim().startsWith('W:') || line.trim().startsWith('W ')) {
+                    type = 'W';
+                    cleanText = line.replace(/^[Ww][: ]\s*/, ''); // "W: "を削除
+                }
+
+                const u = new SpeechSynthesisUtterance(cleanText);
+                const config = getVoiceConfig(type);
+                
+                if (config.voice) u.voice = config.voice;
+                u.pitch = config.pitch;
+                u.rate = config.rate;
+                u.lang = 'en-US';
+
+                // 最後の行が終わったら onEnd を呼ぶ
+                if (index === lines.length - 1 && onEnd) {
+                    u.onend = onEnd;
+                }
+                
+                // エラー時も次に進めるように
+                u.onerror = (e) => {
+                    console.error('Speech error', e);
+                    if (index === lines.length - 1 && onEnd) onEnd();
+                };
+
+                window.speechSynthesis.speak(u);
+            });
+            
+            // もし読み上げる行がなかった場合
+            if (lines.length === 0 && onEnd) onEnd();
+        };
+
+        // 音声を強制停止する関数
+        const stopAudio = () => {
+             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'en-US';
-                // Try to find a good voice
-                const voices = window.speechSynthesis.getVoices();
-                const enVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Samantha')) || 
-                                voices.find(v => v.lang === 'en-US' && v.name.includes('Google')) ||
-                                voices.find(v => v.lang === 'en-US');
-                if (enVoice) utterance.voice = enVoice;
-                utterance.rate = 0.9; // Slightly slower for clarity
-                window.speechSynthesis.speak(utterance);
             }
         };
-
-        const shuffleArray = (array) => {
-            return array.map(value => ({ value, sort: Math.random() }))
-                        .sort((a, b) => a.sort - b.sort)
-                        .map(({ value }) => value);
-        };
-
+        
         // ==========================================
         // COMPONENTS
         // ==========================================
@@ -705,7 +767,7 @@ const ResultScreen = ({ score, total, onRetry, onHome }) => {
     );
 };
         // ==========================================
-// QUIZ SESSION (修正版 v2)
+// QUIZ SESSION (音声対応・修正版 v3)
 // ==========================================
 const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
     const playSFX = useContext(SoundContext);
@@ -720,49 +782,35 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
     const [isLocked, setIsLocked] = useState(false);
     const [timeLeft, setTimeLeft] = useState(0);
     
-    // リトライを確実に検知するためのトリガー
+    // 音声再生中かどうかを管理するフラグ
+    const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+    
     const [retryCount, setRetryCount] = useState(0);
 
     // 問題データのフィルタリングとロード
     useEffect(() => {
-        // ロード開始時にgameStateをloadingにする
         setGameState('loading');
 
         let filtered = [...rawData];
         const savedProgress = JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}');
-
-        // 1. カテゴリによるフィルタリング
+        
         if (mode === 'vocab') {
-            if (filterId === 'weak') {
-                filtered = filtered.filter(item => {
-                    const p = savedProgress[item.id];
-                    return !p || !p.mastered;
-                });
-            } else if (filterId === '600') filtered = filtered.filter(item => item.level === 600);
-            else if (filterId === '730') filtered = filtered.filter(item => item.level === 730);
-            else if (filterId === '860') filtered = filtered.filter(item => item.level >= 860);
+             if (filterId === 'weak') filtered = filtered.filter(item => { const p = savedProgress[item.id]; return !p || !p.mastered; });
+             else if (filterId === '600') filtered = filtered.filter(item => item.level === 600);
+             else if (filterId === '730') filtered = filtered.filter(item => item.level === 730);
+             else if (filterId === '860') filtered = filtered.filter(item => item.level >= 860);
         } else if (mode === 'listening') {
-            if (filterId === 'part1') filtered = filtered.filter(i => i.part === 1);
-            else if (filterId === 'part2') filtered = filtered.filter(i => i.part === 2);
-            else if (filterId === 'part3') filtered = filtered.filter(i => i.part === 3);
-            else if (filterId === 'part4') filtered = filtered.filter(i => i.part === 4);
+             if (filterId.startsWith('part')) filtered = filtered.filter(i => i.part === parseInt(filterId.replace('part','')));
         } else if (mode === 'reading') {
-            if (filterId === 'part5') filtered = filtered.filter(i => i.part === 5);
-            else if (filterId === 'part6') filtered = filtered.filter(i => i.part === 6);
-            else if (filterId === 'part7') filtered = filtered.filter(i => i.part === 7);
+             if (filterId.startsWith('part')) filtered = filtered.filter(i => i.part === parseInt(filterId.replace('part','')));
         }
-
-        // 2. 特訓モード（Spartan）の場合、習得済みを除外する
+        
         if (isDrillMode) {
-            filtered = filtered.filter(item => {
-                const p = savedProgress[item.id];
-                return !p || !p.mastered;
-            });
+            filtered = filtered.filter(item => { const p = savedProgress[item.id]; return !p || !p.mastered; });
         }
-
-        // すべて習得済みかどうかの判定
+        
         if (filtered.length === 0) {
-            let originalScope = [...rawData];
+             let originalScope = [...rawData];
              if (mode === 'vocab') {
                 if (filterId === '600') originalScope = originalScope.filter(item => item.level === 600);
                 else if (filterId === '730') originalScope = originalScope.filter(item => item.level === 730);
@@ -782,50 +830,45 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
                 return;
             }
         }
-
-        // ランダムに10問出題
-        setSessionData(shuffleArray(filtered).slice(0, 10));
         
-        // 少し遅延させてレンダリングエラーを防ぐ
+        setSessionData(shuffleArray(filtered).slice(0, 10));
         setTimeout(() => setGameState('playing'), 100);
 
-    }, [rawData, mode, filterId, isDrillMode, retryCount]); // retryCountを依存配列に追加
+    }, [rawData, mode, filterId, isDrillMode, retryCount]);
+
 
     const currentItem = sessionData[currentIndex];
 
-    // 現在の問題の習得状況を取得
-    const currentItemStreak = useMemo(() => {
-        if (!currentItem) return 0;
-        const savedProgress = JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}');
-        return savedProgress[currentItem.id]?.streak || 0;
-    }, [currentItem, isCorrect]); // 正解判定後に更新されるように依存関係追加
+    // --- 音声制御とタイマーロジック ---
     
-    // 制限時間の設定
-    const getMaxTime = () => {
-        if (mode === 'vocab') return 10;
-        if (mode === 'reading') {
-            if (currentItem?.part === 7) return 60;
-            return 20;
+    // 1. 問題切り替え時の自動再生
+    useEffect(() => {
+        if (gameState !== 'playing' || !currentItem) return;
+
+        // 前の音声を停止
+        stopAudio();
+        setIsAudioPlaying(false);
+
+        // リスニングモードなら自動再生
+        if (mode === 'listening') {
+            setIsAudioPlaying(true);
+            speak(currentItem.script, () => {
+                setIsAudioPlaying(false);
+            });
         }
-        return 15;
-    };
-    const maxTime = getMaxTime();
+    }, [currentIndex, gameState, mode]); 
 
-    // タイマーリセット
+    // 2. コンポーネント破棄時に停止
     useEffect(() => {
-        if (gameState === 'playing') setTimeLeft(maxTime);
-    }, [currentIndex, maxTime, gameState]);
-
-    // 選択肢の準備
-    const choices = useMemo(() => {
-        if (!currentItem) return [];
-        if (mode === 'vocab') return shuffleArray([...currentItem.choices, currentItem.meaning]);
-        return currentItem.options || currentItem.choices; 
-    }, [currentItem, mode]);
-
-    // カウントダウン
+        return () => {
+            stopAudio();
+        };
+    }, []);
+    
+    // 3. タイマーカウントダウン（音声再生中は停止）
     useEffect(() => {
-        if (gameState !== 'playing' || showExplanation || !currentItem) return;
+        if (gameState !== 'playing' || showExplanation || !currentItem || isAudioPlaying) return;
+        
         const timer = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev <= 1) {
@@ -837,9 +880,38 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
             });
         }, 1000);
         return () => clearInterval(timer);
-    }, [currentIndex, showExplanation, gameState]);
+    }, [currentIndex, showExplanation, gameState, isAudioPlaying]);
+
+
+    const currentItemStreak = useMemo(() => {
+        if (!currentItem) return 0;
+        const savedProgress = JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}');
+        return savedProgress[currentItem.id]?.streak || 0;
+    }, [currentItem, isCorrect]);
+    
+    const getMaxTime = () => {
+        if (mode === 'vocab') return 10;
+        if (mode === 'reading') {
+            if (currentItem?.part === 7) return 60;
+            return 20;
+        }
+        return 15;
+    };
+    const maxTime = getMaxTime();
+
+    // タイマー初期化
+    useEffect(() => {
+        if (gameState === 'playing') setTimeLeft(maxTime);
+    }, [currentIndex, maxTime, gameState]);
+
+    const choices = useMemo(() => {
+        if (!currentItem) return [];
+        if (mode === 'vocab') return shuffleArray([...currentItem.choices, currentItem.meaning]);
+        return currentItem.options || currentItem.choices; 
+    }, [currentItem, mode]);
 
     const handleTimeUp = () => {
+        stopAudio();
         playSFX('wrong');
         setIsCorrect(false);
         setShowExplanation(true);
@@ -849,32 +921,28 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
     const updateProgress = (isAnswerCorrect) => {
         const savedData = JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}');
         const itemData = savedData[currentItem.id] || { streak: 0, mastered: false };
-
         if (isAnswerCorrect) {
             itemData.streak += 1; 
             const threshold = isDrillMode ? 2 : 1; 
-            if (itemData.streak >= threshold) {
-                itemData.mastered = true;
-            }
+            if (itemData.streak >= threshold) itemData.mastered = true;
         } else {
             itemData.streak = 0;
         }
-
         savedData[currentItem.id] = itemData;
         localStorage.setItem('toeic_progress_v3', JSON.stringify(savedData));
     };
 
     const handleAnswer = (choice, index) => {
         if (isLocked || showExplanation) return;
+        
+        stopAudio(); // 回答時に停止
+        
         setIsLocked(true);
         setSelected(index);
         
         let correct = false;
-        if (mode === 'vocab') {
-            correct = (choice === currentItem.meaning);
-        } else {
-            correct = (index === currentItem.correct);
-        }
+        if (mode === 'vocab') correct = (choice === currentItem.meaning);
+        else correct = (index === currentItem.correct);
 
         setIsCorrect(correct);
         playSFX(correct ? 'correct' : 'wrong');
@@ -900,6 +968,7 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
     };
 
     const nextQuestion = () => {
+        stopAudio(); // 次へ行く時に停止
         if (currentIndex >= sessionData.length - 1) {
             playSFX('complete');
             setGameState('result');
@@ -912,27 +981,25 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
             setIsLocked(false);
         }
     };
-
+    
     const handleResetCourse = () => {
         if(!confirm("このコースの学習データをリセットして、最初から特訓し直しますか？")) return;
         const savedData = JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}');
         let targetItems = [...rawData];
         
-        // 簡易的な絞り込み（実際はuseEffectと同じロジックが望ましい）
         if (mode === 'vocab' && filterId === '600') targetItems = targetItems.filter(i => i.level === 600);
-        // ... 他条件省略 ...
-
+        
         targetItems.forEach(item => {
             if (savedData[item.id]) savedData[item.id] = { streak: 0, mastered: false };
         });
-
         localStorage.setItem('toeic_progress_v3', JSON.stringify(savedData));
         alert("リセットしました！");
+        stopAudio();
         onFinish(0); 
     };
 
-    // リトライ処理修正：カウンタを増やしてuseEffectを再発火させる
     const handleRetry = () => {
+        stopAudio();
         setScore(0);
         setSessionStreak(0);
         setCurrentIndex(0);
@@ -940,9 +1007,13 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
         setIsCorrect(null);
         setShowExplanation(false);
         setIsLocked(false);
-        
-        // これでuseEffectが走り、データ再取得 -> gameState='playing' になる
         setRetryCount(prev => prev + 1);
+    };
+    
+    // 終了ボタン・閉じるボタンの処理
+    const handleFinish = () => {
+        stopAudio();
+        onFinish(sessionStreak);
     };
 
     // --- レンダリング ---
@@ -963,8 +1034,7 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
                         <Button onClick={handleResetCourse} variant="primary" fullWidth>
                             <Icon name="rotate-ccw" size={20} /> リセットしてやり直す
                         </Button>
-                        {/* 修正後: 閉じるボタンに変更 */}
-                        <Button onClick={() => onFinish(0)} variant="secondary" fullWidth>
+                        <Button onClick={handleFinish} variant="secondary" fullWidth>
                             <Icon name="x" size={20} /> 閉じる
                         </Button>
                     </div>
@@ -974,12 +1044,12 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
     }
 
     if (gameState === 'result') {
-        return <ResultScreen score={score} total={sessionData.length} onRetry={handleRetry} onHome={() => onFinish(sessionStreak)} />;
+        return <ResultScreen score={score} total={sessionData.length} onRetry={handleRetry} onHome={handleFinish} />;
     }
 
     if (!currentItem || gameState !== 'playing') {
         return (
-            <div className="h-full flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-900">
+             <div className="h-full flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-900">
                 <Icon name="loader-2" className="animate-spin text-yellow-500 mb-2" size={32} />
                 <span className="text-slate-500 text-sm font-bold animate-pulse">Loading...</span>
             </div>
@@ -988,18 +1058,16 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
 
     const timerWidth = (timeLeft / maxTime) * 100;
     const timerColor = timeLeft <= 5 ? "bg-red-500" : "bg-blue-500";
+    const barColor = isAudioPlaying ? "bg-green-500" : timerColor;
 
-    // ヘッダーのサブタイトル生成（ここに・・を表示）
+    // ヘッダーサブタイトル
     const headerSub = (
         <div className="flex items-center gap-3">
             <span>{currentIndex + 1} / {sessionData.length}</span>
-            
-            {/* 特訓モードの場合のみドットを表示 */}
             {isDrillMode && (
                 <>
                     <span className="w-px h-3 bg-slate-300 dark:bg-slate-600"></span>
                     <div className="flex items-center gap-1.5">
-                        {/* 2つの丸を表示。currentItemStreakが1以上なら1つ目点灯、2以上なら2つ目点灯 */}
                         <div className={`w-2.5 h-2.5 rounded-full border border-slate-300 dark:border-slate-500 transition-all duration-300 ${currentItemStreak >= 1 ? 'bg-yellow-500 border-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]' : 'bg-transparent'}`}></div>
                         <div className={`w-2.5 h-2.5 rounded-full border border-slate-300 dark:border-slate-500 transition-all duration-300 ${currentItemStreak >= 2 ? 'bg-yellow-500 border-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]' : 'bg-transparent'}`}></div>
                     </div>
@@ -1014,66 +1082,69 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
                 title={mode === 'vocab' ? '単語テスト' : `Part ${currentItem.part || '?'}`} 
                 sub={headerSub} 
                 leftIcon="x"
-                onLeftClick={() => onFinish(sessionStreak)}
+                onLeftClick={handleFinish}
             />
 
             {/* Progress Bar */}
-            <div className="w-full h-1.5 bg-gray-200 dark:bg-slate-800 overflow-hidden">
+            <div className="w-full h-1.5 bg-gray-200 dark:bg-slate-800 overflow-hidden relative">
                 <div 
-                    className={`h-full ${timerColor} transition-all duration-1000 ease-linear shadow-[0_0_10px_rgba(59,130,246,0.5)]`} 
-                    style={{ width: `${timerWidth}%` }}
+                    className={`h-full ${barColor} transition-all duration-1000 ease-linear shadow-[0_0_10px_rgba(59,130,246,0.5)]`} 
+                    style={{ width: isAudioPlaying ? '100%' : `${timerWidth}%` }}
                 ></div>
+                {isAudioPlaying && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-full h-full bg-green-500/20 animate-pulse"></div>
+                    </div>
+                )}
             </div>
 
             <div className={`flex-1 overflow-y-auto p-4 transition-all duration-300 ${showExplanation ? 'pb-[450px]' : 'pb-32'}`}>
                 
-                {/* --- コンテキストエリア --- */}
                 <div className="mb-6 space-y-4">
-                    
-                    {/* 1. Vocabモード: 単語を大きく表示 */}
+                    {/* Vocab表示 */}
                     {mode === 'vocab' && (
-                        <div className="text-center animate-pop my-8">
-                            <span className="inline-block px-3 py-1 mb-4 text-xs font-bold text-slate-800 bg-yellow-400 rounded-full no-select shadow-sm">
-                                LEVEL {currentItem.level}
-                            </span>
-                            <h2 className="text-4xl font-extrabold text-slate-800 dark:text-white mb-2 tracking-wide selectable-text drop-shadow-sm">
-                                {currentItem.word}
-                            </h2>
-                            {/* ここにあったドット表示は削除しました */}
+                         <div className="text-center animate-pop my-8">
+                            <span className="inline-block px-3 py-1 mb-4 text-xs font-bold text-slate-800 bg-yellow-400 rounded-full no-select shadow-sm">LEVEL {currentItem.level}</span>
+                            <h2 className="text-4xl font-extrabold text-slate-800 dark:text-white mb-2 tracking-wide selectable-text drop-shadow-sm">{currentItem.word}</h2>
                         </div>
                     )}
-
-                    {/* 2. Part 1: 画像表示 */}
+                    
+                    {/* 画像表示 */}
                     {currentItem.contextType === 'image' && currentItem.imageUrl && (
                         <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-200 dark:border-slate-700 animate-pop">
                             <img src={currentItem.imageUrl} alt="Question Context" className="w-full h-auto object-cover" />
                         </div>
                     )}
-
-                    {/* 3. Part 6/7: 長文表示 */}
+                    
+                    {/* 長文表示 */}
                     {currentItem.contextType === 'long_text' && (
-                        <div className="glass-panel p-5 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm animate-pop max-h-64 overflow-y-auto">
-                            {currentItem.contextTitle && (
-                                <h3 className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider sticky top-0 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm py-1">
-                                    {currentItem.contextTitle}
-                                </h3>
-                            )}
-                            <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-serif">
-                                {currentItem.passage}
-                            </p>
+                         <div className="glass-panel p-5 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm animate-pop max-h-64 overflow-y-auto">
+                            {currentItem.contextTitle && <h3 className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider sticky top-0 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm py-1">{currentItem.contextTitle}</h3>}
+                            <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-serif">{currentItem.passage}</p>
                         </div>
                     )}
 
-                    {/* 4. リスニング共通: 再生ボタン */}
+                    {/* リスニング再生ボタン */}
                     {mode === 'listening' && (
                         <div className="flex flex-col items-center justify-center py-4 animate-pop">
                             <button 
-                                onClick={() => speak(currentItem.script)}
-                                className="w-20 h-20 rounded-full bg-yellow-100 dark:bg-yellow-900/30 border-4 border-yellow-500 flex items-center justify-center shadow-lg btn-press hover:scale-105 transition-transform"
+                                onClick={() => {
+                                    stopAudio();
+                                    setIsAudioPlaying(true);
+                                    speak(currentItem.script, () => setIsAudioPlaying(false));
+                                }}
+                                disabled={isAudioPlaying}
+                                className={`w-20 h-20 rounded-full border-4 flex items-center justify-center shadow-lg transition-transform ${isAudioPlaying ? 'bg-green-100 dark:bg-green-900/30 border-green-500 scale-110' : 'bg-yellow-100 dark:bg-yellow-900/30 border-yellow-500 btn-press hover:scale-105'}`}
                             >
-                                <Icon name="volume-2" className="w-8 h-8 text-yellow-600 dark:text-yellow-500" />
+                                {isAudioPlaying ? (
+                                    <Icon name="volume-2" className="w-8 h-8 text-green-600 dark:text-green-500 animate-pulse" />
+                                ) : (
+                                    <Icon name="play" className="w-8 h-8 text-yellow-600 dark:text-yellow-500 ml-1" />
+                                )}
                             </button>
-                            <p className="mt-2 text-xs text-slate-500 animate-pulse-slow">Tap to Listen</p>
+                            <p className="mt-2 text-xs text-slate-500">
+                                {isAudioPlaying ? "Listening..." : "Replay Audio"}
+                            </p>
                             
                             {(showExplanation || currentItem.part >= 3) && (
                                 <details className="w-full mt-4 group">
@@ -1087,8 +1158,8 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
                             )}
                         </div>
                     )}
-
-                    {/* 5. 問題文の表示 (Vocab以外) */}
+                    
+                    {/* 問題文表示 */}
                     {mode !== 'vocab' && currentItem.question && (
                         <div className="glass-panel p-4 rounded-xl border border-blue-100 dark:border-slate-700 bg-blue-50/50 dark:bg-slate-800/50 shadow-sm animate-pop">
                             <p className="text-lg font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
@@ -1099,16 +1170,12 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
                     )}
                 </div>
 
-                {/* --- 選択肢エリア --- */}
+                {/* 選択肢エリア */}
                 <div className="space-y-3">
                     {choices.map((choice, idx) => {
-                        let isAnsCorrect = false;
-                        if (mode === 'vocab') isAnsCorrect = (choice === currentItem.meaning);
-                        else isAnsCorrect = (idx === currentItem.correct);
-
-                        let btnClass = "w-full p-4 rounded-xl text-left font-medium text-lg transition-all border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700";
-                        
-                        if (selected !== null) {
+                         let btnClass = "w-full p-4 rounded-xl text-left font-medium text-lg transition-all border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700";
+                         
+                         if (selected !== null) {
                             if (mode === 'vocab') {
                                 if (choice === currentItem.meaning) btnClass = "w-full p-4 rounded-xl text-left font-bold border-2 border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 shadow-md";
                                 else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border-2 border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400";
@@ -1120,23 +1187,10 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
                             }
                         }
 
-                        return (
-                            <div 
-                                key={idx} 
-                                className="animate-slide-up" 
-                                style={{ 
-                                    animationDelay: `${idx * 40}ms`,
-                                    transform: 'translateZ(0)'
-                                }}
-                            >
-                                <button 
-                                    onClick={() => handleAnswer(choice, idx)} 
-                                    disabled={selected !== null} 
-                                    className={`${btnClass} btn-press flex items-center`}
-                                >
-                                    <span className="inline-flex items-center justify-center min-w-[28px] h-7 rounded-lg bg-gray-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs font-bold mr-3 shadow-inner">
-                                        {String.fromCharCode(65 + idx)}
-                                    </span>
+                         return (
+                            <div key={idx} className="animate-slide-up" style={{ animationDelay: `${idx * 40}ms`, transform: 'translateZ(0)' }}>
+                                <button onClick={() => handleAnswer(choice, idx)} disabled={selected !== null} className={`${btnClass} btn-press flex items-center`}>
+                                    <span className="inline-flex items-center justify-center min-w-[28px] h-7 rounded-lg bg-gray-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs font-bold mr-3 shadow-inner">{String.fromCharCode(65 + idx)}</span>
                                     <span className="selectable-text text-sm md:text-base leading-relaxed">{choice}</span>
                                 </button>
                             </div>
@@ -1145,24 +1199,19 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
                 </div>
             </div>
 
-            {/* --- 解説モーダル --- */}
+            {/* 解説モーダル */}
             {showExplanation && (
-                <div 
-                    className="fixed bottom-0 left-0 w-full glass-panel bg-white/95 dark:bg-slate-800/95 border-t border-gray-200 dark:border-slate-600 z-50 animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.2)] rounded-t-3xl"
-                    style={{ padding: '1.5rem', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }} 
-                >
+                <div className="fixed bottom-0 left-0 w-full glass-panel bg-white/95 dark:bg-slate-800/95 border-t border-gray-200 dark:border-slate-600 z-50 animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.2)] rounded-t-3xl" style={{ padding: '1.5rem', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}>
                     <div className="max-w-md mx-auto">
-                        <div className="flex items-center gap-3 mb-4">
+                         <div className="flex items-center gap-3 mb-4">
                             {isCorrect ? (
                                 <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shrink-0 shadow-lg shadow-green-500/30 animate-pop"><Icon name="check" className="text-white w-6 h-6" /></div>
                             ) : (
                                 <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30 animate-pop"><Icon name="x" className="text-white w-6 h-6" /></div>
                             )}
-                            <h3 className={`text-2xl font-black ${isCorrect ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {isCorrect ? 'Correct!' : 'Wrong...'}
-                            </h3>
+                            <h3 className={`text-2xl font-black ${isCorrect ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{isCorrect ? 'Correct!' : 'Wrong...'}</h3>
                         </div>
-                        
+
                         {mode !== 'vocab' && currentItem.explanation && (
                             <div className="mb-6 p-4 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-600 max-h-40 overflow-y-auto">
                                 <span className="block text-xs text-slate-400 uppercase font-bold mb-2 tracking-wider">解説</span>
@@ -1170,11 +1219,7 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
                             </div>
                         )}
                         
-                        <Button 
-                            onClick={nextQuestion} 
-                            className="w-full text-lg h-14" 
-                            variant="primary"
-                        >
+                        <Button onClick={nextQuestion} className="w-full text-lg h-14" variant="primary">
                             Next Question <Icon name="arrow-right" size={20} />
                         </Button>
                     </div>
@@ -1183,7 +1228,6 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
         </div>
     );
 };
-
         // ==========================================
         // SETTINGS SCREEN
         // ==========================================
