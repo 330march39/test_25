@@ -591,19 +591,20 @@ const CountdownWidget = () => {
 };
 
         // ==========================================
-// RESULT SCREEN (修正版)
+// RESULT SCREEN (修正完了版)
 // ==========================================
 const ResultScreen = ({ score, total, onRetry, onHome }) => {
-    // スコアが0の場合のNaNを防ぐため、totalが0の時は0%にする
+    // 0除算対策
     const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
     
-    const radius = 36;
-    const circumference = 2 * Math.PI * radius;
-    const dashoffset = circumference - (percentage / 100) * circumference;
+    // 円のサイズ設定
+    const radius = 40; // 半径を少し大きくして見やすく
+    const circumference = 2 * Math.PI * radius; // 円周の長さ
+    const strokeDashoffset = circumference - (percentage / 100) * circumference; // 線の長さ計算
 
     let rank = 'C';
     let message = "Keep Going!";
-    let color = "#94a3b8"; // slate
+    let color = "#94a3b8"; // slate (gray)
 
     if (percentage >= 100) { rank = 'S'; message = "Perfect!!"; color = "#eab308"; } // yellow
     else if (percentage >= 80) { rank = 'A'; message = "Excellent!"; color = "#22c55e"; } // green
@@ -611,7 +612,7 @@ const ResultScreen = ({ score, total, onRetry, onHome }) => {
 
     return (
         <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-900 animate-fade-in relative overflow-hidden">
-            {/* Confetti-like background elements */}
+            {/* --- 背景エフェクト --- */}
             {percentage >= 80 && (
                 <>
                     <div className="absolute top-10 left-10 w-4 h-4 bg-yellow-400 rounded-full animate-bounce opacity-50"></div>
@@ -627,26 +628,36 @@ const ResultScreen = ({ score, total, onRetry, onHome }) => {
                 </h2>
 
                 <div className="relative w-64 h-64 mb-8 animate-pop">
-                     <svg viewBox="0 0 100 100" className="circular-chart transform -rotate-90 drop-shadow-2xl">
-                        <path className="circle-bg" d="M50 10 a 40 40 0 0 1 0 80 a 40 40 0 0 1 0 -80" />
-                        <path 
-                            className="circle" 
-                            strokeDasharray={`${circumference}, ${circumference}`} 
-                            strokeDashoffset={dashoffset}
+                    {/* --- SVG円グラフ (修正箇所) --- */}
+                    <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90 drop-shadow-xl">
+                        {/* 背景の薄いグレーの円 */}
+                        <circle
+                            cx="50" cy="50" r={radius}
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="8"
+                            className="text-gray-200 dark:text-slate-700"
+                        />
+                        {/* 進捗を示す色のついた円 */}
+                        <circle
+                            cx="50" cy="50" r={radius}
+                            fill="none"
                             stroke={color}
-                            d="M50 10 a 40 40 0 0 1 0 80 a 40 40 0 0 1 0 -80" 
-                            style={{ '--to-offset': dashoffset }}
+                            strokeWidth="8"
+                            strokeLinecap="round"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={strokeDashoffset}
+                            className="transition-all duration-1000 ease-out" // アニメーションはCSS transitionで制御
                         />
                     </svg>
                     
-                    {/* --- 円の中身の修正箇所 --- */}
+                    {/* --- 中央のテキスト (修正箇所) --- */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-800 dark:text-white">
-                        {/* 数字と%を横並びにして中央揃え */}
-                        <div className="flex items-baseline justify-center translate-x-1 mt-2">
+                        <div className="flex items-baseline justify-center">
                             <span className="text-6xl font-black tracking-tighter leading-none">
                                 {percentage}
                             </span>
-                            <span className="text-xl font-bold ml-1 leading-none">%</span>
+                            <span className="text-xl font-bold ml-1">%</span>
                         </div>
                         <span className="text-sm font-medium text-slate-500 uppercase tracking-widest mt-1">Accuracy</span>
                     </div>
@@ -658,7 +669,6 @@ const ResultScreen = ({ score, total, onRetry, onHome }) => {
                         <p className="text-2xl font-black" style={{ color: color }}>{rank}</p>
                     </div>
                     
-                    {/* --- 下のボックスの修正箇所 --- */}
                     <div className="glass-panel p-4 rounded-2xl text-center border border-slate-200 dark:border-slate-700">
                         <p className="text-xs text-slate-500 mb-1">CORRECT</p>
                         <p className="text-2xl font-black text-slate-800 dark:text-white">
