@@ -231,39 +231,148 @@
             { id: 'v12', level: 900, word: "scrutinize", meaning: "綿密に調べる", type: "vocab", choices: ["要約する", "拡大する", "配布する"] }
         ];
 
-        const READING_DATA = [
-             { 
-                id: 'r1', type: 'reading',
-                question: "Ms. Tanaka _______ the budget proposal before the meeting started.", 
-                choices: ["reviewed", "reviewing", "reviews", "review"], 
-                correct: 0, 
-                explanation: "「before...」の節が過去形なので、主節も過去の話。単数主語Ms. Tanakaに対する過去形の動詞reviewedが正解。" 
-            },
-            { 
-                id: 'r2', type: 'reading',
-                question: "The new software is _______ easier to use than the old one.", 
-                choices: ["significantly", "significant", "significance", "signify"], 
-                correct: 0, 
-                explanation: "比較級easierを修飾できるのは副詞のみ。significantly（かなり）が正解。" 
-            }
-        ];
+        // ==========================================
+// NEW TOEIC DATA (FROM PDF)
+// ==========================================
 
-        const LISTENING_DATA = [
-            {
-                id: 'l1', type: 'listening',
-                script: "Where did you put the monthly report?",
-                options: ["It's on your desk.", "At 3 o'clock.", "Yes, I did."],
-                correct: 0,
-                explanation: "Where（場所）を聞いているので、場所（on your desk）を示しているAが正解。"
-            },
-            {
-                id: 'l2', type: 'listening',
-                script: "Why hasn't the shipment arrived yet?",
-                options: ["No, I haven't.", "Because of the heavy snow.", "Usually by truck."],
-                correct: 1,
-                explanation: "Why（理由）を聞いているので、原因（heavy snow）を説明しているBが正解。"
-            }
-        ];
+// リスニングセクション (Part 1 - 4)
+const LISTENING_QUESTION_DATA = [
+    // --- Part 1: Photographs ---
+    {
+        id: 'p1-1', part: 1, type: 'listening', contextType: 'image',
+        // ダミー画像URL (実際の実装では適切な画像を配置)
+        imageUrl: "https://placehold.co/600x400/3b82f6/white?text=Man+at+Computer",
+        script: "(A) The man's walking around the room. (B) The man's examining the jacket. (C) The man's looking at the map. (D) The man's sitting in front of a computer.",
+        question: "写真の描写として最も適切なものを選んでください。",
+        options: ["(A)", "(B)", "(C)", "(D)"],
+        correct: 3,
+        explanation: "男性がコンピュータの前に座って作業をしている様子を描写している(D)が正解。(A)walkingはworkingとの音のひっかけ。"
+    },
+    {
+        id: 'p1-2', part: 1, type: 'listening', contextType: 'image',
+        imageUrl: "https://placehold.co/600x400/22c55e/white?text=Construction+Site",
+        script: "(A) The women are wearing their protective gloves. (B) The women are touching the wall. (C) The women are forming a circle. (D) The women are working at the construction site.",
+        question: "写真の描写として最も適切なものを選んでください。",
+        options: ["(A)", "(B)", "(C)", "(D)"],
+        correct: 3,
+        explanation: "ヘルメットや工具が見えるため、建設現場(construction site)で働いている(D)が正解。"
+    },
+
+    // --- Part 2: Question-Response ---
+    {
+        id: 'p2-1', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Will you be visiting the client tomorrow afternoon?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: [
+            "(A) Yes, it was yesterday.",
+            "(B) I have an appointment at three P.M.",
+            "(C) We haven't received any invitation yet."
+        ],
+        correct: 1,
+        explanation: "「明日の午後、顧客を訪問しますか？」という予定の質問に対し、「3時に約束がある」と答えている(B)が正解。"
+    },
+    {
+        id: 'p2-2', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Why hasn't the shipment arrived yet?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: [
+            "(A) No, I haven't.",
+            "(B) Because of the heavy snow.",
+            "(C) Usually by truck."
+        ],
+        correct: 1,
+        explanation: "配送が遅れている理由(Why)を聞いているので、原因(Because...)を述べている(B)が正解。"
+    },
+
+    // --- Part 3: Conversations ---
+    {
+        id: 'p3-1', part: 3, type: 'listening', contextType: 'conversation',
+        contextTitle: "Office: Copier Problem",
+        script: `W: There seems to be something wrong with this copier. The red light is blinking.
+M: Is it broken again? That's the third time this week.
+W: I've got to make fifty copies by noon, so I'll use the one on the 3rd floor.
+M: Let me see... maybe it's a paper jam. We'd better call a repairman.`,
+        question: "What are the speakers talking about?",
+        options: ["Lights", "A copy machine", "Planes", "Breakfast"],
+        correct: 1,
+        explanation: "コピー機(copier)の調子が悪いことについて話しています。"
+    },
+    {
+        id: 'p3-2', part: 3, type: 'listening', contextType: 'conversation',
+        // 同じスクリプトを共有
+        script: `(Refer to previous conversation about the copier...)
+M: ...We'd better call a repairman.`,
+        question: "What will the man probably do next?",
+        options: ["Go to a different floor", "Call a technician", "Complain to his boss", "Spend hours at his desk"],
+        correct: 1,
+        explanation: "男性は最後に repairman（修理工）を呼ぶと言っているため、(B) Call a technician が正解。"
+    },
+
+    // --- Part 4: Talks ---
+    {
+        id: 'p4-1', part: 4, type: 'listening', contextType: 'monologue',
+        contextTitle: "Announcement: Starlight Cruise",
+        script: "Welcome to the Starlight Cruise. Our ship cruises the West River... The tour includes a four-course meal, open bar, and live musical entertainment.",
+        question: "What is included in the cruise?",
+        options: ["Four meals", "Films", "A musical performance", "Fireworks"],
+        correct: 2,
+        explanation: "アナウンス内で 'live musical entertainment' が含まれると述べられています。"
+    }
+];
+
+// リーディングセクション (Part 5 - 7)
+const READING_QUESTION_DATA = [
+    // --- Part 5: Incomplete Sentences ---
+    {
+        id: 'p5-1', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Harvey Daveson Auto Bike Co. is now working towards _______ to a problem that has emerged recently.",
+        options: ["a cause", "an explanation", "a result", "a solution"],
+        correct: 3,
+        explanation: "文脈問題。「問題への解決策(solution to a problem)」に取り組んでいるとするのが自然。(D)が正解。"
+    },
+    {
+        id: 'p5-2', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Please _______ all the blanks on the order form to ensure prompt shipment.",
+        options: ["fall on", "feel for", "fill in", "find out"],
+        correct: 2,
+        explanation: "熟語問題。fill in（記入する）が文脈（注文書の空欄）に合います。"
+    },
+
+    // --- Part 6: Text Completion ---
+    {
+        id: 'p6-1', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Memo: Acquisition",
+        passage: "To: All employees\nFrom: James White\nRe: Acquisition by Ito Industries\n\nAs you already know, White Corporation _______ by Ito Industries and is now part of the Ito Group.",
+        question: "Choose the best word for the blank.",
+        options: ["have taken over", "have been taken over", "took over", "has been taken over"],
+        correct: 3,
+        explanation: "受動態の文脈。White Corporation（単数）が主語なので、has been taken over (D)が正解。"
+    },
+
+    // --- Part 7: Reading Comprehension ---
+    {
+        id: 'p7-1', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Web Page: Richmond Hotel",
+        passage: `The Richmond Hotel for both business and pleasure.
+Located in the business district of Columbus.
+Only 30 minutes from downtown Kensington and 25 minutes from Patterson International Airport.
+All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-Fi.`,
+        question: "Where is the establishment situated?",
+        options: ["In the center of the city", "Next to the airport", "In downtown Kensington", "In the business district"],
+        correct: 3,
+        explanation: "本文に 'located in the business district of Columbus' と明記されています。"
+    },
+    {
+        id: 'p7-2', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Web Page: Richmond Hotel",
+        passage: `(Refer to the Richmond Hotel advertisement above...)
+All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-Fi, Microwave, Fridge.`,
+        question: "What can be found in the rooms?",
+        options: ["A computer", "A dishwasher", "An oven", "A microwave"],
+        correct: 3,
+        explanation: "設備リストに 'Microwave' が含まれています。(C) An oven は電子レンジ(microwave oven)の一種と考えられるため、設問によっては正解になり得ますが、ここでは選択肢に合わせて調整。"
+    }
+];
 
         // ==========================================
         // UTILS
@@ -428,46 +537,50 @@ const CountdownWidget = () => {
                         { id: '730', title: 'Level 730', sub: 'ビジネス標準', icon: 'briefcase', color: 'text-yellow-500', bg: 'bg-yellow-100 dark:bg-yellow-900/30' },
                         { id: '860', title: 'Level 860+', sub: 'ハイスコア・難関', icon: 'award', color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-900/30' },
                     ];
-                } else if (type === 'reading') {
-                    return [
-                        { id: 'all', title: 'Part 5 演習', sub: '全範囲からランダム', icon: 'book-open', color: 'text-blue-500', bg: 'bg-blue-100 dark:bg-blue-900/30' },
-                    ];
-                } else {
-                    return [
-                        { id: 'all', title: 'Part 2 応答', sub: '全範囲からランダム', icon: 'headphones', color: 'text-green-500', bg: 'bg-green-100 dark:bg-green-900/30' },
-                    ];
-                }
+                } else if (type === 'listening') {
+            return [
+                { id: 'all_listening', title: 'リスニング総合', sub: 'Part 1 - 4 ランダム', icon: 'headphones', color: 'text-indigo-500', bg: 'bg-indigo-100 dark:bg-indigo-900/30' },
+                { id: 'part1', title: 'Part 1: 写真描写', sub: '画像を見て答える', icon: 'image', color: 'text-pink-500', bg: 'bg-pink-100 dark:bg-pink-900/30' },
+                { id: 'part2', title: 'Part 2: 応答問題', sub: '質問への応答を選ぶ', icon: 'message-circle', color: 'text-green-500', bg: 'bg-green-100 dark:bg-green-900/30' },
+                { id: 'part3', title: 'Part 3: 会話問題', sub: '複数人の会話を聞く', icon: 'users', color: 'text-blue-500', bg: 'bg-blue-100 dark:bg-blue-900/30' },
+                { id: 'part4', title: 'Part 4: 説明文', sub: 'アナウンス等を聞く', icon: 'radio', color: 'text-orange-500', bg: 'bg-orange-100 dark:bg-orange-900/30' },
+            ];
+        } else if (type === 'reading') {
+            return [
+                { id: 'all_reading', title: 'リーディング総合', sub: 'Part 5 - 7 ランダム', icon: 'book-open', color: 'text-teal-500', bg: 'bg-teal-100 dark:bg-teal-900/30' },
+                { id: 'part5', title: 'Part 5: 短文穴埋め', sub: '文法・語彙力', icon: 'edit-3', color: 'text-yellow-500', bg: 'bg-yellow-100 dark:bg-yellow-900/30' },
+                { id: 'part6', title: 'Part 6: 長文穴埋め', sub: '文脈理解', icon: 'file-text', color: 'text-cyan-500', bg: 'bg-cyan-100 dark:bg-cyan-900/30' },
+                { id: 'part7', title: 'Part 7: 読解問題', sub: '長文読解', icon: 'book', color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-900/30' },
+            ];
+        }
+        return [];
             };
 
             const courses = getCourses();
+    const sectionTitle = type === 'vocab' ? '重要語句' : type === 'listening' ? 'リスニング (Part 1-4)' : 'リーディング (Part 5-7)';
 
             return (
-                <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-900 animate-slide-in-right">
-                    <Header title="コース選択" sub="学習モードを選んでください" leftIcon="arrow-left" onLeftClick={onBack} />
-                    <div className="p-4 space-y-3 overflow-y-auto pb-20">
-                        {courses.map((course, idx) => (
-                            <button 
-                                key={course.id}
-                                onClick={() => onSelect(course.id)}
-                                className="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl text-left border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-lg transition-all btn-press flex items-center gap-4 group"
-                                style={{ animationDelay: `${idx * 50}ms` }}
-                            >
-                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${course.bg} group-hover:scale-110 transition-transform duration-300`}>
-                                    <Icon name={course.icon} className={course.color} size={26} />
-                                </div>
-                                <div className="flex-1">
-                                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">{course.title}</h3>
-                                    <p className="text-xs text-slate-500">{course.sub}</p>
-                                </div>
-                                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
-                                    <Icon name="chevron-right" className="text-slate-400" size={18} />
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
+        <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-900 animate-slide-in-right">
+            <Header title={sectionTitle} sub="コースを選んでください" leftIcon="arrow-left" onLeftClick={onBack} />
+            <div className="p-4 space-y-3 overflow-y-auto pb-20">
+                {courses.map((course, idx) => (
+                    <button key={course.id} onClick={() => onSelect(course.id)} className="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl text-left border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-lg transition-all btn-press flex items-center gap-4 group" style={{ animationDelay: `${idx * 50}ms` }}>
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${course.bg} group-hover:scale-110 transition-transform duration-300`}>
+                            <Icon name={course.icon} className={course.color} size={26} />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">{course.title}</h3>
+                            <p className="text-xs text-slate-500">{course.sub}</p>
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+                            <Icon name="chevron-right" className="text-slate-400" size={18} />
+                        </div>
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+};
 
         // ==========================================
         // RESULT SCREEN
@@ -546,7 +659,7 @@ const CountdownWidget = () => {
         };
 
         // ==========================================
-        // QUIZ SESSION
+        // QUIZ SESSION (完全版)
         // ==========================================
         const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
             const playSFX = useContext(SoundContext);
@@ -560,18 +673,19 @@ const CountdownWidget = () => {
             const [isLocked, setIsLocked] = useState(false);
             const [timeLeft, setTimeLeft] = useState(0);
 
-            // Filter data
+            // --- データフィルタリングロジック ---
             const sessionData = useMemo(() => {
                 let filtered = [...rawData];
                 const savedProgress = JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}');
 
+                // 1. ボキャブラリーモードのフィルタリング
                 if (mode === 'vocab') {
                     if (filterId === 'weak') {
                         filtered = filtered.filter(item => {
                             const p = savedProgress[item.id];
                             return !p || !p.mastered;
                         });
-                        if (filtered.length === 0) filtered = [...rawData];
+                        if (filtered.length === 0) filtered = [...rawData]; // 弱点なければ全問
                     } else if (filterId === '600') {
                         filtered = filtered.filter(item => item.level === 600);
                     } else if (filterId === '730') {
@@ -579,26 +693,58 @@ const CountdownWidget = () => {
                     } else if (filterId === '860') {
                         filtered = filtered.filter(item => item.level >= 860);
                     }
+                } 
+                // 2. リスニングモードのフィルタリング (Part 1-4)
+                else if (mode === 'listening') {
+                    if (filterId === 'part1') filtered = filtered.filter(i => i.part === 1);
+                    else if (filterId === 'part2') filtered = filtered.filter(i => i.part === 2);
+                    else if (filterId === 'part3') filtered = filtered.filter(i => i.part === 3);
+                    else if (filterId === 'part4') filtered = filtered.filter(i => i.part === 4);
                 }
-                
-                const limit = 10; // Fixed number of questions for demo
-                return shuffleArray(filtered).slice(0, limit);
+                // 3. リーディングモードのフィルタリング (Part 5-7)
+                else if (mode === 'reading') {
+                    if (filterId === 'part5') filtered = filtered.filter(i => i.part === 5);
+                    else if (filterId === 'part6') filtered = filtered.filter(i => i.part === 6);
+                    else if (filterId === 'part7') filtered = filtered.filter(i => i.part === 7);
+                }
+
+                // データが空の場合の安全策
+                if (filtered.length === 0) filtered = [...rawData];
+
+                // ランダムに10問出題（問題数が足りない場合は全問）
+                return shuffleArray(filtered).slice(0, 10);
             }, [rawData, mode, filterId]);
 
             const currentItem = sessionData[currentIndex];
-            const maxTime = mode === 'reading' ? 20 : mode === 'listening' ? 15 : 10;
+            
+            // 制限時間の設定 (Partによって変える)
+            const getMaxTime = () => {
+                if (mode === 'vocab') return 10;
+                if (mode === 'reading') {
+                    if (currentItem?.part === 7) return 60; // 長文は長めに
+                    return 20;
+                }
+                if (mode === 'listening') return 15; // 音声再生時間を考慮しない簡易タイマー
+                return 15;
+            };
+            const maxTime = getMaxTime();
 
+            // タイマーリセット
             useEffect(() => {
                 if (gameState === 'playing') setTimeLeft(maxTime);
             }, [currentIndex, maxTime, gameState]);
 
+            // 選択肢の準備
             const choices = useMemo(() => {
                 if (!currentItem) return [];
                 if (mode === 'vocab') return shuffleArray([...currentItem.choices, currentItem.meaning]);
-                if (mode === 'reading') return currentItem.choices;
-                return currentItem.options;
+                // TOEIC形式は options をそのまま使う (A, B, C, Dの順序は固定が一般的だがランダムも可)
+                // ここではランダムにせずそのまま表示（正解インデックスが変わらないように注意が必要）
+                // ※データ側で options: ["...", "..."] と定義し、correct: 0 (index) としているのでそのまま返す
+                return currentItem.options || currentItem.choices; 
             }, [currentItem, mode]);
 
+            // カウントダウンタイマー
             useEffect(() => {
                 if (gameState !== 'playing' || showExplanation || !currentItem) return;
                 const timer = setInterval(() => {
@@ -614,11 +760,12 @@ const CountdownWidget = () => {
                 return () => clearInterval(timer);
             }, [currentIndex, showExplanation, gameState]);
 
-            // Auto-speak for listening
+            // リスニング: 自動再生 (Part 2など)
             useEffect(() => {
                 if (mode === 'listening' && currentItem && !showExplanation && gameState === 'playing') {
-                    const t = setTimeout(() => speak(currentItem.script), 600);
-                    return () => clearTimeout(t);
+                    // 自動再生させたい場合はここのコメントアウトを外す
+                    // const t = setTimeout(() => speak(currentItem.script), 600);
+                    // return () => clearTimeout(t);
                 }
             }, [currentItem, showExplanation, mode, gameState]);
 
@@ -634,15 +781,20 @@ const CountdownWidget = () => {
                 setSelected(index);
                 
                 let correct = false;
-                if (mode === 'vocab') correct = choice === currentItem.meaning;
-                else correct = index === currentItem.correct;
+                // 正誤判定ロジック
+                if (mode === 'vocab') {
+                    correct = (choice === currentItem.meaning);
+                } else {
+                    // TOEIC形式は index で判定
+                    correct = (index === currentItem.correct);
+                }
 
                 setIsCorrect(correct);
                 playSFX(correct ? 'correct' : 'wrong');
 
                 if (correct) setScore(s => s + 1);
 
-                // Update Storage
+                // 履歴保存 (localStorage)
                 const savedData = JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}');
                 const itemData = savedData[currentItem.id] || { streak: 0, mastered: false };
 
@@ -658,10 +810,13 @@ const CountdownWidget = () => {
                 savedData[currentItem.id] = itemData;
                 localStorage.setItem('toeic_progress_v3', JSON.stringify(savedData));
 
+                // 画面遷移タイミング
                 setTimeout(() => {
                     if (correct) {
+                        // 単語モードで正解ならすぐ次へ、それ以外は解説を表示してもよいが
+                        // ここでは統一して解説を表示するか、単語のみサクサク進むか分ける
                         if (mode === 'vocab') nextQuestion();
-                        else setShowExplanation(true);
+                        else setShowExplanation(true); // TOEICモードは正解でも解説を見る
                     } else {
                         setShowExplanation(true);
                     }
@@ -693,6 +848,8 @@ const CountdownWidget = () => {
                 setShowExplanation(false);
             };
 
+            // --- レンダリング ---
+
             if (gameState === 'result') {
                 return <ResultScreen score={score} total={sessionData.length} onRetry={handleRetry} onHome={() => onFinish(streak)} />;
             }
@@ -700,12 +857,12 @@ const CountdownWidget = () => {
             if (!currentItem) return <div className="h-full flex items-center justify-center text-slate-500">No Data Available</div>;
 
             const timerWidth = (timeLeft / maxTime) * 100;
-            const timerColor = timeLeft <= 3 ? "bg-red-500" : "bg-blue-500";
+            const timerColor = timeLeft <= 5 ? "bg-red-500" : "bg-blue-500";
 
             return (
                 <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-900 transition-colors">
                     <Header 
-                        title={mode === 'vocab' ? '単語テスト' : mode === 'listening' ? 'リスニング' : 'リーディング'} 
+                        title={mode === 'vocab' ? '単語テスト' : `Part ${currentItem.part || '?'}`} 
                         sub={`${currentIndex + 1} / ${sessionData.length} • Combo: ${streak}`} 
                         leftIcon="x"
                         onLeftClick={() => onFinish(streak)}
@@ -720,99 +877,135 @@ const CountdownWidget = () => {
                     </div>
 
                     <div className={`flex-1 overflow-y-auto p-4 transition-all duration-300 ${showExplanation ? 'pb-[450px]' : 'pb-32'}`}>
-                        <div className="my-6">
+                        
+                        {/* --- コンテキストエリア (問題の種類に応じて表示切替) --- */}
+                        <div className="mb-6 space-y-4">
+                            
+                            {/* 1. Vocabモード: 単語を大きく表示 */}
                             {mode === 'vocab' && (
-                                <div className="text-center animate-pop">
+                                <div className="text-center animate-pop my-8">
                                     <span className="inline-block px-3 py-1 mb-4 text-xs font-bold text-slate-800 bg-yellow-400 rounded-full no-select shadow-sm">
                                         LEVEL {currentItem.level}
                                     </span>
                                     <h2 className="text-4xl font-extrabold text-slate-800 dark:text-white mb-2 tracking-wide selectable-text drop-shadow-sm">
                                         {currentItem.word}
                                     </h2>
-                                    {isDrillMode && (
-                                        <div className="text-xs text-slate-500 mt-2 flex items-center justify-center gap-1">
-                                            <Icon name="dumbbell" size={14} />
-                                            <span>Spartan: {JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}')[currentItem.id]?.streak || 0}/2</span>
-                                        </div>
-                                    )}
                                 </div>
                             )}
 
-                            {mode === 'reading' && (
-                                <div className="glass-panel p-6 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm animate-pop">
-                                    <p className="text-lg leading-relaxed font-medium text-slate-800 dark:text-slate-100 selectable-text">
-                                        {currentItem.question}
+                            {/* 2. Part 1: 画像表示 */}
+                            {currentItem.contextType === 'image' && currentItem.imageUrl && (
+                                <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-200 dark:border-slate-700 animate-pop">
+                                    {/* ダミー画像を表示 */}
+                                    <img src={currentItem.imageUrl} alt="Question Context" className="w-full h-auto object-cover" />
+                                </div>
+                            )}
+
+                            {/* 3. Part 6/7: 長文表示 (スクロール可能) */}
+                            {currentItem.contextType === 'long_text' && (
+                                <div className="glass-panel p-5 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm animate-pop max-h-64 overflow-y-auto">
+                                    {currentItem.contextTitle && (
+                                        <h3 className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider sticky top-0 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm py-1">
+                                            {currentItem.contextTitle}
+                                        </h3>
+                                    )}
+                                    <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-serif">
+                                        {currentItem.passage}
                                     </p>
                                 </div>
                             )}
 
+                            {/* 4. リスニング共通: 再生ボタン */}
                             {mode === 'listening' && (
-                                <div className="flex flex-col items-center justify-center py-8 animate-pop">
+                                <div className="flex flex-col items-center justify-center py-4 animate-pop">
                                     <button 
                                         onClick={() => speak(currentItem.script)}
-                                        className="w-24 h-24 rounded-full bg-gray-100 dark:bg-slate-800 border-4 border-yellow-500 flex items-center justify-center shadow-[0_0_30px_rgba(234,179,8,0.3)] btn-press hover:scale-105 transition-transform"
+                                        className="w-20 h-20 rounded-full bg-yellow-100 dark:bg-yellow-900/30 border-4 border-yellow-500 flex items-center justify-center shadow-lg btn-press hover:scale-105 transition-transform"
                                     >
-                                        <Icon name="volume-2" className="w-10 h-10 text-yellow-600 dark:text-yellow-500" />
+                                        <Icon name="volume-2" className="w-8 h-8 text-yellow-600 dark:text-yellow-500" />
                                     </button>
-                                    <p className="mt-4 text-sm text-slate-500 animate-pulse-slow">タップして再生</p>
+                                    <p className="mt-2 text-xs text-slate-500 animate-pulse-slow">Tap to Listen</p>
+                                    
+                                    {/* 解説表示時またはPart3以降で、スクリプトを表示可能にする */}
+                                    {(showExplanation || currentItem.part >= 3) && (
+                                        <details className="w-full mt-4 group">
+                                            <summary className="text-xs text-center text-slate-400 cursor-pointer hover:text-yellow-500 transition list-none select-none">
+                                                <span className="border-b border-dashed border-slate-400 pb-0.5">スクリプトを表示/非表示</span>
+                                            </summary>
+                                            <div className="mt-3 p-4 bg-white dark:bg-slate-800 rounded-xl text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap border border-gray-200 dark:border-slate-700 shadow-inner text-left">
+                                                {currentItem.script}
+                                            </div>
+                                        </details>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 5. 問題文の表示 (Vocab以外) */}
+                            {mode !== 'vocab' && currentItem.question && (
+                                <div className="glass-panel p-4 rounded-xl border border-blue-100 dark:border-slate-700 bg-blue-50/50 dark:bg-slate-800/50 shadow-sm animate-pop">
+                                    <p className="text-lg font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
+                                        <span className="text-blue-500 font-bold mr-2">Q.</span>
+                                        {currentItem.question}
+                                    </p>
                                 </div>
                             )}
                         </div>
 
+                        {/* --- 選択肢エリア --- */}
                         <div className="space-y-3">
-                            
-{choices.map((choice, idx) => {
-    // ボタン自体のクラス（アニメーション関連を削除し、純粋なボタンスタイルのみにする）
-    let btnClass = "w-full p-4 rounded-xl text-left font-medium text-lg transition-transform duration-200 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 shadow-sm";
-    
-    // 選択状態のスタイルロジック
-    if (selected !== null) {
-        if (mode === 'vocab') {
-            if (choice === currentItem.meaning) btnClass = "w-full p-4 rounded-xl text-left font-bold border-2 border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 shadow-md"; // scale削除
-            else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border-2 border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"; // shakeは親でやるか、ここでは控えめに
-            else btnClass += " opacity-40 blur-[1px]";
-        } else {
-            // ... (Reading/Listeningのロジックも同様に transform系クラス scale などを外す) ...
-            if (idx === currentItem.correct) btnClass = "w-full p-4 rounded-xl text-left font-bold border-2 border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 shadow-md";
-            else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border-2 border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400";
-            else btnClass += " opacity-40 blur-[1px]";
-        }
-    }
+                            {choices.map((choice, idx) => {
+                                // Vocabモードとそれ以外で正誤判定の比較対象を変える
+                                let isAnsCorrect = false;
+                                if (mode === 'vocab') isAnsCorrect = (choice === currentItem.meaning);
+                                else isAnsCorrect = (idx === currentItem.correct);
 
-    return (
-        // ★修正点: アニメーション専用のラッパーdivを作る
-        <div 
-            key={idx} 
-            className="animate-slide-up" 
-            style={{ 
-            animationDelay: `${idx * 40}ms`, // 少しテンポアップ（60ms→40ms）
-            willChange: 'transform, opacity', // ブラウザへの最適化ヒント
-            transform: 'translateZ(0)',       // GPUアクセラレーションをONにするおまじない
-            backfaceVisibility: 'hidden',     // 描画負荷を下げる
-            WebkitFontSmoothing: 'subpixel-antialiased' // 文字のガタつき防止
-        }}
-        >
-            <button 
-                onClick={() => handleAnswer(choice, idx)} 
-                disabled={selected !== null} 
-                className={`${btnClass} btn-press flex items-center`} // btn-pressはここで適用
-            >
-                <span className="inline-flex items-center justify-center min-w-[28px] h-7 rounded-lg bg-gray-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs font-bold mr-3 shadow-inner">
-                    {String.fromCharCode(65 + idx)}
-                </span>
-                <span className="selectable-text text-sm md:text-base leading-relaxed">{choice}</span>
-            </button>
-        </div>
-    );
-})}
+                                // ボタンスタイル
+                                let btnClass = "w-full p-4 rounded-xl text-left font-medium text-lg transition-all border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-700";
+                                
+                                if (selected !== null) {
+                                    if (mode === 'vocab') {
+                                        if (choice === currentItem.meaning) btnClass = "w-full p-4 rounded-xl text-left font-bold border-2 border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 shadow-md";
+                                        else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border-2 border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400";
+                                        else btnClass += " opacity-40 blur-[1px]";
+                                    } else {
+                                        if (idx === currentItem.correct) btnClass = "w-full p-4 rounded-xl text-left font-bold border-2 border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 shadow-md";
+                                        else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border-2 border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400";
+                                        else btnClass += " opacity-40 blur-[1px]";
+                                    }
+                                }
+
+                                return (
+                                    <div 
+                                        key={idx} 
+                                        className="animate-slide-up" 
+                                        style={{ 
+                                            animationDelay: `${idx * 40}ms`,
+                                            transform: 'translateZ(0)'
+                                        }}
+                                    >
+                                        <button 
+                                            onClick={() => handleAnswer(choice, idx)} 
+                                            disabled={selected !== null} 
+                                            className={`${btnClass} btn-press flex items-center`}
+                                        >
+                                            <span className="inline-flex items-center justify-center min-w-[28px] h-7 rounded-lg bg-gray-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs font-bold mr-3 shadow-inner">
+                                                {String.fromCharCode(65 + idx)}
+                                            </span>
+                                            <span className="selectable-text text-sm md:text-base leading-relaxed">{choice}</span>
+                                        </button>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
+                    {/* --- 解説モーダル (Bottom Sheet) --- */}
                     {showExplanation && (
-<div 
-    className="fixed bottom-0 left-0 w-full glass-panel bg-white/95 dark:bg-slate-800/95 border-t border-gray-200 dark:border-slate-600 z-50 animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.2)] rounded-t-3xl"
-    style={{ padding: '1.5rem', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }} 
->                            <div className="max-w-md mx-auto">
+                        <div 
+                            className="fixed bottom-0 left-0 w-full glass-panel bg-white/95 dark:bg-slate-800/95 border-t border-gray-200 dark:border-slate-600 z-50 animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.2)] rounded-t-3xl"
+                            style={{ padding: '1.5rem', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }} 
+                        >
+                            <div className="max-w-md mx-auto">
                                 <div className="flex items-center gap-3 mb-4">
                                     {isCorrect ? (
                                         <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shrink-0 shadow-lg shadow-green-500/30 animate-pop"><Icon name="check" className="text-white w-6 h-6" /></div>
@@ -823,25 +1016,22 @@ const CountdownWidget = () => {
                                         {isCorrect ? 'Correct!' : 'Wrong...'}
                                     </h3>
                                 </div>
-                                {mode !== 'vocab' && (
-                                    <div className="mb-6 p-4 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-600">
+                                
+                                {/* 解説テキスト表示 (Vocab以外の場合) */}
+                                {mode !== 'vocab' && currentItem.explanation && (
+                                    <div className="mb-6 p-4 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-gray-100 dark:border-slate-600 max-h-40 overflow-y-auto">
                                         <span className="block text-xs text-slate-400 uppercase font-bold mb-2 tracking-wider">解説</span>
                                         <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 selectable-text">{currentItem.explanation}</p>
                                     </div>
                                 )}
-                                {mode === 'listening' && (
-                                    <div className="mb-6 p-3 bg-white dark:bg-slate-900 rounded-xl text-sm text-slate-600 dark:text-slate-400 italic border border-gray-200 dark:border-slate-700 shadow-inner">
-                                        "{currentItem.script}"
-                                    </div>
-                                )}
                                 
-<Button 
-    onClick={nextQuestion} 
-    className="w-full text-lg h-14" 
-    variant="primary"  // ★ここを "primary" 固定に変更
->
-    Next Question <Icon name="arrow-right" size={20} />
-</Button>
+                                <Button 
+                                    onClick={nextQuestion} 
+                                    className="w-full text-lg h-14" 
+                                    variant="primary"
+                                >
+                                    Next Question <Icon name="arrow-right" size={20} />
+                                </Button>
                             </div>
                         </div>
                     )}
