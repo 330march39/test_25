@@ -419,20 +419,17 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
     return (
         <span
             ref={ref}
-            // 修正点: 
-            // - inline-flex: アイコンの箱を作る
-            // - items-center justify-center: 中身のSVGをど真ん中に
-            // - leading-none: 行の高さによる下の余白を削除
-            // - align-middle: テキストの横に並んだ時の位置ズレ防止
-            // - shrink-0: 狭い場所でも潰れないようにする
-            className={`inline-flex items-center justify-center leading-none align-middle shrink-0 ${className || ''}`}
-            style={{ width: size, height: size }}
+            // 修正: align-middle や leading-none を削除し、純粋なFlexコンテナにします
+            // shrink-0 は縮小防止のために維持します
+            className={`inline-flex items-center justify-center shrink-0 ${className || ''}`}
+            // line-height: 0 を強制することで、フォント由来の上下の余白を完全に排除します
+            style={{ width: size, height: size, lineHeight: 0 }}
         >
             <i 
                 data-lucide={name} 
                 width={size} 
-                height={size} 
-                // SVG自体も親要素いっぱいに広げる
+                height={size}
+                // SVGをブロック要素にすることで、インライン特有のベースライン余白を消します
                 style={{ display: 'block' }} 
             ></i>
         </span>
@@ -1233,27 +1230,36 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
         };
 
         // ==========================================
-// HOME SCREEN (修正版)
+// HOME SCREEN (修正版 v2)
 // ==========================================
 const Home = ({ onStart, onSettings }) => {
-    const [progress, setProgress] = useState({ mastered: 0, total: VOCAB_DATA.length });
+    const [progress, setProgress] = useState({ mastered: 0, total: 0 }); // 初期値を0に
 
     useEffect(() => {
-        // 習得済み単語のカウントロジック
-        // localStorageからデータを取得し、mastered: true の数を数える
+        // 1. 全単語の総数を取得
+        const totalVocab = VOCAB_DATA.length;
+
+        // 2. ローカルストレージの学習記録を取得
         const saved = JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}');
-        const masteredCount = Object.values(saved).filter(i => i.mastered).length;
         
-        // 全単語数は VOCAB_DATA の長さを使用（リスニングやリーディング問題は含めない場合）
-        // もしリスニングなども含めるなら rawData を統合する必要がありますが、
-        // ここでは「ボキャブラリーのプログレスバー」という要望のため VOCAB_DATA を基準にします。
-        setProgress({ mastered: masteredCount, total: VOCAB_DATA.length });
+        // 3. VOCAB_DATA に存在するIDだけを対象に、mastered かどうかをカウント
+        const masteredCount = VOCAB_DATA.reduce((count, item) => {
+            const itemData = saved[item.id];
+            // データが存在し、かつ mastered フラグが true ならカウント
+            if (itemData && itemData.mastered) {
+                return count + 1;
+            }
+            return count;
+        }, 0);
+        
+        setProgress({ mastered: masteredCount, total: totalVocab });
     }, []);
 
     // パーセンテージ計算
     const percentage = progress.total > 0 ? Math.round((progress.mastered / progress.total) * 100) : 0;
 
     return (
+        // ... (return内の JSX コードは変更なしでそのまま使えます) ...
         <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-slate-800 dark:text-white p-6 pb-24 transition-colors animate-fade-in">
             <div className="flex justify-between items-center mb-6 pt-2 relative z-20">
                 <div className="flex items-center gap-2">
