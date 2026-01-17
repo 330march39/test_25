@@ -405,34 +405,36 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
         // ==========================================
 
         const Icon = ({ name, size = 24, className }) => {
-    // 参照（ref）を使って、このコンポーネントのDOM要素を特定する
     const ref = useRef(null);
 
     useEffect(() => {
-        // 全体ではなく、このコンポーネントの中（root: ref.current）だけを変換する
         if (window.lucide && ref.current) {
             window.lucide.createIcons({
                 root: ref.current,
                 nameAttr: 'data-lucide',
-                attrs: {
-                    class: "lucide-icon" // SVG自体にクラスをつけたい場合
-                }
             });
         }
-    }, [name]); // nameが変わったときだけ再実行
+    }, [name]);
 
-    // 解説: 
-    // Lucideは <i> タグを <svg> に「置換」してしまうため、Reactがそれを見失ってエラーになります。
-    // そのため、Reactが管理する <span> で包みます。
-    // Reactはこの <span> を削除・更新しようとするため、中身が <i> だろうが <svg> だろうが
-    // エラーにならずに安全に処理できます。
     return (
-        <span 
-            ref={ref} 
-            className={`inline-flex items-center justify-center ${className || ''}`} 
+        <span
+            ref={ref}
+            // 修正点: 
+            // - inline-flex: アイコンの箱を作る
+            // - items-center justify-center: 中身のSVGをど真ん中に
+            // - leading-none: 行の高さによる下の余白を削除
+            // - align-middle: テキストの横に並んだ時の位置ズレ防止
+            // - shrink-0: 狭い場所でも潰れないようにする
+            className={`inline-flex items-center justify-center leading-none align-middle shrink-0 ${className || ''}`}
             style={{ width: size, height: size }}
         >
-            <i data-lucide={name} width={size} height={size}></i>
+            <i 
+                data-lucide={name} 
+                width={size} 
+                height={size} 
+                // SVG自体も親要素いっぱいに広げる
+                style={{ display: 'block' }} 
+            ></i>
         </span>
     );
 };
