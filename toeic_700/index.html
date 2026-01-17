@@ -147,36 +147,35 @@
         }
         .dark .percentage { fill: #fff; }
 
-        /* --- クラッカーのアニメーション --- */
-        @keyframes pop-particle {
+        /* --- 画面いっぱいに弾けるクラッカーのアニメーション --- */
+        @keyframes big-pop-particle {
             0% {
-                transform: translate(0, 0) rotate(0deg) scale(0.5);
+                /* 画面下部中央からスタート */
+                transform: translate(-50%, 100vh) rotate(0deg) scale(0.5);
                 opacity: 1;
             }
-            60% {
+            15% {
+                 /* 弾ける瞬間 */
                 opacity: 1;
             }
             100% {
-                /* CSS変数を使ってランダムな位置へ飛ばす */
-                transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0);
+                /* 計算されたランダムな位置へ飛んでいきながら、回転・拡大・フェードアウト */
+                transform: translate(calc(-50% + var(--tx)), calc(100vh + var(--ty))) rotate(var(--rot)) scale(var(--scale));
                 opacity: 0;
             }
         }
 
-        .particle {
+        .particle-big {
             position: absolute;
-            width: 8px;
-            height: 8px;
-            bottom: 20px; /* クラッカーの発射口付近 */
             left: 50%;
-            border-radius: 50%; /* 丸い紙吹雪 */
-            animation: pop-particle 1.2s ease-out forwards;
+            bottom: 0; /* 画面最下部を基準 */
+            width: var(--size);
+            height: var(--size);
+            border-radius: 2px; /* 少し角丸の四角 */
+            /* 勢いよく飛び出して、ゆっくり減速するイージング */
+            animation: big-pop-particle var(--duration) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
             pointer-events: none;
-        }
-
-        /* クラッカー本体を少し揺らす */
-        .popper-shake {
-            animation: shake 0.4s ease-in-out;
+            z-index: 50;
         }
     </style>
 </head>
@@ -623,78 +622,60 @@ const CountdownWidget = () => {
 };
 
         // ==========================================
-// RESULT SCREEN (クラッカー演出バージョン)
+// RESULT SCREEN (画面いっぱいクラッカー演出)
 // ==========================================
 
 // クラッカー用のサブコンポーネント
 const CrackerEffect = () => {
-    const colors = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899'];
+    const colors = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#FCD34D', '#6EE7B7'];
     
-    // 片側あたりの紙吹雪の枚数
-    const particleCount = 30;
+    // 紙吹雪の枚数を増やす
+    const particleCount = 100;
     const particles = Array.from({ length: particleCount });
 
     return (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-50 flex justify-between items-end px-8 pb-8">
-            {/* --- 左側のクラッカー --- */}
-            <div className="relative popper-shake">
-                {/* クラッカーアイコン */}
-                <Icon name="party-popper" size={48} className="text-yellow-500 transform -rotate-45" />
+        // 画面全体を覆うコンテナ
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+            {particles.map((_, i) => {
+                // --- ランダムなパラメータ生成 ---
                 
-                {/* 左側の紙吹雪パーティクル */}
-                {particles.map((_, i) => {
-                    // 左側は右上に飛ばす (X:プラス, Y:マイナス)
-                    const tx = `${20 + Math.random() * 150}px`;
-                    const ty = `-${50 + Math.random() * 200}px`;
-                    const rot = `${Math.random() * 720}deg`;
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-                    const delay = `${Math.random() * 0.2}s`; // ほぼ同時に弾ける
-
-                    return (
-                        <div
-                            key={`l-${i}`}
-                            className="particle"
-                            style={{
-                                '--tx': tx,
-                                '--ty': ty,
-                                '--rot': rot,
-                                backgroundColor: color,
-                                animationDelay: delay
-                            }}
-                        />
-                    );
-                })}
-            </div>
-
-            {/* --- 右側のクラッカー --- */}
-            <div className="relative popper-shake">
-                {/* クラッカーアイコン（左右反転） */}
-                <Icon name="party-popper" size={48} className="text-yellow-500 transform rotate-45 scale-x-[-1]" />
+                // 角度: 真上(0度)を中心に左右に広げる (-100度 ～ 100度)
+                const angleDeg = Math.random() * 200 - 100;
+                const angleRad = angleDeg * (Math.PI / 180);
                 
-                {/* 右側の紙吹雪パーティクル */}
-                {particles.map((_, i) => {
-                    // 右側は左上に飛ばす (X:マイナス, Y:マイナス)
-                    const tx = `-${20 + Math.random() * 150}px`;
-                    const ty = `-${50 + Math.random() * 200}px`;
-                    const rot = `${Math.random() * 720}deg`;
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-                    const delay = `${Math.random() * 0.2}s`;
+                // 距離: 画面を飛び出すくらい遠くまで (画面の高さの0.5倍 ～ 1.5倍)
+                const distance = window.innerHeight * (0.5 + Math.random());
 
-                    return (
-                        <div
-                            key={`r-${i}`}
-                            className="particle"
-                            style={{
-                                '--tx': tx,
-                                '--ty': ty,
-                                '--rot': rot,
-                                backgroundColor: color,
-                                animationDelay: delay
-                            }}
-                        />
-                    );
-                })}
-            </div>
+                // 飛んでいく目標座標 (tx, ty) を計算
+                // Math.sin(angleRad) で左右、-Math.cos(angleRad) で上方向
+                const tx = `${distance * Math.sin(angleRad)}px`;
+                const ty = `${-distance * Math.cos(angleRad)}px`;
+
+                // 回転、サイズ、色、アニメーション時間、遅延
+                const rot = `${Math.random() * 1080 - 540}deg`; // 大きく回転
+                const size = `${6 + Math.random() * 8}px`;
+                const scale = `${0.5 + Math.random()}`; // 最終的な大きさもバラバラに
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const duration = `${1.5 + Math.random() * 1.5}s`; // 飛び飛ぶ時間
+                const delay = `${Math.random() * 0.3}s`; // 弾けるタイミングを少しずらす
+
+                return (
+                    <div
+                        key={i}
+                        className="particle-big"
+                        style={{
+                            '--tx': tx,
+                            '--ty': ty,
+                            '--rot': rot,
+                            '--size': size,
+                            '--scale': scale,
+                            '--duration': duration,
+                            backgroundColor: color,
+                            animationDelay: delay
+                        }}
+                    />
+                );
+            })}
         </div>
     );
 };
