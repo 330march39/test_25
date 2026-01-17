@@ -376,8 +376,18 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
 ];
 
         // ==========================================
-        // UTILS (音声機能の強化版)
+        // UTILS (iOS対応・修正版)
         // ==========================================
+        
+        const stopAudio = () => {
+             if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        };
+
+        // iOSでのガベージコレクション対策（再生中に音声が途切れるのを防ぐ）
+        window.utterances = [];
+
         const speak = (text, onEnd) => {
             if (!('speechSynthesis' in window)) {
                 if (onEnd) onEnd();
@@ -387,46 +397,54 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
             // 既存の音声をキャンセル
             window.speechSynthesis.cancel();
 
-            // テキストを行ごとに分割し、M: W: のタグを処理する
-            // 空行を除去し、各行をオブジェクト化
+            // テキストを行ごとに分割
             const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
-            const utterances = [];
             
-            // 声の候補を取得（ブラウザによって取得タイミングが異なるため再取得）
-            const voices = window.speechSynthesis.getVoices();
+            // 声の候補を取得
+            let voices = window.speechSynthesis.getVoices();
             
-            // 声の割り当てロジック（簡易版）
-            // 名前や言語設定から男女っぽい声を探す、なければピッチで調整
+            // iOSなどは非同期で声がロードされるため、ない場合は少し待つかデフォルトに任せる
+            // ここでは簡易的に取得できた場合のみ選択ロジックを走らせる
+            
             const getVoiceConfig = (type) => {
-                let voice = voices.find(v => v.lang === 'en-US'); // デフォルト
+                // 声が見つからない場合はnullを返し、ブラウザのデフォルトを使用させる
+                if (!voices || voices.length === 0) return { voice: null, pitch: 1.0, rate: 0.9 };
+
+                let voice = voices.find(v => v.lang === 'en-US'); 
                 let pitch = 1.0;
-                let rate = 0.9; // 少しゆっくり
+                let rate = 0.9; 
 
                 if (type === 'M') {
-                    // 男性声を探す試み
                     const maleVoice = voices.find(v => v.lang === 'en-US' && (v.name.includes('Male') || v.name.includes('David') || v.name.includes('Google US English')));
                     if (maleVoice) voice = maleVoice;
-                    else pitch = 0.9; // 声が見つからない場合はピッチを下げる
+                    else pitch = 0.9; 
                 } else if (type === 'W') {
-                    // 女性声を探す試み
                     const femaleVoice = voices.find(v => v.lang === 'en-US' && (v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Samantha')));
                     if (femaleVoice) voice = femaleVoice;
-                    else pitch = 1.1; // 声が見つからない場合はピッチを上げる
+                    else pitch = 1.1; 
                 }
                 return { voice, pitch, rate };
             };
 
-            // 各行をUtterance（発話データ）に変換
-            lines.forEach((line, index) => {
+            let currentLine = 0;
+
+            const playNextLine = () => {
+                if (currentLine >= lines.length) {
+                    window.utterances = []; // クリア
+                    if (onEnd) onEnd();
+                    return;
+                }
+
+                const line = lines[currentLine];
                 let cleanText = line;
-                let type = 'N'; // Narration
+                let type = 'N'; 
 
                 if (line.trim().startsWith('M:') || line.trim().startsWith('M ')) {
                     type = 'M';
-                    cleanText = line.replace(/^[Mm][: ]\s*/, ''); // "M: "を削除
+                    cleanText = line.replace(/^[Mm][: ]\s*/, '');
                 } else if (line.trim().startsWith('W:') || line.trim().startsWith('W ')) {
                     type = 'W';
-                    cleanText = line.replace(/^[Ww][: ]\s*/, ''); // "W: "を削除
+                    cleanText = line.replace(/^[Ww][: ]\s*/, '');
                 }
 
                 const u = new SpeechSynthesisUtterance(cleanText);
@@ -437,31 +455,31 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
                 u.rate = config.rate;
                 u.lang = 'en-US';
 
-                // 最後の行が終わったら onEnd を呼ぶ
-                if (index === lines.length - 1 && onEnd) {
-                    u.onend = onEnd;
-                }
+                // GC対策で配列に保持
+                window.utterances.push(u);
+
+                u.onend = () => {
+                    currentLine++;
+                    playNextLine();
+                };
                 
-                // エラー時も次に進めるように
                 u.onerror = (e) => {
-                    console.error('Speech error', e);
-                    if (index === lines.length - 1 && onEnd) onEnd();
+                    // interrupted はキャンセル時の正常動作なので無視する
+                    if (e.error !== 'interrupted') {
+                        console.error('Speech error', e);
+                    }
+                    // エラーでも次へ進める（止まらないようにする）
+                    currentLine++;
+                    playNextLine();
                 };
 
                 window.speechSynthesis.speak(u);
-            });
-            
-            // もし読み上げる行がなかった場合
-            if (lines.length === 0 && onEnd) onEnd();
+            };
+
+            playNextLine();
         };
 
-        // 音声を強制停止する関数
-        const stopAudio = () => {
-             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-            }
-        };
-
+        // 配列をシャッフルする関数
         const shuffleArray = (array) => {
             return array.map(value => ({ value, sort: Math.random() }))
                         .sort((a, b) => a.sort - b.sort)
@@ -661,12 +679,27 @@ const CountdownWidget = () => {
             const courses = getCourses();
     const sectionTitle = type === 'vocab' ? '重要語句' : type === 'listening' ? 'リスニング (Part 1-4)' : 'リーディング (Part 5-7)';
 
+            // ★追加: iOS対策のサイレント再生関数
+    const handleSelectWithWarmup = (courseId) => {
+        // iOSではユーザーアクション(タップ)の中で一度音声を再生しておくと、
+        // その後の自動再生(useEffectなど)が許可されることが多い。
+        if ('speechSynthesis' in window) {
+            // 無音の短い発話を作成
+            const silent = new SpeechSynthesisUtterance(" ");
+            silent.volume = 0; // 音量0
+            silent.duration = 0; // 短く
+            window.speechSynthesis.speak(silent);
+        }
+        // 本来の処理を実行
+        onSelect(courseId);
+    };
+
             return (
         <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-900 animate-slide-in-right">
             <Header title={sectionTitle} sub="コースを選んでください" leftIcon="arrow-left" onLeftClick={onBack} />
             <div className="p-4 space-y-3 overflow-y-auto pb-20">
                 {courses.map((course, idx) => (
-                    <button key={course.id} onClick={() => onSelect(course.id)} className="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl text-left border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-lg transition-all btn-press flex items-center gap-4 group" style={{ animationDelay: `${idx * 50}ms` }}>
+                    <button key={course.id} onClick={() => handleSelectWithWarmup(course.id)} className="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl text-left border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-lg transition-all btn-press flex items-center gap-4 group" style={{ animationDelay: `${idx * 50}ms` }}>
                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${course.bg} group-hover:scale-110 transition-transform duration-300`}>
                             <Icon name={course.icon} className={course.color} size={26} />
                         </div>
