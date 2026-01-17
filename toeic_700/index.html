@@ -461,6 +461,12 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
                 window.speechSynthesis.cancel();
             }
         };
+
+        const shuffleArray = (array) => {
+            return array.map(value => ({ value, sort: Math.random() }))
+                        .sort((a, b) => a.sort - b.sort)
+                        .map(({ value }) => value);
+        };
         
         // ==========================================
         // COMPONENTS
