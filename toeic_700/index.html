@@ -191,21 +191,26 @@
                 }
                 switch (type) {
                     case 'correct':
-                        playTone(600, 'sine', 0.1, 0.1);
-                        setTimeout(() => playTone(1200, 'sine', 0.2, 0.1), 50);
+                        // ピンポン！ (正解音: 明るいサイン波)
+                        playTone(880, 'sine', 0.1, 0.3);
+                        setTimeout(() => playTone(1760, 'sine', 0.3, 0.3), 100);
                         break;
                     case 'wrong':
-                        playTone(150, 'sawtooth', 0.3, 0.15);
-                        setTimeout(() => playTone(100, 'sawtooth', 0.3, 0.15), 100);
+                        // ブブー... (不正解音: 低いノコギリ波)
+                        playTone(150, 'sawtooth', 0.2, 0.4);
+                        setTimeout(() => playTone(120, 'sawtooth', 0.3, 0.4), 150);
                         break;
                     case 'click':
-                        playTone(800, 'triangle', 0.05, 0.03);
+                        // カチッ (クリック音: 短い高い音)
+                        playTone(1200, 'triangle', 0.05, 0.1);
                         break;
                     case 'complete':
-                        playTone(400, 'sine', 0.1);
-                        setTimeout(() => playTone(500, 'sine', 0.1), 100);
-                        setTimeout(() => playTone(600, 'sine', 0.1), 200);
-                        setTimeout(() => playTone(800, 'sine', 0.4), 300);
+                        // ファンファーレ (完了音)
+                        const now = 0;
+                        playTone(523.25, 'sine', 0.2, 0.3); // Do
+                        setTimeout(() => playTone(659.25, 'sine', 0.2, 0.3), 150); // Mi
+                        setTimeout(() => playTone(783.99, 'sine', 0.2, 0.3), 300); // So
+                        setTimeout(() => playTone(1046.50, 'sine', 0.6, 0.4), 450); // High Do
                         break;
                     default: break;
                 }
