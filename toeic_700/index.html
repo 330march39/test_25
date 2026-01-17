@@ -440,13 +440,14 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
         };
 
         const Toggle = ({ checked, onChange }) => (
-            <div 
-                className={`w-14 h-8 flex items-center bg-gray-300 dark:bg-slate-700 rounded-full p-1 cursor-pointer transition-all duration-300 border border-transparent ${checked ? 'bg-yellow-500 dark:bg-yellow-500 border-yellow-400' : ''}`}
-                onClick={onChange}
-            >
-                <div className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ease-spring ${checked ? 'translate-x-6' : ''}`}></div>
-            </div>
-        );
+    <div 
+        // 背景色（bg-gray-300など）を条件分岐の中に移動させ、競合を防ぎます
+        className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300 border ${checked ? 'bg-yellow-500 border-yellow-400' : 'bg-gray-300 dark:bg-slate-700 border-transparent'}`}
+        onClick={onChange}
+    >
+        <div className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ease-spring ${checked ? 'translate-x-6' : ''}`}></div>
+    </div>
+);
 
         const Header = ({ title, sub, leftIcon, onLeftClick, rightAction }) => (
             <div className="flex items-center justify-between p-4 glass-panel sticky top-0 z-30 border-b border-gray-200/50 dark:border-slate-800/50 no-select transition-all">
@@ -636,8 +637,8 @@ const CountdownWidget = () => {
                                 />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-800 dark:text-white">
-                                <span className="text-6xl font-black tracking-tighter">{score}</span>
-                                <span className="text-sm font-medium text-slate-500 uppercase tracking-widest">/ {total} Score</span>
+                                <span className="text-6xl font-black tracking-tighter leading-none mt-2">{score}</span>
+    <span className="text-sm font-medium text-slate-500 uppercase tracking-widest mt-1">/ {total} Score</span>
                             </div>
                         </div>
 
