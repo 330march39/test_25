@@ -147,35 +147,41 @@
         }
         .dark .percentage { fill: #fff; }
 
-        /* --- 画面いっぱいに弾けるクラッカーのアニメーション --- */
-        @keyframes big-pop-particle {
+        /* --- 勢いよく弾けて舞うクラッカーのアニメーション --- */
+        @keyframes big-pop-particle-v2 {
             0% {
-                /* 画面下部中央からスタート */
-                transform: translate(-50%, 100vh) rotate(0deg) scale(0.5);
+                /* 発射点：画面下部中央 */
+                transform: translate3d(-50%, 100vh, 0) scale(0);
                 opacity: 1;
             }
-            15% {
-                 /* 弾ける瞬間 */
+            /* 最初の短時間で一気に飛び出す（勢いの表現） */
+            25% {
                 opacity: 1;
+                /* 目標地点の8割くらいまで一気に到達し、少し拡大する */
+                transform: translate3d(calc(-50% + var(--tx) * 0.8), calc(100vh + var(--ty) * 0.8), 0) rotate3d(var(--rx), var(--ry), var(--rz), calc(var(--rot) * 0.3)) scale(1.2);
             }
+            /* その後、ゆっくりと舞いながら最終地点へ（舞う表現） */
             100% {
-                /* 計算されたランダムな位置へ飛んでいきながら、回転・拡大・フェードアウト */
-                transform: translate(calc(-50% + var(--tx)), calc(100vh + var(--ty))) rotate(var(--rot)) scale(var(--scale));
-                opacity: 0;
+                opacity: 0; /* 最後は消える */
+                /* 最終地点までゆっくり移動し、回転を続け、少し小さくなる */
+                transform: translate3d(calc(-50% + var(--tx)), calc(100vh + var(--ty)), 0) rotate3d(var(--rx), var(--ry), var(--rz), var(--rot)) scale(0.6);
             }
         }
 
         .particle-big {
             position: absolute;
             left: 50%;
-            bottom: 0; /* 画面最下部を基準 */
+            bottom: 0;
             width: var(--size);
             height: var(--size);
-            border-radius: 2px; /* 少し角丸の四角 */
-            /* 勢いよく飛び出して、ゆっくり減速するイージング */
-            animation: big-pop-particle var(--duration) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            /* ランダムな形（丸、四角、三角風） */
+            border-radius: var(--radius);
+            /* 爆発的な飛び出しを表現するイージング (easeOutQuartに近い) */
+            animation: big-pop-particle-v2 var(--duration) cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
             pointer-events: none;
             z-index: 50;
+            /* 立体的な回転のために裏面も描画 */
+            transform-style: preserve-3d;
         }
     </style>
 </head>
@@ -626,38 +632,45 @@ const CountdownWidget = () => {
 // ==========================================
 
 // クラッカー用のサブコンポーネント
+// クラッカー用のサブコンポーネント (強化版)
 const CrackerEffect = () => {
-    const colors = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#FCD34D', '#6EE7B7'];
+    // よりカラフルな色パレット
+    const colors = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#FCD34D', '#6EE7B7', '#F472B6', '#22D3EE'];
     
-    // 紙吹雪の枚数を増やす
-    const particleCount = 100;
+    // 紙吹雪の枚数を大幅に増やす (150枚)
+    const particleCount = 150;
     const particles = Array.from({ length: particleCount });
 
     return (
-        // 画面全体を覆うコンテナ
-        <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+        // 画面全体を覆うコンテナ (perspectiveで3D効果を有効化)
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-50" style={{ perspective: '1000px' }}>
             {particles.map((_, i) => {
                 // --- ランダムなパラメータ生成 ---
                 
-                // 角度: 真上(0度)を中心に左右に広げる (-100度 ～ 100度)
-                const angleDeg = Math.random() * 200 - 100;
+                // 角度: 扇状に広げる (-110度 ～ 110度)
+                const angleDeg = Math.random() * 220 - 110;
                 const angleRad = angleDeg * (Math.PI / 180);
                 
-                // 距離: 画面を飛び出すくらい遠くまで (画面の高さの0.5倍 ～ 1.5倍)
-                const distance = window.innerHeight * (0.5 + Math.random());
+                // 飛距離: 画面外まで飛び出すように大きく設定 (画面高さの0.8倍 ～ 1.6倍)
+                const distance = window.innerHeight * (0.8 + Math.random() * 0.8);
 
-                // 飛んでいく目標座標 (tx, ty) を計算
-                // Math.sin(angleRad) で左右、-Math.cos(angleRad) で上方向
+                // 目標座標 (tx, ty)
                 const tx = `${distance * Math.sin(angleRad)}px`;
                 const ty = `${-distance * Math.cos(angleRad)}px`;
 
-                // 回転、サイズ、色、アニメーション時間、遅延
-                const rot = `${Math.random() * 1080 - 540}deg`; // 大きく回転
-                const size = `${6 + Math.random() * 8}px`;
-                const scale = `${0.5 + Math.random()}`; // 最終的な大きさもバラバラに
+                // 3D回転の軸をランダムに決定
+                const rx = Math.random();
+                const ry = Math.random();
+                const rz = Math.random();
+                const rot = `${Math.random() * 1440 - 720}deg`; // 複数回回転させる
+
+                // サイズ、形、色、時間
+                const size = `${7 + Math.random() * 10}px`; // 少し大きめに
+                const radius = Math.random() > 0.7 ? '50%' : (Math.random() > 0.5 ? '0' : '4px'); // 丸、四角、角丸を混ぜる
                 const color = colors[Math.floor(Math.random() * colors.length)];
-                const duration = `${1.5 + Math.random() * 1.5}s`; // 飛び飛ぶ時間
-                const delay = `${Math.random() * 0.3}s`; // 弾けるタイミングを少しずらす
+                // アニメーション時間を長めにして「舞う」時間を確保 (2.5秒 ～ 4.5秒)
+                const duration = `${2.5 + Math.random() * 2}s`;
+                const delay = `${Math.random() * 0.2}s`; // ほぼ一斉に弾けさせる
 
                 return (
                     <div
@@ -666,9 +679,12 @@ const CrackerEffect = () => {
                         style={{
                             '--tx': tx,
                             '--ty': ty,
+                            '--rx': rx,
+                            '--ry': ry,
+                            '--rz': rz,
                             '--rot': rot,
                             '--size': size,
-                            '--scale': scale,
+                            '--radius': radius,
                             '--duration': duration,
                             backgroundColor: color,
                             animationDelay: delay
