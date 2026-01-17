@@ -352,61 +352,93 @@
         // ==========================================
         // COUNTDOWN WIDGET
         // ==========================================
-        const CountdownWidget = () => {
-            const [timeLeft, setTimeLeft] = useState(null);
-            const TARGET_DATE = new Date("2026-01-23T00:00:00+09:00"); // JST
+        // 秒表示をなくし、日と時間を強調した新しい CountdownWidget
+const CountdownWidget = () => {
+    const [timeLeft, setTimeLeft] = useState(null);
+    const TARGET_DATE = new Date("2026-01-23T00:00:00+09:00"); // 目標日
 
-            useEffect(() => {
-                const calculateTime = () => {
-                    const now = new Date();
-                    const diff = TARGET_DATE - now;
+    useEffect(() => {
+        const calculateTime = () => {
+            const now = new Date();
+            const diff = TARGET_DATE - now;
+            if (diff <= 0) return null;
+            return {
+                total: diff,
+                days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+                hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+            };
+        };
+        setTimeLeft(calculateTime());
+        // 秒表示がないので、更新は1分ごと(60000ms)で十分です
+        const timer = setInterval(() => setTimeLeft(calculateTime()), 60000); 
+        return () => clearInterval(timer);
+    }, []);
 
-                    if (diff <= 0) {
-                        return null;
-                    }
+    if (!timeLeft) return null;
 
-                    return {
-                        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-                        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-                        minutes: Math.floor((diff / 1000 / 60) % 60),
-                    };
-                };
+    // プログレスバー用の計算（1年前からスタートと仮定）
+    const totalDuration = 365 * 24 * 60 * 60 * 1000; 
+    const progressPercent = Math.min(100, Math.max(0, ((totalDuration - timeLeft.total) / totalDuration) * 100));
 
-                setTimeLeft(calculateTime());
-                const timer = setInterval(() => {
-                    setTimeLeft(calculateTime());
-                }, 60000); // Update every minute is enough for this UI
+    return (
+        <div className="mx-4 mb-8 mt-4 animate-slide-up group cursor-default">
+            {/* 背景のグロー効果 */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur-lg opacity-20 group-hover:opacity-30 transition duration-500"></div>
+            
+            <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 p-6 rounded-3xl border border-slate-700 shadow-2xl text-white overflow-hidden">
+                {/* 装飾用の背景 */}
+                <div className="absolute -top-12 -right-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl"></div>
 
-                return () => clearInterval(timer);
-            }, []);
-
-            if (!timeLeft) return null;
-
-            return (
-                <div className="mx-4 mb-6 mt-2 relative group animate-slide-up">
-                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-500"></div>
-                    <div className="relative glass-panel bg-white/80 dark:bg-slate-800/80 p-4 rounded-2xl border border-yellow-500/30 flex items-center justify-between shadow-lg">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600 dark:text-yellow-500">
-                                <Icon name="flag" size={20} />
-                            </div>
-                            <div>
-                                <p className="text-xs font-bold text-yellow-600 dark:text-yellow-500 uppercase tracking-wide">TOEIC Exam Day</p>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">2026.01.23 (金)</p>
-                            </div>
+                <div className="flex justify-between items-center relative z-10 mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-indigo-500/20 rounded-xl border border-indigo-500/30">
+                            <Icon name="calendar" size={24} className="text-indigo-400" />
                         </div>
-                        <div className="text-right">
-                            <div className="text-2xl font-black text-slate-800 dark:text-white leading-none font-mono">
-                                {timeLeft.days}<span className="text-xs font-sans font-normal ml-1">日</span>
-                            </div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                                {timeLeft.hours}H {timeLeft.minutes}M
-                            </div>
+                        <div>
+                            <p className="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-0.5">Exam Day</p>
+                            <p className="text-sm text-slate-300 font-mono">2026.01.23</p>
                         </div>
                     </div>
+                    
+                    <div className="text-right">
+                         <span className="text-xs font-bold text-slate-400 bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-600">
+                             あと
+                         </span>
+                    </div>
                 </div>
-            );
-        };
+
+                {/* メインの時間表示（日と時間のみ） */}
+                <div className="flex items-baseline justify-center gap-2 mb-5">
+                    <div className="text-center">
+                        <span className="text-6xl font-black text-white tracking-tighter drop-shadow-lg">
+                            {timeLeft.days}
+                        </span>
+                        <span className="text-sm font-bold text-slate-400 ml-1">days</span>
+                    </div>
+                    <span className="text-4xl font-light text-slate-600 mx-2">/</span>
+                    <div className="text-center">
+                        <span className="text-4xl font-bold text-white tracking-tight">
+                            {timeLeft.hours}
+                        </span>
+                        <span className="text-xs font-bold text-slate-400 ml-1">hours</span>
+                    </div>
+                </div>
+
+                {/* プログレスバー */}
+                <div className="relative h-2.5 bg-slate-700/50 rounded-full overflow-hidden">
+                    <div 
+                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-blue-500" 
+                        style={{ width: `${progressPercent}%` }}
+                    ></div>
+                </div>
+                <div className="flex justify-between mt-2 text-[10px] text-slate-500 font-medium uppercase tracking-wider">
+                    <span>Start</span>
+                    <span>Goal</span>
+                </div>
+            </div>
+        </div>
+    );
+};
 
         // ==========================================
         // COURSE SELECTION
@@ -901,9 +933,11 @@
                 <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-slate-800 dark:text-white p-6 pb-24 transition-colors animate-fade-in">
                     <div className="flex justify-between items-center mb-8 pt-2">
                         <div className="flex items-center gap-2">
-                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center text-white font-black text-xs shadow-lg shadow-orange-500/20 transform rotate-3">Pro</div>
-                             <span className="font-bold text-xl tracking-tight">Booster</span>
-                        </div>
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center text-white font-black text-xs shadow-lg shadow-orange-500/20 transform rotate-3">
+                    700
+                </div>
+                <span className="font-bold text-xl tracking-tight text-slate-800 dark:text-white">TOEIC 700</span>
+            </div>
                         <button onClick={onSettings} className="p-3 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-gray-200 dark:border-slate-700 btn-press">
                             <Icon name="settings" className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                         </button>
