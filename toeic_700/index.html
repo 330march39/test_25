@@ -769,20 +769,23 @@
                                     }
                                 }
                                 return (
-                                    <button 
-                                        key={idx} 
-                                        onClick={() => handleAnswer(choice, idx)} 
-                                        disabled={selected !== null} 
-                                        className={`${btnClass} btn-press relative overflow-hidden ${animClass}`}
-                                        style={delay}
-                                    >
-                                        <div className="flex items-start">
-                                            <span className="inline-flex items-center justify-center min-w-[28px] h-7 rounded-lg bg-gray-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs font-bold mr-3 mt-0.5 shadow-inner">
-                                                {String.fromCharCode(65 + idx)}
-                                            </span>
-                                            <span className="selectable-text text-sm md:text-base leading-relaxed">{choice}</span>
-                                        </div>
-                                    </button>
+                                    // QuizSession コンポーネント内の choices.map の中身（ボタンの内部）
+<button 
+    key={idx} 
+    onClick={() => handleAnswer(choice, idx)} 
+    disabled={selected !== null} 
+    className={`${btnClass} btn-press relative overflow-hidden ${animClass}`}
+    style={delay}
+>
+    {/* items-start を items-center に変更 */}
+    <div className="flex items-center">
+        {/* mt-0.5 を削除 */}
+        <span className="inline-flex items-center justify-center min-w-[28px] h-7 rounded-lg bg-gray-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs font-bold mr-3 shadow-inner">
+            {String.fromCharCode(65 + idx)}
+        </span>
+        <span className="selectable-text text-sm md:text-base leading-relaxed">{choice}</span>
+    </div>
+</button>
                                 );
                             })}
                         </div>
@@ -1014,31 +1017,34 @@
                 return [];
             };
 
-            return (
-                <SoundProvider enabled={settings.sound}>
-                    <div className="max-w-md mx-auto h-full bg-gray-50 dark:bg-slate-900 shadow-2xl relative overflow-hidden">
-                        {view === 'home' && <Home onStart={handleStartPreSelect} onSettings={() => setView('settings')} />}
-                        
-                        {view === 'settings' && (
-                            <Settings settings={settings} updateSettings={updateSettings} onBack={() => setView('home')} resetData={resetData} />
-                        )}
+            // App コンポーネント内の return 部分を以下のように書き換えてください
+return (
+    <SoundProvider enabled={settings.sound}>
+        {/* overflow-hidden を overflow-y-auto に変更し、スクロール可能にします */}
+        <div className="max-w-md mx-auto h-full bg-gray-50 dark:bg-slate-900 shadow-2xl relative overflow-y-auto overflow-x-hidden">
+            {view === 'home' && <Home onStart={handleStartPreSelect} onSettings={() => setView('settings')} />}
+            
+            {/* その他のコンポーネント表示ロジックはそのまま... */}
+            {view === 'settings' && (
+                <Settings settings={settings} updateSettings={updateSettings} onBack={() => setView('home')} resetData={resetData} />
+            )}
 
-                        {view === 'course_select' && (
-                            <CourseSelection type={activeMode} onSelect={handleCourseSelect} onBack={() => setView('home')} />
-                        )}
+            {view === 'course_select' && (
+                <CourseSelection type={activeMode} onSelect={handleCourseSelect} onBack={() => setView('home')} />
+            )}
 
-                        {view === 'quiz' && (
-                            <QuizSession 
-                                rawData={getDataForMode()} 
-                                mode={activeMode} 
-                                filterId={courseFilter}
-                                isDrillMode={settings.spartan} 
-                                onFinish={() => setView('home')} 
-                            />
-                        )}
-                    </div>
-                </SoundProvider>
-            );
+            {view === 'quiz' && (
+                <QuizSession 
+                    rawData={getDataForMode()} 
+                    mode={activeMode} 
+                    filterId={courseFilter}
+                    isDrillMode={settings.spartan} 
+                    onFinish={() => setView('home')} 
+                />
+            )}
+        </div>
+    </SoundProvider>
+);
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
