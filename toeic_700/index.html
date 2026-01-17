@@ -752,48 +752,53 @@
                         </div>
 
                         <div className="space-y-3">
-                            {choices.map((choice, idx) => {
-                                let btnClass = "w-full p-4 rounded-xl text-left font-medium text-lg transition-all border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 shadow-sm";
-                                let animClass = "animate-slide-up";
-                                const delay = { animationDelay: `${idx * 100}ms` };
-                                
-                                if (selected !== null) {
-                                    if (mode === 'vocab') {
-                                        if (choice === currentItem.meaning) btnClass = "w-full p-4 rounded-xl text-left font-bold border-2 border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 shadow-md transform scale-[1.02]";
-                                        else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border-2 border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 animate-shake";
-                                        else btnClass += " opacity-40 blur-[1px]";
-                                    } else {
-                                        if (idx === currentItem.correct) btnClass = "w-full p-4 rounded-xl text-left font-bold border-2 border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 shadow-md transform scale-[1.02]";
-                                        else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border-2 border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 animate-shake";
-                                        else btnClass += " opacity-40 blur-[1px]";
-                                    }
-                                }
-                                return (
-                                    // QuizSession コンポーネント内の choices.map の中身（ボタンの内部）
-<button 
-    key={idx} 
-    onClick={() => handleAnswer(choice, idx)} 
-    disabled={selected !== null} 
-    className={`${btnClass} btn-press relative overflow-hidden ${animClass}`}
-    style={delay}
->
-    {/* items-start を items-center に変更 */}
-    <div className="flex items-center">
-        {/* mt-0.5 を削除 */}
-        <span className="inline-flex items-center justify-center min-w-[28px] h-7 rounded-lg bg-gray-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs font-bold mr-3 shadow-inner">
-            {String.fromCharCode(65 + idx)}
-        </span>
-        <span className="selectable-text text-sm md:text-base leading-relaxed">{choice}</span>
-    </div>
-</button>
-                                );
-                            })}
+                            // QuizSession コンポーネントの choices.map の中身
+{choices.map((choice, idx) => {
+    // ボタン自体のクラス（アニメーション関連を削除し、純粋なボタンスタイルのみにする）
+    let btnClass = "w-full p-4 rounded-xl text-left font-medium text-lg transition-transform duration-200 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 shadow-sm";
+    
+    // 選択状態のスタイルロジック
+    if (selected !== null) {
+        if (mode === 'vocab') {
+            if (choice === currentItem.meaning) btnClass = "w-full p-4 rounded-xl text-left font-bold border-2 border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 shadow-md"; // scale削除
+            else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border-2 border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"; // shakeは親でやるか、ここでは控えめに
+            else btnClass += " opacity-40 blur-[1px]";
+        } else {
+            // ... (Reading/Listeningのロジックも同様に transform系クラス scale などを外す) ...
+            if (idx === currentItem.correct) btnClass = "w-full p-4 rounded-xl text-left font-bold border-2 border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 shadow-md";
+            else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border-2 border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400";
+            else btnClass += " opacity-40 blur-[1px]";
+        }
+    }
+
+    return (
+        // ★修正点: アニメーション専用のラッパーdivを作る
+        <div 
+            key={idx} 
+            className="animate-slide-up" 
+            style={{ animationDelay: `${idx * 60}ms` }} // 遅延を少し短くしてキビキビさせる
+        >
+            <button 
+                onClick={() => handleAnswer(choice, idx)} 
+                disabled={selected !== null} 
+                className={`${btnClass} btn-press flex items-center`} // btn-pressはここで適用
+            >
+                <span className="inline-flex items-center justify-center min-w-[28px] h-7 rounded-lg bg-gray-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs font-bold mr-3 shadow-inner">
+                    {String.fromCharCode(65 + idx)}
+                </span>
+                <span className="selectable-text text-sm md:text-base leading-relaxed">{choice}</span>
+            </button>
+        </div>
+    );
+})}
                         </div>
                     </div>
 
                     {showExplanation && (
-                        <div className="fixed bottom-0 left-0 w-full glass-panel bg-white/95 dark:bg-slate-800/95 border-t border-gray-200 dark:border-slate-600 p-6 z-50 animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.2)] rounded-t-3xl">
-                            <div className="max-w-md mx-auto">
+<div 
+    className="fixed bottom-0 left-0 w-full glass-panel bg-white/95 dark:bg-slate-800/95 border-t border-gray-200 dark:border-slate-600 z-50 animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.2)] rounded-t-3xl"
+    style={{ padding: '1.5rem', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }} 
+>                            <div className="max-w-md mx-auto">
                                 <div className="flex items-center gap-3 mb-4">
                                     {isCorrect ? (
                                         <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shrink-0 shadow-lg shadow-green-500/30 animate-pop"><Icon name="check" className="text-white w-6 h-6" /></div>
@@ -815,9 +820,14 @@
                                         "{currentItem.script}"
                                     </div>
                                 )}
-                                <Button onClick={nextQuestion} className="w-full text-lg h-14" variant={isCorrect ? "primary" : "secondary"}>
-                                    Next Question <Icon name="arrow-right" size={20} />
-                                </Button>
+                                // 解説表示エリアのボタン部分
+<Button 
+    onClick={nextQuestion} 
+    className="w-full text-lg h-14" 
+    variant="primary"  // ★ここを "primary" 固定に変更
+>
+    Next Question <Icon name="arrow-right" size={20} />
+</Button>
                             </div>
                         </div>
                     )}
