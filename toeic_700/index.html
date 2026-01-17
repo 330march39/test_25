@@ -147,27 +147,36 @@
         }
         .dark .percentage { fill: #fff; }
 
-        /* --- 紙吹雪のアニメーション --- */
-        @keyframes confetti-fall {
+        /* --- クラッカーのアニメーション --- */
+        @keyframes pop-particle {
             0% {
-                transform: translateY(-10vh) rotate(0deg) scale(1);
+                transform: translate(0, 0) rotate(0deg) scale(0.5);
+                opacity: 1;
+            }
+            60% {
                 opacity: 1;
             }
             100% {
-                transform: translateY(110vh) rotate(720deg) scale(0.8);
+                /* CSS変数を使ってランダムな位置へ飛ばす */
+                transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0);
                 opacity: 0;
             }
         }
 
-        .confetti-piece {
+        .particle {
             position: absolute;
-            top: -5%; /* 画面外の上からスタート */
-            width: 10px;
-            height: 10px;
-            opacity: 0.9;
-            animation: confetti-fall 4s linear infinite; /* アニメーションを適用 */
-            pointer-events: none; /* 操作を妨げないようにする */
-            z-index: 50; /* コンテンツの前面に表示する */
+            width: 8px;
+            height: 8px;
+            bottom: 20px; /* クラッカーの発射口付近 */
+            left: 50%;
+            border-radius: 50%; /* 丸い紙吹雪 */
+            animation: pop-particle 1.2s ease-out forwards;
+            pointer-events: none;
+        }
+
+        /* クラッカー本体を少し揺らす */
+        .popper-shake {
+            animation: shake 0.4s ease-in-out;
         }
     </style>
 </head>
@@ -614,67 +623,101 @@ const CountdownWidget = () => {
 };
 
         // ==========================================
-// RESULT SCREEN (紙吹雪バージョン)
+// RESULT SCREEN (クラッカー演出バージョン)
 // ==========================================
 
-// 紙吹雪の色パレット
-const confettiColors = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899'];
-
-// 紙吹雪を生成するサブコンポーネント
-const Confetti = () => {
-    // 50枚の紙吹雪を生成
-    const pieces = Array.from({ length: 50 });
+// クラッカー用のサブコンポーネント
+const CrackerEffect = () => {
+    const colors = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899'];
+    
+    // 片側あたりの紙吹雪の枚数
+    const particleCount = 30;
+    const particles = Array.from({ length: particleCount });
 
     return (
-        // 画面全体を覆う絶対配置のコンテナ
-        <div className="fixed inset-0 pointer-events-none overflow-hidden">
-            {pieces.map((_, i) => {
-                // ランダムなスタイルを生成
-                const left = `${Math.random() * 100}%`; // 横位置
-                const animDelay = `${Math.random() * 5}s`; // アニメーション開始遅延
-                const animDuration = `${3 + Math.random() * 3}s`; // 落下速度（3〜6秒）
-                const bgColor = confettiColors[Math.floor(Math.random() * confettiColors.length)]; // 色
-                const size = `${6 + Math.random() * 8}px`; // 大きさ（6〜14px）
-                const shape = Math.random() > 0.5 ? '50%' : '0'; // 丸か四角か
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-50 flex justify-between items-end px-8 pb-8">
+            {/* --- 左側のクラッカー --- */}
+            <div className="relative popper-shake">
+                {/* クラッカーアイコン */}
+                <Icon name="party-popper" size={48} className="text-yellow-500 transform -rotate-45" />
+                
+                {/* 左側の紙吹雪パーティクル */}
+                {particles.map((_, i) => {
+                    // 左側は右上に飛ばす (X:プラス, Y:マイナス)
+                    const tx = `${20 + Math.random() * 150}px`;
+                    const ty = `-${50 + Math.random() * 200}px`;
+                    const rot = `${Math.random() * 720}deg`;
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    const delay = `${Math.random() * 0.2}s`; // ほぼ同時に弾ける
 
-                const style = {
-                    left,
-                    animationDelay: animDelay,
-                    animationDuration: animDuration,
-                    backgroundColor: bgColor,
-                    width: size,
-                    height: size,
-                    borderRadius: shape,
-                };
+                    return (
+                        <div
+                            key={`l-${i}`}
+                            className="particle"
+                            style={{
+                                '--tx': tx,
+                                '--ty': ty,
+                                '--rot': rot,
+                                backgroundColor: color,
+                                animationDelay: delay
+                            }}
+                        />
+                    );
+                })}
+            </div>
 
-                return <div key={i} className="confetti-piece" style={style}></div>;
-            })}
+            {/* --- 右側のクラッカー --- */}
+            <div className="relative popper-shake">
+                {/* クラッカーアイコン（左右反転） */}
+                <Icon name="party-popper" size={48} className="text-yellow-500 transform rotate-45 scale-x-[-1]" />
+                
+                {/* 右側の紙吹雪パーティクル */}
+                {particles.map((_, i) => {
+                    // 右側は左上に飛ばす (X:マイナス, Y:マイナス)
+                    const tx = `-${20 + Math.random() * 150}px`;
+                    const ty = `-${50 + Math.random() * 200}px`;
+                    const rot = `${Math.random() * 720}deg`;
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    const delay = `${Math.random() * 0.2}s`;
+
+                    return (
+                        <div
+                            key={`r-${i}`}
+                            className="particle"
+                            style={{
+                                '--tx': tx,
+                                '--ty': ty,
+                                '--rot': rot,
+                                backgroundColor: color,
+                                animationDelay: delay
+                            }}
+                        />
+                    );
+                })}
+            </div>
         </div>
     );
 };
 
 const ResultScreen = ({ score, total, onRetry, onHome }) => {
-    // 0除算対策
     const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
     
-    // 円のサイズ設定
     const radius = 40;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
     let rank = 'C';
     let message = "Keep Going!";
-    let color = "#94a3b8"; // slate (gray)
+    let color = "#94a3b8"; // slate
 
-    if (percentage === 100) { rank = 'S'; message = "Perfect!!"; color = "#eab308"; } // yellow (100%のみ)
-    else if (percentage >= 80) { rank = 'A'; message = "Excellent!"; color = "#22c55e"; } // green
-    else if (percentage >= 60) { rank = 'B'; message = "Good Job!"; color = "#3b82f6"; } // blue
+    if (percentage === 100) { rank = 'S'; message = "Perfect!!"; color = "#eab308"; }
+    else if (percentage >= 80) { rank = 'A'; message = "Excellent!"; color = "#22c55e"; }
+    else if (percentage >= 60) { rank = 'B'; message = "Good Job!"; color = "#3b82f6"; }
 
     return (
         <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-900 animate-fade-in relative overflow-hidden">
-            {/* --- 紙吹雪エフェクト (100%の時のみ表示) --- */}
-            {percentage === 100 && <Confetti />}
-            {/* --------------------------------------- */}
+            {/* --- クラッカー演出 (100%の時のみ) --- */}
+            {percentage === 100 && <CrackerEffect />}
 
             <div className="flex-1 flex flex-col items-center justify-center p-6 z-10">
                 <div className="mb-2 text-sm font-bold tracking-widest text-slate-400 uppercase animate-slide-up">Result</div>
