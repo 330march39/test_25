@@ -679,30 +679,35 @@ const ResultScreen = ({ score, total, onRetry, onHome }) => {
     );
 };
         // ==========================================
-// QUIZ SESSION (修正版)
+// QUIZ SESSION (修正版 v2)
 // ==========================================
 const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
     const playSFX = useContext(SoundContext);
-    const [gameState, setGameState] = useState('loading'); // loading, playing, result, mastered
+    const [gameState, setGameState] = useState('loading'); 
     const [sessionData, setSessionData] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selected, setSelected] = useState(null);
     const [isCorrect, setIsCorrect] = useState(null);
-    const [sessionStreak, setSessionStreak] = useState(0); // その回の連続正解数（リザルト用）
+    const [sessionStreak, setSessionStreak] = useState(0); 
     const [score, setScore] = useState(0);
     const [showExplanation, setShowExplanation] = useState(false);
     const [isLocked, setIsLocked] = useState(false);
     const [timeLeft, setTimeLeft] = useState(0);
+    
+    // リトライを確実に検知するためのトリガー
+    const [retryCount, setRetryCount] = useState(0);
 
     // 問題データのフィルタリングとロード
     useEffect(() => {
+        // ロード開始時にgameStateをloadingにする
+        setGameState('loading');
+
         let filtered = [...rawData];
         const savedProgress = JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}');
 
         // 1. カテゴリによるフィルタリング
         if (mode === 'vocab') {
             if (filterId === 'weak') {
-                // 弱点モードは常に未習得のみ
                 filtered = filtered.filter(item => {
                     const p = savedProgress[item.id];
                     return !p || !p.mastered;
@@ -722,7 +727,6 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
         }
 
         // 2. 特訓モード（Spartan）の場合、習得済みを除外する
-        // ※「弱点克服」以外でも、特訓モードがONなら習得済みは出さない
         if (isDrillMode) {
             filtered = filtered.filter(item => {
                 const p = savedProgress[item.id];
@@ -730,9 +734,8 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
             });
         }
 
+        // すべて習得済みかどうかの判定
         if (filtered.length === 0) {
-            // 対象データが存在するが、すべてフィルタリング（習得済み）された場合
-            // rawDataから、同じ条件（レベルやパート）の元データが本来あるか確認
             let originalScope = [...rawData];
              if (mode === 'vocab') {
                 if (filterId === '600') originalScope = originalScope.filter(item => item.level === 600);
@@ -744,34 +747,32 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
                  originalScope = originalScope.filter(i => i.part === parseInt(filterId.replace('part','')));
             }
 
-            // 元データはあるのに、フィルタ後が0件 = すべて習得済み
             if (originalScope.length > 0) {
                 setGameState('mastered');
+                return;
+            } else {
+                alert("出題できる問題がありません。");
+                onFinish(0);
                 return;
             }
         }
 
-        // 問題がない場合（データ不足など）
-        if (filtered.length === 0) {
-            alert("出題できる問題がありません。");
-            onFinish(0);
-            return;
-        }
-
         // ランダムに10問出題
         setSessionData(shuffleArray(filtered).slice(0, 10));
-        setGameState('playing');
+        
+        // 少し遅延させてレンダリングエラーを防ぐ
+        setTimeout(() => setGameState('playing'), 100);
 
-    }, [rawData, mode, filterId, isDrillMode]);
+    }, [rawData, mode, filterId, isDrillMode, retryCount]); // retryCountを依存配列に追加
 
     const currentItem = sessionData[currentIndex];
 
-    // 現在の問題の習得状況を取得（ヘッダー表示用）
+    // 現在の問題の習得状況を取得
     const currentItemStreak = useMemo(() => {
         if (!currentItem) return 0;
         const savedProgress = JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}');
         return savedProgress[currentItem.id]?.streak || 0;
-    }, [currentItem]);
+    }, [currentItem, isCorrect]); // 正解判定後に更新されるように依存関係追加
     
     // 制限時間の設定
     const getMaxTime = () => {
@@ -816,31 +817,21 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
         playSFX('wrong');
         setIsCorrect(false);
         setShowExplanation(true);
-        // 時間切れはストリークリセット
         updateProgress(false);
     };
 
-    // 進捗保存ロジック（ここが重要）
     const updateProgress = (isAnswerCorrect) => {
         const savedData = JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}');
         const itemData = savedData[currentItem.id] || { streak: 0, mastered: false };
 
         if (isAnswerCorrect) {
-            itemData.streak += 1; // 正解なら+1
-            
-            // 特訓モードONなら2回連続、OFFなら1回で習得
+            itemData.streak += 1; 
             const threshold = isDrillMode ? 2 : 1; 
-            
             if (itemData.streak >= threshold) {
                 itemData.mastered = true;
             }
         } else {
-            // 間違えたらストリークは0に戻る（連続正解が条件のため）
             itemData.streak = 0;
-            // 一度マスターしていても、間違えたらマスター解除するか？
-            // 特訓モードの趣旨（苦手克服）的には解除したほうが親切ですが、
-            // 今回は「連続正解しないと習得にならない」仕様にフォーカスします。
-            // 必要であれば itemData.mastered = false; を追加してください。
         }
 
         savedData[currentItem.id] = itemData;
@@ -869,7 +860,6 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
             setSessionStreak(0);
         }
 
-        // ローカルストレージ更新
         updateProgress(correct);
 
         setTimeout(() => {
@@ -897,45 +887,40 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
         }
     };
 
-    // コースリセット処理
     const handleResetCourse = () => {
         if(!confirm("このコースの学習データをリセットして、最初から特訓し直しますか？")) return;
-
         const savedData = JSON.parse(localStorage.getItem('toeic_progress_v3') || '{}');
-        
-        // rawData全体から、現在のフィルタ条件に合致するIDを抽出してリセット
         let targetItems = [...rawData];
-        // （フィルタリング条件は useEffect と同じロジックが必要ですが簡略化のため下記のようにします）
-        // 厳密にはここでも mode/filterId に応じた絞り込みを行って対象IDを特定すべきです。
+        
+        // 簡易的な絞り込み（実際はuseEffectと同じロジックが望ましい）
         if (mode === 'vocab' && filterId === '600') targetItems = targetItems.filter(i => i.level === 600);
-        // ... 他の条件も同様 ...
+        // ... 他条件省略 ...
 
         targetItems.forEach(item => {
-            // 対象アイテムのデータをリセット
-            if (savedData[item.id]) {
-                savedData[item.id] = { streak: 0, mastered: false };
-            }
+            if (savedData[item.id]) savedData[item.id] = { streak: 0, mastered: false };
         });
 
         localStorage.setItem('toeic_progress_v3', JSON.stringify(savedData));
         alert("リセットしました！");
-        onFinish(0); // ホームに戻る
+        onFinish(0); 
     };
 
+    // リトライ処理修正：カウンタを増やしてuseEffectを再発火させる
     const handleRetry = () => {
-        // 同じ条件で再ロード（useEffectが走る）
-        setGameState('loading');
         setScore(0);
         setSessionStreak(0);
         setCurrentIndex(0);
-        // state更新後にeffectが走るように少し待つ（簡易ハック）
-        setTimeout(() => setGameState('loading_retry'), 10);
-        setTimeout(() => setGameState('loading'), 20);
+        setSelected(null);
+        setIsCorrect(null);
+        setShowExplanation(false);
+        setIsLocked(false);
+        
+        // これでuseEffectが走り、データ再取得 -> gameState='playing' になる
+        setRetryCount(prev => prev + 1);
     };
 
     // --- レンダリング ---
 
-    // すべて習得済みの場合のポップアップ画面
     if (gameState === 'mastered') {
         return (
             <div className="h-full flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-slate-900 animate-pop">
@@ -965,22 +950,42 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
         return <ResultScreen score={score} total={sessionData.length} onRetry={handleRetry} onHome={() => onFinish(sessionStreak)} />;
     }
 
-    if (!currentItem || gameState !== 'playing') return <div className="h-full flex items-center justify-center text-slate-500">Loading...</div>;
+    if (!currentItem || gameState !== 'playing') {
+        return (
+            <div className="h-full flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-900">
+                <Icon name="loader-2" className="animate-spin text-yellow-500 mb-2" size={32} />
+                <span className="text-slate-500 text-sm font-bold animate-pulse">Loading...</span>
+            </div>
+        );
+    }
 
     const timerWidth = (timeLeft / maxTime) * 100;
     const timerColor = timeLeft <= 5 ? "bg-red-500" : "bg-blue-500";
 
-    // ヘッダーのコンボ表示の生成
-    // 特訓モードなら「現在の連続数 / ノルマ」を表示
-    const comboDisplay = isDrillMode 
-        ? `Streak: ${currentItemStreak} / 2` 
-        : `Streak: ${currentItemStreak}`;
+    // ヘッダーのサブタイトル生成（ここに・・を表示）
+    const headerSub = (
+        <div className="flex items-center gap-3">
+            <span>{currentIndex + 1} / {sessionData.length}</span>
+            
+            {/* 特訓モードの場合のみドットを表示 */}
+            {isDrillMode && (
+                <>
+                    <span className="w-px h-3 bg-slate-300 dark:bg-slate-600"></span>
+                    <div className="flex items-center gap-1.5">
+                        {/* 2つの丸を表示。currentItemStreakが1以上なら1つ目点灯、2以上なら2つ目点灯 */}
+                        <div className={`w-2.5 h-2.5 rounded-full border border-slate-300 dark:border-slate-500 transition-all duration-300 ${currentItemStreak >= 1 ? 'bg-yellow-500 border-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]' : 'bg-transparent'}`}></div>
+                        <div className={`w-2.5 h-2.5 rounded-full border border-slate-300 dark:border-slate-500 transition-all duration-300 ${currentItemStreak >= 2 ? 'bg-yellow-500 border-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]' : 'bg-transparent'}`}></div>
+                    </div>
+                </>
+            )}
+        </div>
+    );
 
     return (
         <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-900 transition-colors">
             <Header 
                 title={mode === 'vocab' ? '単語テスト' : `Part ${currentItem.part || '?'}`} 
-                sub={`${currentIndex + 1} / ${sessionData.length} • ${comboDisplay}`} 
+                sub={headerSub} 
                 leftIcon="x"
                 onLeftClick={() => onFinish(sessionStreak)}
             />
@@ -995,7 +1000,7 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
 
             <div className={`flex-1 overflow-y-auto p-4 transition-all duration-300 ${showExplanation ? 'pb-[450px]' : 'pb-32'}`}>
                 
-                {/* --- コンテキストエリア (問題の種類に応じて表示切替) --- */}
+                {/* --- コンテキストエリア --- */}
                 <div className="mb-6 space-y-4">
                     
                     {/* 1. Vocabモード: 単語を大きく表示 */}
@@ -1007,13 +1012,7 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
                             <h2 className="text-4xl font-extrabold text-slate-800 dark:text-white mb-2 tracking-wide selectable-text drop-shadow-sm">
                                 {currentItem.word}
                             </h2>
-                            {/* 特訓モードの場合、習得状況を視覚的に表示 */}
-                            {isDrillMode && (
-                                <div className="flex justify-center gap-1 mt-2">
-                                    <div className={`w-2 h-2 rounded-full ${currentItemStreak >= 1 ? 'bg-yellow-500' : 'bg-gray-300 dark:bg-slate-700'}`}></div>
-                                    <div className={`w-2 h-2 rounded-full ${currentItemStreak >= 2 ? 'bg-yellow-500' : 'bg-gray-300 dark:bg-slate-700'}`}></div>
-                                </div>
-                            )}
+                            {/* ここにあったドット表示は削除しました */}
                         </div>
                     )}
 
