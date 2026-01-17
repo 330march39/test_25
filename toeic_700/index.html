@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOEIC 700 Booster</title>
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>TOEIC 700 Booster v2</title>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -14,6 +17,40 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 850: '#151e32' }
+                    },
+                    animation: {
+                        'bounce-short': 'bounce 0.5s ease-in-out 1',
+                        'shake': 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out'
+                    },
+                    keyframes: {
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -24,29 +61,37 @@
     <style>
         body {
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
-            background-color: #0f172a; /* Slate 900 */
-            color: #f8fafc;
             -webkit-tap-highlight-color: transparent;
+            /* Prevents pull-to-refresh on mobile generally */
+            overscroll-behavior-y: none;
+            touch-action: manipulation;
+        }
+        
+        /* App-like select behavior */
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .selectable-text {
+            -webkit-user-select: text;
+            user-select: text;
+            cursor: text;
         }
         
         /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1e293b;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 3px;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
 
-        /* Glassmorphism utilities */
+        /* Glassmorphism */
         .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .gold-text {
@@ -55,25 +100,99 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .btn-press {
-            transition: transform 0.1s;
-        }
-        .btn-press:active {
-            transform: scale(0.96);
+        /* Tactile feedback */
+        .btn-press { transition: transform 0.1s, opacity 0.1s; }
+        .btn-press:active { transform: scale(0.96); opacity: 0.9; }
+
+        /* Transitions for Theme Switch */
+        .theme-transition {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
     </style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="bg-gray-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 theme-transition h-screen w-screen overflow-hidden">
+    <div id="root" class="h-full w-full"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo, useRef } = React;
+        const { useState, useEffect, useMemo, useRef, createContext, useContext } = React;
 
         // ==========================================
-        // DATA STORE (Easy to Expand)
+        // AUDIO SYSTEM (Web Audio API - No external files)
         // ==========================================
-        
-        // 単語データの構造: level (600, 730, 860), word, meaning, choices (wrong answers)
+        const SoundContext = createContext();
+
+        const SoundProvider = ({ children, enabled }) => {
+            const audioCtxRef = useRef(null);
+
+            const playTone = (freq, type, duration, vol = 0.1) => {
+                if (!enabled) return;
+                if (!audioCtxRef.current) {
+                    audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const ctx = audioCtxRef.current;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = type; // sine, square, sawtooth, triangle
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                
+                gain.gain.setValueAtTime(vol, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            };
+
+            const playSFX = (type) => {
+                if (!enabled) return;
+                
+                // Haptic feedback for mobile
+                if (navigator.vibrate) {
+                    if (type === 'wrong') navigator.vibrate(200);
+                    if (type === 'correct') navigator.vibrate(50);
+                    if (type === 'click') navigator.vibrate(10);
+                }
+
+                switch (type) {
+                    case 'correct':
+                        // Happy ding
+                        playTone(600, 'sine', 0.1, 0.1);
+                        setTimeout(() => playTone(1200, 'sine', 0.2, 0.1), 50);
+                        break;
+                    case 'wrong':
+                        // Low buzz
+                        playTone(150, 'sawtooth', 0.3, 0.15);
+                        setTimeout(() => playTone(100, 'sawtooth', 0.3, 0.15), 100);
+                        break;
+                    case 'click':
+                        // Subtle tick
+                        playTone(800, 'triangle', 0.05, 0.05);
+                        break;
+                    case 'complete':
+                        // Fanfareish
+                        playTone(400, 'sine', 0.1);
+                        setTimeout(() => playTone(500, 'sine', 0.1), 100);
+                        setTimeout(() => playTone(600, 'sine', 0.1), 200);
+                        setTimeout(() => playTone(800, 'sine', 0.4), 300);
+                        break;
+                    default:
+                        break;
+                }
+            };
+
+            return (
+                <SoundContext.Provider value={playSFX}>
+                    {children}
+                </SoundContext.Provider>
+            );
+        };
+
+        // ==========================================
+        // DATA
+        // ==========================================
         const VOCAB_DATA = [
             { id: 'v1', level: 600, word: "significant", meaning: "かなりの、重要な", type: "vocab", choices: ["一時的な", "微細な", "疑わしい"] },
             { id: 'v2', level: 600, word: "appointment", meaning: "約束、予約、任命", type: "vocab", choices: ["失望", "許可", "評価"] },
@@ -85,10 +204,10 @@
             { id: 'v8', level: 730, word: "reimburse", meaning: "払い戻す", type: "vocab", choices: ["再利用する", "強化する", "輸入する"] },
             { id: 'v9', level: 600, word: "proposal", meaning: "提案", type: "vocab", choices: ["処分", "目的", "反対"] },
             { id: 'v10', level: 730, word: "itinerary", meaning: "旅程表", type: "vocab", choices: ["日記", "入り口", "要約"] },
-            // ここにデータを追加できます
+            { id: 'v11', level: 860, word: "consecutive", meaning: "連続した", type: "vocab", choices: ["建設的な", "保守的な", "結果的な"] },
+            { id: 'v12', level: 900, word: "scrutinize", meaning: "綿密に調べる", type: "vocab", choices: ["要約する", "拡大する", "配布する"] }
         ];
 
-        // リーディング（Part 5形式）
         const READING_DATA = [
             { 
                 id: 'r1', 
@@ -105,28 +224,15 @@
                 choices: ["significantly", "significant", "significance", "signify"], 
                 correct: 0, 
                 explanation: "比較級 easier を修飾するのは副詞。" 
-            },
-            { 
-                id: 'r3', 
-                type: 'reading',
-                question: "Despite _______ hard, the team could not meet the deadline.", 
-                choices: ["working", "work", "worked", "works"], 
-                correct: 0, 
-                explanation: "Despite は前置詞なので、後ろには名詞または動名詞(ing)がくる。" 
             }
         ];
 
-        // リスニング（TTS使用）
         const LISTENING_DATA = [
             {
                 id: 'l1',
                 type: 'listening',
-                script: "Where did you put the monthly report?", // TTSで読まれる
-                options: [
-                    "It's on your desk.",
-                    "At 3 o'clock.",
-                    "Yes, I did."
-                ],
+                script: "Where did you put the monthly report?",
+                options: ["It's on your desk.", "At 3 o'clock.", "Yes, I did."],
                 correct: 0,
                 explanation: "場所(Where)を聞いているので、場所を示しているAが正解。"
             },
@@ -134,11 +240,7 @@
                 id: 'l2',
                 type: 'listening',
                 script: "Why hasn't the shipment arrived yet?",
-                options: [
-                    "No, I haven't.",
-                    "Because of the heavy snow.",
-                    "Usually by truck."
-                ],
+                options: ["No, I haven't.", "Because of the heavy snow.", "Usually by truck."],
                 correct: 1,
                 explanation: "理由(Why)を聞いているので、原因を説明しているBが正解。"
             }
@@ -147,16 +249,17 @@
         // ==========================================
         // UTILS
         // ==========================================
-        
         const speak = (text) => {
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // 前の音声をキャンセル
+                window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'en-US';
-                utterance.rate = 1.0; // 通常速度
-                // 英語の声を探す（iOS/Androidで自然な声を選ぶ）
+                utterance.rate = 1.0;
                 const voices = window.speechSynthesis.getVoices();
-                const enVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Samantha')) || voices.find(v => v.lang === 'en-US');
+                // Prefer Samantha or Google US English
+                const enVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Samantha')) || 
+                                voices.find(v => v.lang === 'en-US' && v.name.includes('Google')) ||
+                                voices.find(v => v.lang === 'en-US');
                 if (enVoice) utterance.voice = enVoice;
                 window.speechSynthesis.speak(utterance);
             }
@@ -172,62 +275,104 @@
         // COMPONENTS
         // ==========================================
 
-        const ProgressBar = ({ current, total, color = "bg-yellow-500" }) => (
-            <div className="w-full bg-slate-800 rounded-full h-2.5 mb-4">
-                <div className={`${color} h-2.5 rounded-full transition-all duration-300`} style={{ width: `${(current / total) * 100}%` }}></div>
+        const Icon = ({ name, size = 24, className }) => {
+            // Wait for Lucide to be ready or just render an i tag
+            // Lucide replaces i tags with svgs
+            return <i data-lucide={name} width={size} height={size} className={className}></i>;
+        };
+
+        const Button = ({ children, onClick, className = "", variant = "primary", disabled = false }) => {
+            const playSFX = useContext(SoundContext);
+            
+            const baseClass = "relative px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 btn-press no-select disabled:opacity-50 disabled:pointer-events-none";
+            
+            const variants = {
+                primary: "bg-yellow-500 text-slate-900 shadow-lg shadow-yellow-500/20",
+                secondary: "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600",
+                glass: "glass-panel border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white hover:bg-slate-100/50 dark:hover:bg-slate-800/50",
+                ghost: "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800",
+                danger: "bg-red-500 text-white shadow-lg shadow-red-500/20"
+            };
+
+            const handleClick = (e) => {
+                if (!disabled) {
+                    playSFX('click');
+                    if (onClick) onClick(e);
+                }
+            };
+
+            return (
+                <button 
+                    onClick={handleClick} 
+                    className={`${baseClass} ${variants[variant]} ${className}`}
+                    disabled={disabled}
+                >
+                    {children}
+                </button>
+            );
+        };
+
+        const Toggle = ({ checked, onChange }) => (
+            <div 
+                className={`w-14 h-8 flex items-center bg-gray-300 dark:bg-slate-700 rounded-full p-1 cursor-pointer transition-colors duration-300 ${checked ? 'bg-yellow-500 dark:bg-yellow-500' : ''}`}
+                onClick={onChange}
+            >
+                <div 
+                    className={`bg-white w-6 h-6 rounded-full shadow-md transform duration-300 ease-in-out ${checked ? 'translate-x-6' : ''}`}
+                ></div>
             </div>
         );
 
-        const Header = ({ title, sub, onBack }) => (
-            <div className="flex items-center justify-between p-4 glass-panel sticky top-0 z-10 border-b-0 border-slate-700">
+        // Header
+        const Header = ({ title, sub, leftIcon, onLeftClick, rightIcon, onRightClick }) => (
+            <div className="flex items-center justify-between p-4 glass-panel sticky top-0 z-20 border-b border-gray-200 dark:border-slate-800 no-select transition-colors">
                 <div className="flex items-center gap-3">
-                    {onBack && (
-                        <button onClick={onBack} className="p-2 rounded-full hover:bg-slate-700 transition">
-                            <i data-lucide="arrow-left" className="w-6 h-6 text-slate-300"></i>
+                    {leftIcon && (
+                        <button onClick={onLeftClick} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition">
+                            <Icon name={leftIcon} className="w-6 h-6 text-slate-600 dark:text-slate-300" />
                         </button>
                     )}
                     <div>
-                        <h1 className="text-lg font-bold text-slate-100">{title}</h1>
-                        {sub && <p className="text-xs text-slate-400">{sub}</p>}
+                        <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-tight">{title}</h1>
+                        {sub && <p className="text-xs text-slate-500 dark:text-slate-400">{sub}</p>}
                     </div>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-slate-600">
-                    <span className="text-xs font-bold text-yellow-500">700</span>
-                </div>
+                {rightIcon && (
+                    <button onClick={onRightClick} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition">
+                         <Icon name={rightIcon} className="w-6 h-6 text-slate-600 dark:text-slate-300" />
+                    </button>
+                )}
             </div>
         );
 
-        // クイズ画面（共通コンポーネント）
+        // QUIZ SCREEN
         const QuizSession = ({ data, mode, isDrillMode, onComplete }) => {
+            const playSFX = useContext(SoundContext);
             const [currentIndex, setCurrentIndex] = useState(0);
-            const [selected, setSelected] = useState(null); // null, index
-            const [isCorrect, setIsCorrect] = useState(null); // null, true, false
-            const [timeLeft, setTimeLeft] = useState(mode === 'reading' ? 20 : mode === 'listening' ? 15 : 5); // 制限時間
-            const [streak, setStreak] = useState(0); // セッション内の正解数
+            const [selected, setSelected] = useState(null);
+            const [isCorrect, setIsCorrect] = useState(null);
+            const [timeLeft, setTimeLeft] = useState(mode === 'reading' ? 20 : mode === 'listening' ? 15 : 8);
+            const [streak, setStreak] = useState(0);
             const [showExplanation, setShowExplanation] = useState(false);
-            const [drillStreak, setDrillStreak] = useState({}); // アイテムごとの連続正解数 {id: count}
-            
+            const [isLocked, setIsLocked] = useState(false); // UI interaction lock
+
             const currentItem = data[currentIndex];
-            
-            // 選択肢の生成（初回レンダリング時のみシャッフル）
+
+            // Setup choices
             const choices = useMemo(() => {
                 if (!currentItem) return [];
                 if (mode === 'vocab') {
-                    const wrongs = currentItem.choices;
-                    const correct = currentItem.meaning;
-                    return shuffleArray([...wrongs, correct]);
+                    return shuffleArray([...currentItem.choices, currentItem.meaning]);
                 } else if (mode === 'reading') {
-                    // Readingは固定順序（A,B,C,D）
-                    return currentItem.choices; 
+                    return currentItem.choices;
                 } else {
                     return currentItem.options;
                 }
-            }, [currentItem]);
+            }, [currentItem, mode]);
 
-            // タイマー
+            // Timer
             useEffect(() => {
                 if (showExplanation || !currentItem) return;
-                
                 const timer = setInterval(() => {
                     setTimeLeft((prev) => {
                         if (prev <= 1) {
@@ -241,139 +386,138 @@
                 return () => clearInterval(timer);
             }, [currentIndex, showExplanation]);
 
-            // リスニングの場合は自動再生
+            // Auto-speak listening
             useEffect(() => {
                 if (mode === 'listening' && currentItem && !showExplanation) {
-                    // 少し遅延させて再生
-                    const t = setTimeout(() => speak(currentItem.script), 500);
+                    const t = setTimeout(() => speak(currentItem.script), 600);
                     return () => clearTimeout(t);
                 }
-            }, [currentItem, showExplanation]);
+            }, [currentItem, showExplanation, mode]);
 
             const handleTimeUp = () => {
+                playSFX('wrong');
                 setIsCorrect(false);
                 setShowExplanation(true);
             };
 
             const handleAnswer = (choice, index) => {
-                if (showExplanation) return;
+                if (isLocked || showExplanation) return;
                 
+                setIsLocked(true); // Prevent double taps
                 setSelected(index);
+                
                 let correct = false;
-
-                if (mode === 'vocab') {
-                    correct = choice === currentItem.meaning;
-                } else {
-                    correct = index === currentItem.correct;
-                }
+                if (mode === 'vocab') correct = choice === currentItem.meaning;
+                else correct = index === currentItem.correct;
 
                 setIsCorrect(correct);
-                
-                // データ保存（ローカルストレージ用ロジックへの準備）
-                updateProgress(currentItem.id, correct);
+                playSFX(correct ? 'correct' : 'wrong');
+
+                // Update Storage
+                const savedData = JSON.parse(localStorage.getItem('toeic_progress_v2') || '{}');
+                const itemData = savedData[currentItem.id] || { streak: 0, mastered: false };
 
                 if (correct) {
                     setStreak(s => s + 1);
-                    // 正解ならすぐに次へ（特訓モードオフの場合、またはリスニング/リーディング以外）
-                    // 少し待って次へ
-                    setTimeout(() => {
+                    itemData.streak += 1;
+                    const threshold = isDrillMode ? 2 : 1;
+                    if (itemData.streak >= threshold) itemData.mastered = true;
+                } else {
+                    setStreak(0);
+                    itemData.streak = 0;
+                }
+                savedData[currentItem.id] = itemData;
+                localStorage.setItem('toeic_progress_v2', JSON.stringify(savedData));
+
+                // Progression logic
+                setTimeout(() => {
+                    if (correct) {
+                        // Quick advance for correct answers in Vocab
                         if (mode === 'vocab') {
                             nextQuestion();
                         } else {
-                            setShowExplanation(true); // 文法・リスニングは解説出す
+                            setShowExplanation(true);
                         }
-                    }, 800);
-                } else {
-                    setStreak(0);
-                    setShowExplanation(true); // 間違えたら解説
-                }
-            };
-
-            const updateProgress = (id, isCorrectNow) => {
-                const savedData = JSON.parse(localStorage.getItem('toeic_progress') || '{}');
-                const itemData = savedData[id] || { streak: 0, mastered: false };
-                
-                if (isCorrectNow) {
-                    itemData.streak += 1;
-                    // 特訓モード: 2回連続正解でMastered. 通常モード: 1回でMastered
-                    const threshold = isDrillMode ? 2 : 1;
-                    if (itemData.streak >= threshold) {
-                        itemData.mastered = true;
+                    } else {
+                        setShowExplanation(true);
                     }
-                } else {
-                    itemData.streak = 0; // 間違えたらリセット
-                    // itemData.mastered = false; // 厳しいモードならここを有効化
-                }
-                
-                savedData[id] = itemData;
-                localStorage.setItem('toeic_progress', JSON.stringify(savedData));
-                setDrillStreak(savedData);
+                    setIsLocked(false);
+                }, correct && mode === 'vocab' ? 800 : 500);
             };
 
             const nextQuestion = () => {
                 if (currentIndex >= data.length - 1) {
+                    playSFX('complete');
                     onComplete(streak);
                 } else {
                     setCurrentIndex(prev => prev + 1);
                     setSelected(null);
                     setIsCorrect(null);
                     setShowExplanation(false);
-                    // 時間リセット
-                    setTimeLeft(mode === 'reading' ? 20 : mode === 'listening' ? 15 : 5);
+                    setTimeLeft(mode === 'reading' ? 20 : mode === 'listening' ? 15 : 8);
+                    setIsLocked(false);
                 }
             };
 
-            if (!currentItem) return <div className="p-8 text-center">完了！</div>;
+            if (!currentItem) return null;
 
-            // プログレスバーの色（制限時間警告）
             const timerColor = timeLeft <= 3 ? "bg-red-500" : "bg-blue-500";
+            const maxTime = mode === 'reading' ? 20 : mode === 'listening' ? 15 : 8;
 
             return (
-                <div className="flex flex-col h-screen bg-slate-900 pb-safe">
-                    <Header title={mode === 'vocab' ? 'Vocabulary' : mode === 'listening' ? 'Listening' : 'Reading'} sub={`${currentIndex + 1} / ${data.length}`} onBack={() => onComplete(streak)} />
-                    
+                <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-900 transition-colors">
+                    <Header 
+                        title={mode === 'vocab' ? 'Vocabulary' : mode === 'listening' ? 'Listening' : 'Reading'} 
+                        sub={`${currentIndex + 1} / ${data.length} • Streak: ${streak}`} 
+                        leftIcon="x"
+                        onLeftClick={() => onComplete(streak)}
+                    />
+
                     {/* Timer Bar */}
-                    <div className="w-full h-1 bg-slate-800">
+                    <div className="w-full h-1.5 bg-gray-200 dark:bg-slate-800">
                         <div 
                             className={`h-full ${timerColor} transition-all duration-1000 ease-linear`} 
-                            style={{ width: `${(timeLeft / (mode === 'reading' ? 20 : mode === 'listening' ? 15 : 5)) * 100}%` }}
+                            style={{ width: `${(timeLeft / maxTime) * 100}%` }}
                         ></div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-4 pb-24">
-                        
-                        {/* Question Area */}
-                        <div className="mb-8 mt-4 text-center">
+                    <div className="flex-1 overflow-y-auto p-4 pb-32">
+                        {/* Question Card */}
+                        <div className="my-6">
                             {mode === 'vocab' && (
-                                <div>
-                                    <span className="inline-block px-3 py-1 mb-4 text-xs font-bold text-slate-900 bg-yellow-500 rounded-full">
+                                <div className="text-center animate-fade-in">
+                                    <span className="inline-block px-3 py-1 mb-4 text-xs font-bold text-slate-800 bg-yellow-400 rounded-full no-select">
                                         LEVEL {currentItem.level}
                                     </span>
-                                    <h2 className="text-4xl font-bold text-white mb-2 tracking-wide">{currentItem.word}</h2>
+                                    <h2 className="text-4xl font-extrabold text-slate-800 dark:text-white mb-2 tracking-wide selectable-text">
+                                        {currentItem.word}
+                                    </h2>
                                     {isDrillMode && (
                                         <div className="text-xs text-slate-500 mt-2 flex items-center justify-center gap-1">
-                                            <i data-lucide="dumbell" className="w-3 h-3"></i> 
-                                            特訓中: {JSON.parse(localStorage.getItem('toeic_progress') || '{}')[currentItem.id]?.streak || 0}/2
+                                            <Icon name="dumbbell" size={14} />
+                                            <span>Spartan: {JSON.parse(localStorage.getItem('toeic_progress_v2') || '{}')[currentItem.id]?.streak || 0}/2</span>
                                         </div>
                                     )}
                                 </div>
                             )}
 
                             {mode === 'reading' && (
-                                <div className="text-left glass-panel p-6 rounded-xl border border-slate-700">
-                                    <p className="text-lg leading-relaxed font-medium">{currentItem.question}</p>
+                                <div className="glass-panel p-6 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm animate-fade-in">
+                                    <p className="text-lg leading-relaxed font-medium text-slate-800 dark:text-slate-100 selectable-text">
+                                        {currentItem.question}
+                                    </p>
                                 </div>
                             )}
 
                             {mode === 'listening' && (
-                                <div className="flex flex-col items-center justify-center py-10">
+                                <div className="flex flex-col items-center justify-center py-8 animate-fade-in">
                                     <button 
                                         onClick={() => speak(currentItem.script)}
-                                        className="w-20 h-20 rounded-full bg-slate-800 border-2 border-yellow-500 flex items-center justify-center shadow-[0_0_20px_rgba(234,179,8,0.2)] btn-press"
+                                        className="w-24 h-24 rounded-full bg-gray-100 dark:bg-slate-800 border-4 border-yellow-500 flex items-center justify-center shadow-[0_0_30px_rgba(234,179,8,0.3)] btn-press"
                                     >
-                                        <i data-lucide="volume-2" className="w-10 h-10 text-yellow-500"></i>
+                                        <Icon name="volume-2" className="w-10 h-10 text-yellow-600 dark:text-yellow-500" />
                                     </button>
-                                    <p className="mt-4 text-sm text-slate-400">Tap to replay</p>
+                                    <p className="mt-4 text-sm text-slate-500">Tap to replay</p>
                                 </div>
                             )}
                         </div>
@@ -381,16 +525,17 @@
                         {/* Choices */}
                         <div className="space-y-3">
                             {choices.map((choice, idx) => {
-                                let btnClass = "w-full p-4 rounded-xl text-left font-semibold text-lg transition-all border border-slate-700 bg-slate-800 hover:bg-slate-700 btn-press";
+                                let btnClass = "w-full p-4 rounded-xl text-left font-medium text-lg transition-all border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 shadow-sm";
                                 
-                                // 正誤判定時の色付け
                                 if (selected !== null) {
                                     if (mode === 'vocab') {
-                                        if (choice === currentItem.meaning) btnClass = "w-full p-4 rounded-xl text-left font-bold border border-green-500 bg-green-900/30 text-green-400";
-                                        else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border border-red-500 bg-red-900/30 text-red-400";
+                                        if (choice === currentItem.meaning) btnClass = "w-full p-4 rounded-xl text-left font-bold border-2 border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400";
+                                        else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border-2 border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 animate-shake";
+                                        else btnClass += " opacity-50";
                                     } else {
-                                        if (idx === currentItem.correct) btnClass = "w-full p-4 rounded-xl text-left font-bold border border-green-500 bg-green-900/30 text-green-400";
-                                        else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border border-red-500 bg-red-900/30 text-red-400";
+                                        if (idx === currentItem.correct) btnClass = "w-full p-4 rounded-xl text-left font-bold border-2 border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400";
+                                        else if (idx === selected) btnClass = "w-full p-4 rounded-xl text-left border-2 border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 animate-shake";
+                                        else btnClass += " opacity-50";
                                     }
                                 }
 
@@ -399,165 +544,249 @@
                                         key={idx} 
                                         onClick={() => handleAnswer(choice, idx)}
                                         disabled={selected !== null}
-                                        className={btnClass}
+                                        className={`${btnClass} btn-press relative overflow-hidden`}
                                     >
-                                        <span className="inline-block w-6 h-6 rounded-full bg-slate-900 text-slate-500 text-xs text-center leading-6 mr-3">
-                                            {String.fromCharCode(65 + idx)}
-                                        </span>
-                                        {choice}
+                                        <div className="flex items-start">
+                                            <span className="inline-flex items-center justify-center min-w-[24px] h-6 rounded bg-gray-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs font-bold mr-3 mt-1">
+                                                {String.fromCharCode(65 + idx)}
+                                            </span>
+                                            <span className="selectable-text">{choice}</span>
+                                        </div>
                                     </button>
                                 );
                             })}
                         </div>
                     </div>
 
-                    {/* Explanation Modal (Overlay) */}
+                    {/* Explanation Overlay */}
                     {showExplanation && (
-                        <div className="fixed bottom-0 left-0 w-full bg-slate-800 rounded-t-3xl border-t border-slate-600 p-6 z-50 animate-slide-up shadow-2xl">
-                            <div className="flex items-center gap-3 mb-4">
-                                {isCorrect ? (
-                                    <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
-                                        <i data-lucide="check" className="text-white w-5 h-5"></i>
-                                    </div>
-                                ) : (
-                                    <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center">
-                                        <i data-lucide="x" className="text-white w-5 h-5"></i>
+                        <div className="fixed bottom-0 left-0 w-full glass-panel bg-white/95 dark:bg-slate-800/95 border-t border-gray-200 dark:border-slate-600 p-6 z-50 animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.2)]">
+                            <div className="max-w-md mx-auto">
+                                <div className="flex items-center gap-3 mb-4">
+                                    {isCorrect ? (
+                                        <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                                            <Icon name="check" className="text-white w-5 h-5" />
+                                        </div>
+                                    ) : (
+                                        <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center shrink-0">
+                                            <Icon name="x" className="text-white w-5 h-5" />
+                                        </div>
+                                    )}
+                                    <h3 className={`text-xl font-bold ${isCorrect ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                        {isCorrect ? 'Excellent!' : 'Review'}
+                                    </h3>
+                                </div>
+                                
+                                {mode !== 'vocab' && (
+                                    <div className="mb-6">
+                                        <span className="block text-xs text-slate-400 uppercase font-bold mb-1 tracking-wider">Explanation</span>
+                                        <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 selectable-text">
+                                            {currentItem.explanation}
+                                        </p>
                                     </div>
                                 )}
-                                <h3 className="text-xl font-bold">{isCorrect ? 'Correct!' : 'Incorrect'}</h3>
+
+                                {mode === 'listening' && (
+                                    <div className="mb-6 p-3 bg-gray-100 dark:bg-slate-900 rounded-lg text-sm text-slate-600 dark:text-slate-400 italic border border-gray-200 dark:border-slate-700">
+                                        "{currentItem.script}"
+                                    </div>
+                                )}
+
+                                <Button onClick={nextQuestion} className="w-full">
+                                    Next Question
+                                    <Icon name="arrow-right" size={18} />
+                                </Button>
                             </div>
-                            
-                            {mode !== 'vocab' && (
-                                <div className="mb-4 text-slate-300 text-sm leading-relaxed">
-                                    <span className="block text-xs text-slate-500 uppercase font-bold mb-1">Explanation</span>
-                                    {currentItem.explanation}
-                                </div>
-                            )}
-
-                            {mode === 'listening' && (
-                                <div className="mb-6 p-3 bg-slate-900 rounded-lg text-sm text-slate-400 italic">
-                                    "{currentItem.script}"
-                                </div>
-                            )}
-
-                            <button 
-                                onClick={nextQuestion}
-                                className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold rounded-xl btn-press"
-                            >
-                                Next Question
-                            </button>
                         </div>
                     )}
                 </div>
             );
         };
 
-        // ホーム画面
-        const Home = ({ onStart }) => {
-            const [drillMode, setDrillMode] = useState(false);
+        // SETTINGS SCREEN
+        const Settings = ({ settings, updateSettings, onBack, resetData }) => {
+            return (
+                <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-900 animate-fade-in">
+                    <Header title="Settings" leftIcon="arrow-left" onLeftClick={onBack} />
+                    
+                    <div className="p-4 space-y-6">
+                        {/* Section: Appearance */}
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-slate-700">
+                            <h3 className="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Appearance & Sound</h3>
+                            
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+                                        <Icon name={settings.theme === 'dark' ? 'moon' : 'sun'} />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-slate-800 dark:text-slate-100">Dark Mode</p>
+                                        <p className="text-xs text-slate-500">Easy on the eyes</p>
+                                    </div>
+                                </div>
+                                <Toggle 
+                                    checked={settings.theme === 'dark'} 
+                                    onChange={() => updateSettings('theme', settings.theme === 'dark' ? 'light' : 'dark')} 
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600 dark:text-green-400">
+                                        <Icon name={settings.sound ? 'volume-2' : 'volume-x'} />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-slate-800 dark:text-slate-100">Sound Effects</p>
+                                        <p className="text-xs text-slate-500">In-app audio feedback</p>
+                                    </div>
+                                </div>
+                                <Toggle 
+                                    checked={settings.sound} 
+                                    onChange={() => updateSettings('sound', !settings.sound)} 
+                                />
+                            </div>
+                        </div>
+
+                        {/* Section: Learning */}
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-slate-700">
+                            <h3 className="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Learning Preference</h3>
+                            
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
+                                        <Icon name="dumbbell" />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-slate-800 dark:text-slate-100">Spartan Mode</p>
+                                        <p className="text-xs text-slate-500">Need 2x streak to master</p>
+                                    </div>
+                                </div>
+                                <Toggle 
+                                    checked={settings.spartan} 
+                                    onChange={() => updateSettings('spartan', !settings.spartan)} 
+                                />
+                            </div>
+                        </div>
+
+                        {/* Section: Data */}
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-slate-700">
+                            <h3 className="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Data Management</h3>
+                            <Button variant="danger" className="w-full" onClick={resetData}>
+                                <Icon name="trash-2" size={18} />
+                                Reset Learning Progress
+                            </Button>
+                            <p className="text-center text-xs text-slate-400 mt-2">This cannot be undone.</p>
+                        </div>
+                        
+                        <div className="text-center text-xs text-slate-400 pt-8 pb-4">
+                            TOEIC 700 Booster v2.0
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // HOME SCREEN
+        const Home = ({ onStart, onSettings, settings }) => {
             const [progress, setProgress] = useState({ mastered: 0, total: VOCAB_DATA.length });
 
             useEffect(() => {
-                // Lucide Icons reload
-                if (window.lucide) window.lucide.createIcons();
-                
-                // Calculate progress
-                const saved = JSON.parse(localStorage.getItem('toeic_progress') || '{}');
+                const saved = JSON.parse(localStorage.getItem('toeic_progress_v2') || '{}');
                 const masteredCount = Object.values(saved).filter(i => i.mastered).length;
                 setProgress({ mastered: masteredCount, total: VOCAB_DATA.length });
             }, []);
 
             return (
-                <div className="min-h-screen bg-slate-900 text-white p-6 pb-24">
-                    {/* Header Area */}
-                    <div className="flex justify-between items-start mb-8 mt-2">
+                <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-slate-800 dark:text-white p-6 pb-24 transition-colors">
+                    {/* Top Bar */}
+                    <div className="flex justify-between items-center mb-8 pt-2">
+                        <div className="flex items-center gap-2">
+                             <div className="w-8 h-8 rounded bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center text-white font-bold text-xs shadow-lg">
+                                T700
+                             </div>
+                             <span className="font-bold text-lg tracking-tight">Booster</span>
+                        </div>
+                        <button onClick={onSettings} className="p-2 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-gray-200 dark:border-slate-700 btn-press">
+                            <Icon name="settings" className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                        </button>
+                    </div>
+
+                    {/* Dashboard Card */}
+                    <div className="flex justify-between items-end mb-6">
                         <div>
-                            <p className="text-sm text-slate-400 mb-1">Remaining</p>
-                            <h1 className="text-3xl font-bold font-mono gold-text">7 DAYS</h1>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Weekly Goal</p>
+                            <h1 className="text-3xl font-extrabold font-mono gold-text">7 DAYS</h1>
                         </div>
                         <div className="text-right">
-                            <p className="text-sm text-slate-400">Target</p>
-                            <div className="flex items-baseline justify-end gap-1">
-                                <span className="text-2xl font-bold text-yellow-500">700</span>
+                            <div className="inline-flex items-center gap-1 bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded-md">
+                                <span className="text-xs font-bold text-yellow-700 dark:text-yellow-500">TARGET</span>
+                            </div>
+                            <div className="flex items-baseline justify-end gap-1 mt-1">
+                                <span className="text-2xl font-bold text-slate-800 dark:text-white">700</span>
                                 <span className="text-xs text-slate-500">pts</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Main Progress Card */}
-                    <div className="glass-panel p-6 rounded-2xl mb-8 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <i data-lucide="award" className="w-24 h-24 text-yellow-500"></i>
+                    {/* Progress Widget */}
+                    <div className="glass-panel p-6 rounded-2xl mb-8 relative overflow-hidden border border-white dark:border-slate-700 shadow-xl bg-white/40 dark:bg-slate-800/40">
+                        <div className="absolute top-0 right-0 p-4 opacity-5 dark:opacity-10 pointer-events-none">
+                            <Icon name="award" size={100} className="text-yellow-500" />
                         </div>
-                        <h2 className="text-lg font-semibold mb-2">Vocabulary Mastery</h2>
-                        <div className="flex items-end gap-2 mb-2">
-                            <span className="text-4xl font-bold">{progress.mastered}</span>
-                            <span className="text-slate-400 mb-1">/ {progress.total} words</span>
-                        </div>
-                        <ProgressBar current={progress.mastered} total={progress.total} />
-                        <p className="text-xs text-slate-400">
-                            {progress.mastered / progress.total * 100 < 50 ? "Keep pushing! Foundation is key." : "Excellent pace!"}
-                        </p>
-                    </div>
-
-                    {/* Drill Mode Toggle */}
-                    <div 
-                        onClick={() => setDrillMode(!drillMode)}
-                        className={`flex items-center justify-between p-4 rounded-xl mb-8 cursor-pointer transition-all border ${drillMode ? 'bg-indigo-900/40 border-indigo-500' : 'bg-slate-800 border-slate-700'}`}
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${drillMode ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-400'}`}>
-                                <i data-lucide="flame" className="w-5 h-5"></i>
+                        <div className="relative z-10">
+                            <h2 className="text-sm font-bold text-slate-600 dark:text-slate-300 mb-3 uppercase tracking-wider">Vocab Mastery</h2>
+                            <div className="flex items-end gap-2 mb-3">
+                                <span className="text-5xl font-extrabold text-slate-800 dark:text-white">{Math.round((progress.mastered / progress.total) * 100)}%</span>
+                                <span className="text-slate-500 dark:text-slate-400 mb-2 text-sm font-medium">{progress.mastered}/{progress.total} words</span>
                             </div>
-                            <div>
-                                <h3 className={`font-bold ${drillMode ? 'text-indigo-200' : 'text-slate-300'}`}>Spartan Mode</h3>
-                                <p className="text-xs text-slate-500">2x streak required to master</p>
+                            <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-3 mb-2 overflow-hidden">
+                                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-1000" style={{ width: `${(progress.mastered / progress.total) * 100}%` }}></div>
                             </div>
-                        </div>
-                        <div className={`w-12 h-6 rounded-full p-1 transition-colors ${drillMode ? 'bg-indigo-500' : 'bg-slate-600'}`}>
-                            <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform ${drillMode ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {progress.mastered === 0 ? "Start your journey today!" : "Consistency is key to success."}
+                            </p>
                         </div>
                     </div>
 
-                    {/* Mode Selection Grid */}
-                    <h3 className="text-sm font-bold text-slate-500 uppercase mb-4 tracking-wider">Start Training</h3>
+                    {/* Mode Selection */}
+                    <h3 className="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider ml-1">Training Modules</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <button 
-                            onClick={() => onStart('vocab', drillMode)}
-                            className="glass-panel p-5 rounded-xl text-left hover:bg-slate-800 transition border border-slate-700 btn-press group"
+                            onClick={() => onStart('vocab')}
+                            className="bg-white dark:bg-slate-800 p-5 rounded-2xl text-left border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all btn-press group"
                         >
-                            <div className="bg-yellow-500/20 w-10 h-10 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-500/30 transition">
-                                <i data-lucide="book-open" className="text-yellow-500 w-5 h-5"></i>
+                            <div className="bg-yellow-100 dark:bg-yellow-900/30 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                <Icon name="book-open" className="text-yellow-600 dark:text-yellow-500" />
                             </div>
-                            <h3 className="font-bold text-lg mb-1">Vocab</h3>
-                            <p className="text-xs text-slate-400">Speed Quiz</p>
+                            <h3 className="font-bold text-lg mb-1 text-slate-800 dark:text-slate-100">Vocab</h3>
+                            <p className="text-xs text-slate-500">Speed Memorization</p>
                         </button>
 
                         <button 
-                            onClick={() => onStart('reading', drillMode)}
-                            className="glass-panel p-5 rounded-xl text-left hover:bg-slate-800 transition border border-slate-700 btn-press group"
+                            onClick={() => onStart('reading')}
+                            className="bg-white dark:bg-slate-800 p-5 rounded-2xl text-left border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all btn-press group"
                         >
-                            <div className="bg-blue-500/20 w-10 h-10 rounded-lg flex items-center justify-center mb-3 group-hover:bg-blue-500/30 transition">
-                                <i data-lucide="glasses" className="text-blue-500 w-5 h-5"></i>
+                            <div className="bg-blue-100 dark:bg-blue-900/30 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                <Icon name="glasses" className="text-blue-600 dark:text-blue-500" />
                             </div>
-                            <h3 className="font-bold text-lg mb-1">Reading</h3>
-                            <p className="text-xs text-slate-400">Part 5 Drills</p>
+                            <h3 className="font-bold text-lg mb-1 text-slate-800 dark:text-slate-100">Reading</h3>
+                            <p className="text-xs text-slate-500">Part 5 Grammer</p>
                         </button>
 
                         <button 
-                            onClick={() => onStart('listening', drillMode)}
-                            className="glass-panel p-5 rounded-xl text-left hover:bg-slate-800 transition border border-slate-700 btn-press group col-span-2"
+                            onClick={() => onStart('listening')}
+                            className="col-span-2 bg-white dark:bg-slate-800 p-5 rounded-2xl text-left border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all btn-press group"
                         >
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <div className="bg-green-500/20 w-10 h-10 rounded-lg flex items-center justify-center mb-3 group-hover:bg-green-500/30 transition">
-                                        <i data-lucide="headphones" className="text-green-500 w-5 h-5"></i>
+                                    <div className="bg-green-100 dark:bg-green-900/30 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                        <Icon name="headphones" className="text-green-600 dark:text-green-500" />
                                     </div>
-                                    <h3 className="font-bold text-lg mb-1">Listening Simulation</h3>
-                                    <p className="text-xs text-slate-400">Part 2 Response (TTS)</p>
+                                    <h3 className="font-bold text-lg mb-1 text-slate-800 dark:text-slate-100">Listening Sim</h3>
+                                    <p className="text-xs text-slate-500">Part 2 Response (AI Voice)</p>
                                 </div>
-                                <div className="bg-slate-800 p-2 rounded-full">
-                                    <i data-lucide="play" className="w-6 h-6 ml-1 text-slate-300"></i>
+                                <div className="bg-slate-100 dark:bg-slate-700 w-10 h-10 rounded-full flex items-center justify-center">
+                                    <Icon name="play" className="w-5 h-5 text-slate-400 dark:text-slate-300 ml-1" />
                                 </div>
                             </div>
                         </button>
@@ -566,44 +795,98 @@
             );
         };
 
-        // Main App Container
+        // MAIN APP CONTAINER
         const App = () => {
-            const [view, setView] = useState('home'); // home, vocab, reading, listening
-            const [isDrillMode, setIsDrillMode] = useState(false);
+            const [view, setView] = useState('home'); // home, settings, vocab, reading, listening
+            
+            // Settings State
+            const [settings, setSettings] = useState(() => {
+                const saved = localStorage.getItem('toeic_settings_v2');
+                return saved ? JSON.parse(saved) : { theme: 'dark', sound: true, spartan: false };
+            });
+
+            // Apply Theme
+            useEffect(() => {
+                if (settings.theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+                localStorage.setItem('toeic_settings_v2', JSON.stringify(settings));
+            }, [settings]);
 
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
-            });
+            }); // Run on every render to catch new icons
 
-            const startSession = (mode, drill) => {
-                setIsDrillMode(drill);
-                setView(mode);
+            const updateSettings = (key, value) => {
+                setSettings(prev => ({ ...prev, [key]: value }));
             };
 
-            const finishSession = () => {
-                setView('home');
+            const resetData = () => {
+                if(confirm("Are you sure you want to reset all progress?")) {
+                    localStorage.removeItem('toeic_progress_v2');
+                    window.location.reload();
+                }
             };
 
-            // 苦手克服（未習得）データのフィルタリング
             const getFilteredVocab = () => {
-                const saved = JSON.parse(localStorage.getItem('toeic_progress') || '{}');
-                // 未習得（mastered: trueでない）かつ レベル順
+                const saved = JSON.parse(localStorage.getItem('toeic_progress_v2') || '{}');
                 const raw = VOCAB_DATA.filter(v => {
                     const status = saved[v.id];
                     return !status || !status.mastered;
                 });
-                
-                // データが空なら全部返す（全問正解時）
                 return raw.length > 0 ? raw : VOCAB_DATA;
             };
 
             return (
-                <div className="max-w-md mx-auto min-h-screen bg-slate-900 shadow-2xl overflow-hidden relative">
-                    {view === 'home' && <Home onStart={startSession} />}
-                    {view === 'vocab' && <QuizSession data={getFilteredVocab()} mode="vocab" isDrillMode={isDrillMode} onComplete={finishSession} />}
-                    {view === 'reading' && <QuizSession data={READING_DATA} mode="reading" isDrillMode={isDrillMode} onComplete={finishSession} />}
-                    {view === 'listening' && <QuizSession data={LISTENING_DATA} mode="listening" isDrillMode={isDrillMode} onComplete={finishSession} />}
-                </div>
+                <SoundProvider enabled={settings.sound}>
+                    <div className="max-w-md mx-auto h-full bg-gray-50 dark:bg-slate-900 shadow-2xl relative overflow-hidden">
+                        {view === 'home' && (
+                            <Home 
+                                onStart={(mode) => setView(mode)} 
+                                onSettings={() => setView('settings')}
+                                settings={settings}
+                            />
+                        )}
+                        
+                        {view === 'settings' && (
+                            <Settings 
+                                settings={settings} 
+                                updateSettings={updateSettings} 
+                                onBack={() => setView('home')}
+                                resetData={resetData}
+                            />
+                        )}
+
+                        {view === 'vocab' && (
+                            <QuizSession 
+                                data={getFilteredVocab()} 
+                                mode="vocab" 
+                                isDrillMode={settings.spartan} 
+                                onComplete={() => setView('home')} 
+                            />
+                        )}
+                        
+                        {view === 'reading' && (
+                            <QuizSession 
+                                data={READING_DATA} 
+                                mode="reading" 
+                                isDrillMode={settings.spartan} 
+                                onComplete={() => setView('home')} 
+                            />
+                        )}
+                        
+                        {view === 'listening' && (
+                            <QuizSession 
+                                data={LISTENING_DATA} 
+                                mode="listening" 
+                                isDrillMode={settings.spartan} 
+                                onComplete={() => setView('home')} 
+                            />
+                        )}
+                    </div>
+                </SoundProvider>
             );
         };
 
