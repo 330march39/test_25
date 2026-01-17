@@ -6,8 +6,9 @@
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>TOEIC 700 Booster Pro</title>
-    
+    <title>TOEIC 700 Pro</title>
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>">
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -752,7 +753,7 @@
                         </div>
 
                         <div className="space-y-3">
-                            // QuizSession コンポーネントの choices.map の中身
+                            
 {choices.map((choice, idx) => {
     // ボタン自体のクラス（アニメーション関連を削除し、純粋なボタンスタイルのみにする）
     let btnClass = "w-full p-4 rounded-xl text-left font-medium text-lg transition-transform duration-200 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 shadow-sm";
@@ -820,7 +821,7 @@
                                         "{currentItem.script}"
                                     </div>
                                 )}
-                                // 解説表示エリアのボタン部分
+                                
 <Button 
     onClick={nextQuestion} 
     className="w-full text-lg h-14" 
