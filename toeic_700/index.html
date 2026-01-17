@@ -405,12 +405,36 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
         // ==========================================
 
         const Icon = ({ name, size = 24, className }) => {
-    // アイコンが表示されるたびにLucideを実行してSVGに変換する
-    useEffect(() => {
-        if (window.lucide) window.lucide.createIcons();
-    });
+    // 参照（ref）を使って、このコンポーネントのDOM要素を特定する
+    const ref = useRef(null);
 
-    return <i data-lucide={name} width={size} height={size} className={className}></i>;
+    useEffect(() => {
+        // 全体ではなく、このコンポーネントの中（root: ref.current）だけを変換する
+        if (window.lucide && ref.current) {
+            window.lucide.createIcons({
+                root: ref.current,
+                nameAttr: 'data-lucide',
+                attrs: {
+                    class: "lucide-icon" // SVG自体にクラスをつけたい場合
+                }
+            });
+        }
+    }, [name]); // nameが変わったときだけ再実行
+
+    // 解説: 
+    // Lucideは <i> タグを <svg> に「置換」してしまうため、Reactがそれを見失ってエラーになります。
+    // そのため、Reactが管理する <span> で包みます。
+    // Reactはこの <span> を削除・更新しようとするため、中身が <i> だろうが <svg> だろうが
+    // エラーにならずに安全に処理できます。
+    return (
+        <span 
+            ref={ref} 
+            className={`inline-flex items-center justify-center ${className || ''}`} 
+            style={{ width: size, height: size }}
+        >
+            <i data-lucide={name} width={size} height={size}></i>
+        </span>
+    );
 };
 
         const Button = ({ children, onClick, className = "", variant = "primary", disabled = false, fullWidth = false }) => {
@@ -1355,7 +1379,7 @@ const Home = ({ onStart, onSettings }) => {
                 localStorage.setItem('toeic_settings_v3', JSON.stringify(settings));
             }, [settings]);
 
-            useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
+            
 
             const updateSettings = (key, value) => setSettings(prev => ({ ...prev, [key]: value }));
             const resetData = () => {
