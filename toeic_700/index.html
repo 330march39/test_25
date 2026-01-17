@@ -376,7 +376,7 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
 ];
 
         // ==========================================
-        // UTILS (iOS対応・修正版)
+        // UTILS (会話トーン強化版)
         // ==========================================
         
         const stopAudio = () => {
@@ -385,7 +385,7 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
             }
         };
 
-        // iOSでのガベージコレクション対策（再生中に音声が途切れるのを防ぐ）
+        // iOSでのガベージコレクション対策
         window.utterances = [];
 
         const speak = (text, onEnd) => {
@@ -403,48 +403,75 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
             // 声の候補を取得
             let voices = window.speechSynthesis.getVoices();
             
-            // iOSなどは非同期で声がロードされるため、ない場合は少し待つかデフォルトに任せる
-            // ここでは簡易的に取得できた場合のみ選択ロジックを走らせる
-            
+            // 声の設定を決めるロジック（会話トーン強化版）
             const getVoiceConfig = (type) => {
-                // 声が見つからない場合はnullを返し、ブラウザのデフォルトを使用させる
-                if (!voices || voices.length === 0) return { voice: null, pitch: 1.0, rate: 0.9 };
-
-                let voice = voices.find(v => v.lang === 'en-US'); 
+                // 英語の声を探す（アメリカ・イギリス問わず）
+                const enVoices = voices.filter(v => v.lang.startsWith('en'));
+                
+                // デフォルトの声（見つからなければシステムデフォルト）
+                let selectedVoice = enVoices.find(v => v.default) || enVoices[0] || voices[0];
+                
                 let pitch = 1.0;
-                let rate = 0.9; 
+                let rate = 0.9; // 聴き取りやすい速度
+
+                // 具体的な男性・女性の声の名前リスト（端末に入っていればこれらを使う）
+                // iPhoneのSiriやGoogle音声などの名前を候補に入れる
+                const maleNames = ['David', 'Daniel', 'Google US English Male', 'Aaron', 'Fred', 'Nicky'];
+                const femaleNames = ['Samantha', 'Google US English Female', 'Zira', 'Victoria', 'Karen', 'Tessa'];
 
                 if (type === 'M') {
-                    const maleVoice = voices.find(v => v.lang === 'en-US' && (v.name.includes('Male') || v.name.includes('David') || v.name.includes('Google US English')));
-                    if (maleVoice) voice = maleVoice;
-                    else pitch = 0.9; 
+                    // --- 男性パートの設定 ---
+                    // 1. 男性っぽい名前のボイスを探す
+                    const maleVoice = enVoices.find(v => maleNames.some(name => v.name.includes(name)));
+                    
+                    if (maleVoice) {
+                        // 男性の声が見つかった場合
+                        selectedVoice = maleVoice;
+                        pitch = 1.0; 
+                    } else {
+                        // ★重要: 男性の声がない場合、デフォルトの声を「低く」する
+                        // 0.7〜0.8くらいまで下げると男性っぽく聞こえます
+                        pitch = 0.75; 
+                    }
                 } else if (type === 'W') {
-                    const femaleVoice = voices.find(v => v.lang === 'en-US' && (v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Samantha')));
-                    if (femaleVoice) voice = femaleVoice;
-                    else pitch = 1.1; 
+                    // --- 女性パートの設定 ---
+                    // 1. 女性っぽい名前のボイスを探す
+                    const femaleVoice = enVoices.find(v => femaleNames.some(name => v.name.includes(name)));
+                    
+                    if (femaleVoice) {
+                        selectedVoice = femaleVoice;
+                        pitch = 1.0;
+                    } else {
+                        // ★重要: 女性の声がない（またはデフォルトが低い）場合、少し高くする
+                        // 1.1〜1.2くらいに上げます
+                        pitch = 1.15;
+                    }
                 }
-                return { voice, pitch, rate };
+
+                // ナレーション(N)や指定なしの場合は標準ピッチ
+                return { voice: selectedVoice, pitch, rate };
             };
 
             let currentLine = 0;
 
             const playNextLine = () => {
                 if (currentLine >= lines.length) {
-                    window.utterances = []; // クリア
+                    window.utterances = []; // メモリクリア
                     if (onEnd) onEnd();
                     return;
                 }
 
                 const line = lines[currentLine];
                 let cleanText = line;
-                let type = 'N'; 
+                let type = 'N'; // Narration (Default)
 
-                if (line.trim().startsWith('M:') || line.trim().startsWith('M ')) {
+                // 行頭の M: や W: を判定してタグ付け
+                if (line.trim().match(/^[Mm](?:an)?[:\s]/)) {
                     type = 'M';
-                    cleanText = line.replace(/^[Mm][: ]\s*/, '');
-                } else if (line.trim().startsWith('W:') || line.trim().startsWith('W ')) {
+                    cleanText = line.replace(/^[Mm](?:an)?[:\s]\s*/, '');
+                } else if (line.trim().match(/^[Ww](?:oman)?[:\s]/)) {
                     type = 'W';
-                    cleanText = line.replace(/^[Ww][: ]\s*/, '');
+                    cleanText = line.replace(/^[Ww](?:oman)?[:\s]\s*/, '');
                 }
 
                 const u = new SpeechSynthesisUtterance(cleanText);
@@ -453,9 +480,9 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
                 if (config.voice) u.voice = config.voice;
                 u.pitch = config.pitch;
                 u.rate = config.rate;
-                u.lang = 'en-US';
+                u.lang = 'en-US'; // 英語指定
 
-                // GC対策で配列に保持
+                // iOS対策: 配列に保持
                 window.utterances.push(u);
 
                 u.onend = () => {
@@ -464,11 +491,9 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
                 };
                 
                 u.onerror = (e) => {
-                    // interrupted はキャンセル時の正常動作なので無視する
                     if (e.error !== 'interrupted') {
                         console.error('Speech error', e);
                     }
-                    // エラーでも次へ進める（止まらないようにする）
                     currentLine++;
                     playNextLine();
                 };
