@@ -403,7 +403,14 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
         // COMPONENTS
         // ==========================================
 
-        const Icon = ({ name, size = 24, className }) => <i data-lucide={name} width={size} height={size} className={className}></i>;
+        const Icon = ({ name, size = 24, className }) => {
+    // アイコンが表示されるたびにLucideを実行してSVGに変換する
+    useEffect(() => {
+        if (window.lucide) window.lucide.createIcons();
+    });
+
+    return <i data-lucide={name} width={size} height={size} className={className}></i>;
+};
 
         const Button = ({ children, onClick, className = "", variant = "primary", disabled = false, fullWidth = false }) => {
             const playSFX = useContext(SoundContext);
