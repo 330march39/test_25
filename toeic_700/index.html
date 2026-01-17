@@ -386,7 +386,7 @@ const CountdownWidget = () => {
                         <Icon name="calendar" size={20} className="text-indigo-500" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Exam Date</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TOEIC 当日まで</p>
                         <p className="text-sm font-bold text-slate-700 dark:text-slate-200 font-mono">2026.01.23</p>
                     </div>
                 </div>
@@ -779,7 +779,13 @@ const CountdownWidget = () => {
         <div 
             key={idx} 
             className="animate-slide-up" 
-            style={{ animationDelay: `${idx * 60}ms` }} // 遅延を少し短くしてキビキビさせる
+            style={{ 
+            animationDelay: `${idx * 40}ms`, // 少しテンポアップ（60ms→40ms）
+            willChange: 'transform, opacity', // ブラウザへの最適化ヒント
+            transform: 'translateZ(0)',       // GPUアクセラレーションをONにするおまじない
+            backfaceVisibility: 'hidden',     // 描画負荷を下げる
+            WebkitFontSmoothing: 'subpixel-antialiased' // 文字のガタつき防止
+        }}
         >
             <button 
                 onClick={() => handleAnswer(choice, idx)} 
@@ -881,7 +887,7 @@ const CountdownWidget = () => {
                                 <Icon name="trash-2" size={18} /> 学習データをリセット
                             </Button>
                         </div>
-                        <div className="text-center text-xs text-slate-400 pt-8 pb-4">TOEIC 700 Booster Pro v3.1</div>
+                        <div className="text-center text-xs text-slate-400 pt-8 pb-4">TOEIC 700  ver 3.1</div>
                     </div>
                 </div>
             );
