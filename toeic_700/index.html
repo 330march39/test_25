@@ -376,7 +376,7 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
 ];
 
         // ==========================================
-        // UTILS (会話トーン強化版)
+        // UTILS (iOS最適化・ランダムアナウンス版)
         // ==========================================
         
         const stopAudio = () => {
@@ -403,52 +403,62 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
             // 声の候補を取得
             let voices = window.speechSynthesis.getVoices();
             
-            // 声の設定を決めるロジック（会話トーン強化版）
+            // ★今回の変更点1: アナウンス(N)用の性別を、この再生セッション用にランダムで決める
+            const randomBaseGender = Math.random() < 0.5 ? 'M' : 'W';
+
+            // 声の設定ロジック（iOS高品質ボイス優先版）
             const getVoiceConfig = (type) => {
-                // 英語の声を探す（アメリカ・イギリス問わず）
-                const enVoices = voices.filter(v => v.lang.startsWith('en'));
+                // アナウンス(N)の場合は、ランダムで決めた性別を割り当てる
+                const targetGender = (type === 'N') ? randomBaseGender : type;
+
+                // 英語の声（方言問わず取得し、US優先でソート）
+                const enVoices = voices.filter(v => v.lang.startsWith('en'))
+                                       .sort((a, b) => {
+                                           // US英語を優先
+                                           if (a.lang === 'en-US' && b.lang !== 'en-US') return -1;
+                                           if (a.lang !== 'en-US' && b.lang === 'en-US') return 1;
+                                           return 0;
+                                       });
                 
-                // デフォルトの声（見つからなければシステムデフォルト）
-                let selectedVoice = enVoices.find(v => v.default) || enVoices[0] || voices[0];
-                
+                // デフォルト設定
+                let selectedVoice = enVoices[0] || voices[0];
                 let pitch = 1.0;
                 let rate = 0.9; // 聴き取りやすい速度
 
-                // 具体的な男性・女性の声の名前リスト（端末に入っていればこれらを使う）
-                // iPhoneのSiriやGoogle音声などの名前を候補に入れる
-                const maleNames = ['David', 'Daniel', 'Google US English Male', 'Aaron', 'Fred', 'Nicky'];
-                const femaleNames = ['Samantha', 'Google US English Female', 'Zira', 'Victoria', 'Karen', 'Tessa'];
+                // iOSで特に滑らかなボイス名リスト
+                // Samantha: iOSの標準的な高品質女性ボイス
+                // Daniel: iOSの高品質男性ボイス（イギリス英語だが非常に滑らか）
+                // Fred: iOSの男性ボイス
+                // Google ...: Android/Chrome用
+                const malePriority = ['Daniel', 'Fred', 'Arthur', 'Aaron', 'Google US English Male'];
+                const femalePriority = ['Samantha', 'Martha', 'Nicky', 'Google US English Female'];
 
-                if (type === 'M') {
-                    // --- 男性パートの設定 ---
-                    // 1. 男性っぽい名前のボイスを探す
-                    const maleVoice = enVoices.find(v => maleNames.some(name => v.name.includes(name)));
+                if (targetGender === 'M') {
+                    // --- 男性パート ---
+                    // 優先リストにある声を探す
+                    const maleVoice = enVoices.find(v => malePriority.some(name => v.name.includes(name)));
                     
                     if (maleVoice) {
-                        // 男性の声が見つかった場合
                         selectedVoice = maleVoice;
-                        pitch = 1.0; 
+                        pitch = 1.0; // ネイティブ男性声ならピッチ操作なし（一番滑らか）
                     } else {
-                        // ★重要: 男性の声がない場合、デフォルトの声を「低く」する
-                        // 0.7〜0.8くらいまで下げると男性っぽく聞こえます
-                        pitch = 0.75; 
+                        // 男性声がない場合、デフォルト（多くはSamantha）を低くする
+                        // iOSのSamanthaはピッチを下げすぎるとロボットっぽくなるため、0.8くらいで止めるのがコツ
+                        pitch = 0.8; 
                     }
-                } else if (type === 'W') {
-                    // --- 女性パートの設定 ---
-                    // 1. 女性っぽい名前のボイスを探す
-                    const femaleVoice = enVoices.find(v => femaleNames.some(name => v.name.includes(name)));
+                } else if (targetGender === 'W') {
+                    // --- 女性パート ---
+                    const femaleVoice = enVoices.find(v => femalePriority.some(name => v.name.includes(name)));
                     
                     if (femaleVoice) {
                         selectedVoice = femaleVoice;
                         pitch = 1.0;
                     } else {
-                        // ★重要: 女性の声がない（またはデフォルトが低い）場合、少し高くする
-                        // 1.1〜1.2くらいに上げます
-                        pitch = 1.15;
+                        // 女性声がない（またはデフォルトが低い）場合、少し高くする
+                        pitch = 1.1;
                     }
                 }
 
-                // ナレーション(N)や指定なしの場合は標準ピッチ
                 return { voice: selectedVoice, pitch, rate };
             };
 
@@ -463,9 +473,9 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
 
                 const line = lines[currentLine];
                 let cleanText = line;
-                let type = 'N'; // Narration (Default)
+                let type = 'N'; // 初期値はナレーション
 
-                // 行頭の M: や W: を判定してタグ付け
+                // 行頭タグ判定
                 if (line.trim().match(/^[Mm](?:an)?[:\s]/)) {
                     type = 'M';
                     cleanText = line.replace(/^[Mm](?:an)?[:\s]\s*/, '');
@@ -480,9 +490,8 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
                 if (config.voice) u.voice = config.voice;
                 u.pitch = config.pitch;
                 u.rate = config.rate;
-                u.lang = 'en-US'; // 英語指定
+                u.lang = 'en-US'; 
 
-                // iOS対策: 配列に保持
                 window.utterances.push(u);
 
                 u.onend = () => {
@@ -491,9 +500,7 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
                 };
                 
                 u.onerror = (e) => {
-                    if (e.error !== 'interrupted') {
-                        console.error('Speech error', e);
-                    }
+                    if (e.error !== 'interrupted') console.error('Speech error', e);
                     currentLine++;
                     playNextLine();
                 };
@@ -503,7 +510,7 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
 
             playNextLine();
         };
-
+        
         // 配列をシャッフルする関数
         const shuffleArray = (array) => {
             return array.map(value => ({ value, sort: Math.random() }))
