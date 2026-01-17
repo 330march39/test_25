@@ -419,17 +419,20 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
     return (
         <span
             ref={ref}
-            // 修正: align-middle や leading-none を削除し、純粋なFlexコンテナにします
-            // shrink-0 は縮小防止のために維持します
-            className={`inline-flex items-center justify-center shrink-0 ${className || ''}`}
-            // line-height: 0 を強制することで、フォント由来の上下の余白を完全に排除します
-            style={{ width: size, height: size, lineHeight: 0 }}
+            // 修正点: 
+            // - inline-flex: アイコンの箱を作る
+            // - items-center justify-center: 中身のSVGをど真ん中に
+            // - leading-none: 行の高さによる下の余白を削除
+            // - align-middle: テキストの横に並んだ時の位置ズレ防止
+            // - shrink-0: 狭い場所でも潰れないようにする
+            className={`inline-flex items-center justify-center leading-none align-middle shrink-0 ${className || ''}`}
+            style={{ width: size, height: size }}
         >
             <i 
                 data-lucide={name} 
                 width={size} 
-                height={size}
-                // SVGをブロック要素にすることで、インライン特有のベースライン余白を消します
+                height={size} 
+                // SVG自体も親要素いっぱいに広げる
                 style={{ display: 'block' }} 
             ></i>
         </span>
@@ -960,8 +963,9 @@ const QuizSession = ({ rawData, mode, filterId, isDrillMode, onFinish }) => {
                         <Button onClick={handleResetCourse} variant="primary" fullWidth>
                             <Icon name="rotate-ccw" size={20} /> リセットしてやり直す
                         </Button>
+                        {/* 修正後: 閉じるボタンに変更 */}
                         <Button onClick={() => onFinish(0)} variant="secondary" fullWidth>
-                            <Icon name="home" size={20} /> ホームへ戻る
+                            <Icon name="x" size={20} /> 閉じる
                         </Button>
                     </div>
                 </div>
