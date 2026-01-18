@@ -222,7 +222,7 @@
         // DATA
         // ==========================================
         // (Simplified data set for brevity, same structure as before)
-        const VOCAB_DATA = [
+        const VOCAB_DATA_LIST = [
             { id: 'v1', level: 600, word: "significant", meaning: "かなりの、重要な", type: "vocab", choices: ["一時的な", "微細な", "疑わしい"] },
             { id: 'v2', level: 600, word: "appointment", meaning: "約束、予約、任命", type: "vocab", choices: ["失望", "許可", "評価"] },
             { id: 'v3', level: 730, word: "tentative", meaning: "仮の、暫定的な", type: "vocab", choices: ["断定的な", "永久の", "高価な"] },
@@ -752,7 +752,7 @@
 
         // データを変換してIDを自動付与する関数
 // これにより、データが増えても id: 'v100', 'v101' と書き換える必要がなくなります
-export const VOCAB_DATA = RAW_VOCAB_LIST.map((item, index) => ({
+export const VOCAB_DATA = VOCAB_DATA_LIST.map((item, index) => ({
   id: `v${index + 1}`,
   level: item.level,
   word: item.word,
