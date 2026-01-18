@@ -1800,6 +1800,828 @@ All rooms are equipped with: Alarm clock radio, Coffee maker, Cable TV, Free Wi-
         options: ["A computer", "A dishwasher", "An oven", "A microwave"],
         correct: 3,
         explanation: "設備リストに 'Microwave' が含まれています。(C) An oven は電子レンジ(microwave oven)の一種と考えられるため、設問によっては正解になり得ますが、ここでは選択肢に合わせて調整。"
+    },
+
+    // --- Part 5: Incomplete Sentences (短文穴埋め) ---
+    {
+        id: 'p5-3', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Ms. Garcia has requested that the marketing team _______ the preliminary results by Friday.",
+        options: ["submit", "submits", "submitting", "submitted"],
+        correct: 0,
+        explanation: "仮定法現在（提案・要求のthat節）。request, suggest, recommend などの後ろのthat節では、動詞は原形になります。(A) submit が正解。"
+    },
+    {
+        id: 'p5-4', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The new software is _______ user-friendly compared to the previous version.",
+        options: ["high", "highly", "height", "heighten"],
+        correct: 1,
+        explanation: "品詞問題。形容詞 user-friendly を修飾するのは副詞です。(B) highly（非常に）が正解。"
+    },
+    {
+        id: 'p5-5', part: 5, type: 'reading', contextType: 'sentence',
+        question: "_______ the bad weather, the construction project was completed on schedule.",
+        options: ["Although", "Despite", "Even", "Unless"],
+        correct: 1,
+        explanation: "前置詞vs接続詞。空欄の後は名詞句 (the bad weather) なので、前置詞の (B) Despite が正解。Althoughは接続詞なので後ろにＳ＋Ｖが必要です。"
+    },
+    {
+        id: 'p5-6', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Employees are reminded to renew their parking permits _______ expiration.",
+        options: ["prior to", "next to", "ahead", "except for"],
+        correct: 0,
+        explanation: "熟語・前置詞。「～より前に」を意味する (A) prior to が文脈（期限切れの前に更新する）に合致します。"
+    },
+    {
+        id: 'p5-7', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The CEO was satisfied with the _______ increase in sales this quarter.",
+        options: ["substance", "substantial", "substantially", "substantiate"],
+        correct: 1,
+        explanation: "品詞問題。名詞 increase を修飾するのは形容詞です。(B) substantial（かなりの、相当な）が正解。"
+    },
+
+    // --- Part 6: Text Completion (長文穴埋め) ---
+    // 文脈：オフィスの移転に関するお知らせ
+    {
+        id: 'p6-2', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Notice: Office Relocation",
+        passage: "To: All Staff\nFrom: Facilities Management\n\nWe are pleased to announce that our office will be moving to the Kenser Building next month. The new location offers more space and better amenities. \n\nWe appreciate your cooperation _______ this transition.",
+        question: "Choose the best word for the blank.",
+        options: ["while", "during", "when", "as"],
+        correct: 1,
+        explanation: "前置詞の選択。this transition（この移行期間）という名詞句の前なので、前置詞 (B) during が適切です。"
+    },
+    {
+        id: 'p6-3', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Notice: Office Relocation",
+        passage: "(...continued)\nPlease start packing your personal belongings by next Wednesday. Boxes _______ in the break room tomorrow morning.",
+        question: "Choose the best word for the blank.",
+        options: ["provide", "will provide", "will be provided", "provided"],
+        correct: 2,
+        explanation: "受動態と未来形。箱(Boxes)は「提供される」側であり、明日のことなので、未来の受動態 (C) will be provided が正解。"
+    },
+    {
+        id: 'p6-4', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Letter: Customer Service",
+        passage: "Dear Mr. Tanaka,\nThank you for your inquiry regarding your recent order. Unfortunately, the item you requested is currently out of stock. _______, we expect a new shipment to arrive early next week.",
+        question: "Choose the best word for the blank.",
+        options: ["Therefore", "Consequently", "However", "Moreover"],
+        correct: 2,
+        explanation: "接続副詞。「在庫切れです」というネガティブな情報の後に、「来週入荷します」というポジティブ（救済）な情報が続くため、逆接の (C) However が適切です。"
+    },
+
+    // --- Part 7: Reading Comprehension (読解問題) ---
+    // 文脈：製品の注文確認メール
+    {
+        id: 'p7-3', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Email: Order Confirmation",
+        passage: `Subject: Order #9928 Confirmation
+Dear Ms. Robinson,
+
+Thank you for shopping at TechLine Supplies. Your order has been processed and is scheduled to ship on October 12.
+You should receive your package within 3-5 business days.
+Please note that due to high volume, delivery times may be slightly longer than usual.
+
+Order Summary:
+- Wireless Keyboard (x1): $45.00
+- Noise-canceling Headphones (x1): $120.00
+Total: $165.00
+
+If you have any questions, simply reply to this email.`,
+        question: "What does the email indicate about the delivery?",
+        options: ["It will arrive tomorrow.", "It includes a free gift.", "It might be delayed.", "It requires a signature."],
+        correct: 2,
+        explanation: "推測問題。本文に 'delivery times may be slightly longer than usual'（通常より少し長くかかるかもしれない）とあるため、(C) It might be delayed が正解です。"
+    },
+    {
+        id: 'p7-4', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Email: Order Confirmation",
+        passage: `(Refer to the email above...)
+Order Summary:
+- Wireless Keyboard (x1): $45.00
+- Noise-canceling Headphones (x1): $120.00`,
+        question: "What is the total cost of the items before tax or shipping?",
+        options: ["$45.00", "$120.00", "$165.00", "$200.00"],
+        correct: 2,
+        explanation: "詳細読取問題。Total: $165.00 と明記されています。(C)が正解。"
+    },
+    // 文脈：会議のアジェンダ
+    {
+        id: 'p7-5', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Agenda: Annual Sales Meeting",
+        passage: `Annual Sales Meeting Agenda
+Date: November 15
+Location: Conference Room B
+
+9:00 AM - Opening Remarks (J. Miller)
+9:30 AM - Q3 Sales Review
+10:30 AM - Coffee Break
+11:00 AM - Strategy for Q4
+12:30 PM - Lunch (Catered by City Foods)
+2:00 PM - Workshop: Client Relations`,
+        question: "What will happen immediately after the sales review?",
+        options: ["Lunch will be served.", "A workshop will begin.", "There will be a break.", "J. Miller will speak."],
+        correct: 2,
+        explanation: "スケジュール読取問題。9:30からの 'Q3 Sales Review' の次は、10:30の 'Coffee Break' です。(C)が正解。"
+    },
+    {
+        id: 'p7-6', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Agenda: Annual Sales Meeting",
+        passage: `(Refer to the agenda above...)
+12:30 PM - Lunch (Catered by City Foods)
+2:00 PM - Workshop: Client Relations`,
+        question: "Who is providing the food for the meeting?",
+        options: ["The hotel staff", "City Foods", "J. Miller", "The marketing team"],
+        correct: 1,
+        explanation: "詳細読取問題。Lunchの行に '(Catered by City Foods)' とあるため、(B)が正解。"
+    },
+    // ---------------------------------------------------------
+    // Part 5: Incomplete Sentences (短文穴埋め) - 15問
+    // ---------------------------------------------------------
+    {
+        id: 'p5-8', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Anyone _______ to attend the seminar must register by the end of the day.",
+        options: ["wish", "wishes", "wishing", "will wish"],
+        correct: 2,
+        explanation: "分詞の形容詞的用法。Anyone (who is) wishing... の省略形です。能動的な意味なので現在分詞(C)が正解。"
+    },
+    {
+        id: 'p5-9', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The keynote speaker arrived _______ at the venue to check the sound system.",
+        options: ["prompt", "promptly", "promptness", "prompter"],
+        correct: 1,
+        explanation: "品詞問題。動詞 arrived を修飾するのは副詞です。(B) promptly（時間通りに、迅速に）が正解。"
+    },
+    {
+        id: 'p5-10', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Ms. Lee is responsible _______ coordinating the travel arrangements for the sales team.",
+        options: ["to", "with", "for", "on"],
+        correct: 2,
+        explanation: "熟語。be responsible for ～（～に対して責任がある、～を担当している）は頻出表現です。"
+    },
+    {
+        id: 'p5-11', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The new printer is _______ faster than the old model.",
+        options: ["significantly", "significant", "significance", "signify"],
+        correct: 0,
+        explanation: "比較級の強調。比較級 faster を修飾できるのは副詞です。(A) significantly（かなり、著しく）が正解。"
+    },
+    {
+        id: 'p5-12', part: 5, type: 'reading', contextType: 'sentence',
+        question: "We look forward to _______ from you regarding this matter.",
+        options: ["hear", "hearing", "heard", "hears"],
+        correct: 1,
+        explanation: "熟語。look forward to の 'to' は前置詞なので、後ろには動名詞(ing)が続きます。(B) hearing が正解。"
+    },
+    {
+        id: 'p5-13', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The hotel offers a _______ breakfast to all guests staying in deluxe rooms.",
+        options: ["complement", "complimentary", "compliment", "completion"],
+        correct: 1,
+        explanation: "語彙問題。complimentary（無料の、優待の）はTOEIC超頻出単語です。「無料の朝食」文脈。"
+    },
+    {
+        id: 'p5-14', part: 5, type: 'reading', contextType: 'sentence',
+        question: "_______ the contract was signed, the team began working on the project immediately.",
+        options: ["Once", "During", "Despite", "So that"],
+        correct: 0,
+        explanation: "接続詞。後ろに「S+V」が続いているため接続詞が必要です。「いったん～するとすぐに」を意味する (A) Once が文脈に合います。"
+    },
+    {
+        id: 'p5-15', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The safety regulations act as a guide to ensure the _______ of all factory workers.",
+        options: ["safe", "safely", "safety", "safest"],
+        correct: 2,
+        explanation: "品詞問題。定冠詞 the の後ろなので名詞が入ります。(C) safety が正解。"
+    },
+    {
+        id: 'p5-16', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Please review the attached documents _______ before the meeting starts.",
+        options: ["careful", "carefully", "care", "caring"],
+        correct: 1,
+        explanation: "品詞問題。動詞 review を修飾する副詞 (B) carefully（慎重に、入念に）が正解。"
+    },
+    {
+        id: 'p5-17', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Mr. Tan _______ has been working here for 20 years, will retire next month.",
+        options: ["who", "which", "whose", "whom"],
+        correct: 0,
+        explanation: "関係代名詞。先行詞が人（Mr. Tan）で、後ろに動詞（has been working）が続くため、主格の (A) who が正解。"
+    },
+    {
+        id: 'p5-18', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The itinerary for the trip is still _______ and subject to change.",
+        options: ["tentative", "durable", "lengthy", "accurate"],
+        correct: 0,
+        explanation: "語彙問題。「変更される可能性がある(subject to change)」とあるため、(A) tentative（仮の、暫定的な）が正解。"
+    },
+    {
+        id: 'p5-19', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Normally, we ship within 24 hours, _______ items ordered on weekends.",
+        options: ["accept", "acceptance", "except for", "expecting"],
+        correct: 2,
+        explanation: "前置詞句。「週末に注文された商品を除いて」とするのが自然。(C) except for が正解。"
+    },
+    {
+        id: 'p5-20', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The marketing director suggested that the budget _______ revised.",
+        options: ["be", "is", "was", "will be"],
+        correct: 0,
+        explanation: "仮定法現在。suggest, demand などの後のthat節内では、動詞は原形になります。(A) be が正解。"
+    },
+    {
+        id: 'p5-21', part: 5, type: 'reading', contextType: 'sentence',
+        question: "We need to find a more _______ way to process customer complaints.",
+        options: ["efficiency", "efficient", "efficiently", "efficiencies"],
+        correct: 1,
+        explanation: "品詞問題。名詞 way を修飾する形容詞 (B) efficient（効率的な）が正解。"
+    },
+    {
+        id: 'p5-22', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Customers can access their account information _______ by logging into the website.",
+        options: ["direct", "direction", "director", "directly"],
+        correct: 3,
+        explanation: "品詞問題。動詞 access を修飾する副詞 (D) directly（直接）が正解。"
+    },
+
+    // ---------------------------------------------------------
+    // Part 6: Text Completion (長文穴埋め) - 7問 (2セット)
+    // ---------------------------------------------------------
+    
+    // Set 1: Internal Memo (社内メモ：ITアップグレード)
+    {
+        id: 'p6-5', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Memo: System Maintenance",
+        passage: "To: All Staff\nRe: Server Maintenance\n\nPlease be advised that the IT department will perform server maintenance this weekend. As a result, email services will be unavailable _______ Saturday night to Sunday morning.",
+        question: "Choose the best word for the blank.",
+        options: ["from", "between", "since", "until"],
+        correct: 0,
+        explanation: "前置詞の選択。「AからBまで」の形（from A to B）。後ろに to があるため、(A) from が正解。"
+    },
+    {
+        id: 'p6-6', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Memo: System Maintenance",
+        passage: "(...continued)\nWe apologize for any inconvenience this may cause. We recommend _______ all important files to your local drive before leaving on Friday.",
+        question: "Choose the best word for the blank.",
+        options: ["save", "saving", "saved", "saves"],
+        correct: 1,
+        explanation: "動詞の語法。recommend doing ～（～することを推奨する）。(B) saving が正解。"
+    },
+    {
+        id: 'p6-7', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Memo: System Maintenance",
+        passage: "(...continued)\nNormal service is expected to _______ by 9:00 AM on Monday.",
+        question: "Choose the best word for the blank.",
+        options: ["resume", "resuming", "resumed", "resumes"],
+        correct: 0,
+        explanation: "不定詞。is expected to の後ろは動詞の原形がきます。(A) resume（再開する）が正解。"
+    },
+
+    // Set 2: Customer Email (顧客メール：会員更新)
+    {
+        id: 'p6-8', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Email: Membership Renewal",
+        passage: "Dear Mr. Johnson,\n\nWe are writing to remind you that your gym membership expires on August 30. We hope you have enjoyed using our facilities. To thank you for your loyalty, we would like to offer you a 10% discount if you _______ before the expiration date.",
+        question: "Choose the best word for the blank.",
+        options: ["renew", "renews", "renewed", "will renew"],
+        correct: 0,
+        explanation: "時制と条件節。if節（条件）の中では、未来のことでも現在形を使います。(A) renew が正解。"
+    },
+    {
+        id: 'p6-9', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Email: Membership Renewal",
+        passage: "(...continued)\nIn addition, renewing members will receive a free specialized training session. This offer is _______ only to current members.",
+        question: "Choose the best word for the blank.",
+        options: ["avail", "available", "availability", "availing"],
+        correct: 1,
+        explanation: "品詞問題。is _______ to ... の文脈で、補語になる形容詞が必要です。(B) available（利用可能な）が正解。"
+    },
+    {
+        id: 'p6-10', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Email: Membership Renewal",
+        passage: "(...continued)\n_______, please visit our front desk or website to complete the process.",
+        question: "Choose the best word for the blank.",
+        options: ["However", "Therefore", "Otherwise", "Instead"],
+        correct: 1,
+        explanation: "接続副詞。「したがって」「それゆえに」という意味で、行動を促す文脈につなげるため (B) Therefore が適切です。"
+    },
+    {
+        id: 'p6-11', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Email: Membership Renewal",
+        passage: "(...continued)\nWe look forward to seeing you at the gym soon.\n\nSincerely,\nFitLife Management",
+        question: "What is the purpose of this email?",
+        options: ["To announce a closure", "To encourage renewal", "To welcome a new member", "To change the schedule"],
+        correct: 1,
+        explanation: "文脈理解。会員期限が切れることを知らせ、更新（renewal）を促す内容です。"
+    },
+
+    // ---------------------------------------------------------
+    // Part 7: Reading Comprehension (読解問題) - 8問 (3セット)
+    // ---------------------------------------------------------
+
+    // Set 1: Text Message Chain (チャット：待ち合わせ変更)
+    {
+        id: 'p7-7', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Text Message Chain",
+        passage: `
+[10:15 AM] Sarah: Hey Tom, are you at the office yet? The client meeting starts in 15 mins.
+[10:16 AM] Tom: I'm stuck in traffic on the highway. There was an accident. I might be 10 mins late.
+[10:17 AM] Sarah: Okay. I'll get started with the introductions. Should I print the handouts for you?
+[10:18 AM] Tom: Yes, please. They are in the shared folder titled "Q4 Report". Thanks!
+        `,
+        question: "Why is Tom going to be late?",
+        options: ["His car broke down.", "He overslept.", "There is heavy traffic.", "He is printing reports."],
+        correct: 2,
+        explanation: "詳細読解。'stuck in traffic'（渋滞にはまった）と記述があります。"
+    },
+    {
+        id: 'p7-8', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Text Message Chain",
+        passage: `(Refer to the text chain above...)
+[10:17 AM] Sarah: Okay. I'll get started with the introductions. Should I print the handouts for you?
+[10:18 AM] Tom: Yes, please. They are in the shared folder titled "Q4 Report". Thanks!`,
+        question: "What does Sarah offer to do?",
+        options: ["Cancel the meeting", "Prepare some documents", "Pick Tom up", "Call the client"],
+        correct: 1,
+        explanation: "意図理解。'print the handouts'（資料を印刷する）という申し出は、documentsの準備にあたります。(B)が正解。"
+    },
+    {
+        id: 'p7-9', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Text Message Chain",
+        passage: `(Refer to the text chain above...)`,
+        question: "Where are the files located?",
+        options: ["On Tom's desk", "In an email", "In a shared folder", "At the printer"],
+        correct: 2,
+        explanation: "詳細読解。Tomが 'in the shared folder' と明言しています。"
+    },
+
+    // Set 2: Invoice (請求書)
+    {
+        id: 'p7-10', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Document: Invoice #5022",
+        passage: `
+INVOICE
+From: Apex Catering Services
+To: Green Leaf Tech
+
+Date: September 5
+Event Date: September 1
+
+Description:
+1. Lunch Buffet (Set B) - 20 people x $15.00 = $300.00
+2. Beverage Service - Flat rate = $50.00
+3. Delivery Fee = $20.00
+
+Subtotal: $370.00
+Tax (8%): $29.60
+Total Due: $399.60
+
+Payment due within 30 days of invoice date.
+        `,
+        question: "When did the event take place?",
+        options: ["September 1", "September 5", "September 30", "October 5"],
+        correct: 0,
+        explanation: "詳細読解。'Event Date: September 1' と書かれています。Date（請求日）と混同しないよう注意。"
+    },
+    {
+        id: 'p7-11', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Document: Invoice #5022",
+        passage: `(Refer to the invoice above...)
+Payment due within 30 days of invoice date.`,
+        question: "By what date should the payment be made?",
+        options: ["September 1", "September 30", "October 5", "October 30"],
+        correct: 2,
+        explanation: "計算問題。請求日(Invoice date)は9月5日。それから30日以内なので、10月5日が期限です。"
+    },
+
+    // Set 3: Advertisement (求人広告)
+    {
+        id: 'p7-12', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Advertisement: Job Opening",
+        passage: `
+Position: Assistant Manager
+Company: Silver Star Logistics
+
+We are seeking a motivated individual to join our growing team.
+Responsibilities include supervising warehouse staff, managing inventory records, and coordinating shipments.
+
+Requirements:
+- At least 3 years of experience in logistics.
+- Excellent communication skills.
+- Proficiency in MS Office.
+- Ability to work night shifts is a plus.
+
+To apply, send your resume and cover letter to hr@silverstar.com by July 15.
+        `,
+        question: "What is mentioned as a requirement for the job?",
+        options: ["A driver's license", "Experience in sales", "Computer skills", "Ability to speak Spanish"],
+        correct: 2,
+        explanation: "言い換え問題。'Proficiency in MS Office'（MSオフィスの熟達）は、Computer skills（コンピュータースキル）に言い換えられます。"
+    },
+    {
+        id: 'p7-13', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Advertisement: Job Opening",
+        passage: `(Refer to the advertisement above...)
+- Ability to work night shifts is a plus.`,
+        question: "What is stated about working at night?",
+        options: ["It is required.", "It is strictly forbidden.", "It is advantageous but not mandatory.", "It pays double."],
+        correct: 2,
+        explanation: "語彙・ニュアンス。「...is a plus」は「プラスになる（有利である）」という意味で、必須（required/mandatory）ではありません。(C)が正解。"
+    },
+    {
+        id: 'p7-14', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Advertisement: Job Opening",
+        passage: `(Refer to the advertisement above...)
+To apply, send your resume and cover letter to hr@silverstar.com by July 15.`,
+        question: "What must candidates submit?",
+        options: ["A photo", "A resume and cover letter", "References", "A portfolio"],
+        correct: 1,
+        explanation: "詳細読解。'send your resume and cover letter' と明記されています。"
+    },
+    // ---------------------------------------------------------
+    // Part 5: Incomplete Sentences (短文穴埋め) - 20問
+    // ---------------------------------------------------------
+    {
+        id: 'p5-23', part: 5, type: 'reading', contextType: 'sentence',
+        question: "_______ who wish to participate in the workshop should contact the HR department immediately.",
+        options: ["They", "Those", "These", "That"],
+        correct: 1,
+        explanation: "代名詞。「～する人々」という意味の定番表現 'Those who...' です。(B)が正解。"
+    },
+    {
+        id: 'p5-24', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The sales figures for this quarter have _______ our expectations.",
+        options: ["exceed", "exceeded", "excess", "excessive"],
+        correct: 1,
+        explanation: "動詞の形。have + 過去分詞（現在完了形）。(B) exceeded（超えた）が正解。"
+    },
+    {
+        id: 'p5-25', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The outdoor concert will be held tomorrow _______ it rains heavily.",
+        options: ["unless", "without", "instead", "therefore"],
+        correct: 0,
+        explanation: "接続詞。「もし～でなければ」という条件を表す (A) unless が文脈に合います。「激しく雨が降らない限り開催される」の意味。"
+    },
+    {
+        id: 'p5-26', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Mr. Henderson has been a valued member of our team _______ the past ten years.",
+        options: ["while", "during", "throughout", "between"],
+        correct: 2,
+        explanation: "前置詞。「過去10年間にわたってずっと」という期間の継続を強調する場合、(C) throughout が最適です。"
+    },
+    {
+        id: 'p5-27', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Please find the _______ invoice for your records.",
+        options: ["attach", "attached", "attaching", "attachment"],
+        correct: 1,
+        explanation: "分詞形容詞。「添付された請求書」なので、過去分詞の (B) attached が正解。"
+    },
+    {
+        id: 'p5-28', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The store offers a wide _______ of organic vegetables.",
+        options: ["vary", "various", "variety", "variable"],
+        correct: 2,
+        explanation: "コロケーション。a wide variety of ～（多種多様な～）は頻出表現です。"
+    },
+    {
+        id: 'p5-29', part: 5, type: 'reading', contextType: 'sentence',
+        question: "All laboratory equipment must _______ regular maintenance checks.",
+        options: ["undergo", "undertake", "understand", "underestimate"],
+        correct: 0,
+        explanation: "語彙問題。検査などを「受ける・経験する」という意味の (A) undergo が適切。"
+    },
+    {
+        id: 'p5-30', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The train services are _______ on time, making them a reliable choice for commuters.",
+        options: ["consistent", "consistently", "consistency", "consist"],
+        correct: 1,
+        explanation: "品詞問題。形容詞(on timeという状態)や動詞句全体を修飾するのは副詞。(B) consistently（常に、変わらず）が正解。"
+    },
+    {
+        id: 'p5-31', part: 5, type: 'reading', contextType: 'sentence',
+        question: "This is the conference room _______ the board meeting will take place.",
+        options: ["which", "that", "where", "what"],
+        correct: 2,
+        explanation: "関係副詞。先行詞が場所（conference room）で、後ろに完全な文が続いているため (C) where が正解。"
+    },
+    {
+        id: 'p5-32', part: 5, type: 'reading', contextType: 'sentence',
+        question: "We need to _______ the issue of rising production costs immediately.",
+        options: ["address", "speak", "talk", "comment"],
+        correct: 0,
+        explanation: "動詞の語彙。「問題に対処する・取り組む」という意味で (A) address が使われます。"
+    },
+    {
+        id: 'p5-33', part: 5, type: 'reading', contextType: 'sentence',
+        question: "By the time the CEO arrives, we _______ the preparations.",
+        options: ["finish", "will finish", "will have finished", "finished"],
+        correct: 2,
+        explanation: "時制（未来完了）。「（未来のある時点）までには～し終えているだろう」という文脈。(C) will have finished が正解。"
+    },
+    {
+        id: 'p5-34', part: 5, type: 'reading', contextType: 'sentence',
+        question: "You can have the package _______ to your home or office.",
+        options: ["deliver", "delivery", "delivered", "delivering"],
+        correct: 2,
+        explanation: "使役動詞 have + O + 過去分詞。「Oを～してもらう」。荷物は配達「される」側なので (C) delivered。"
+    },
+    {
+        id: 'p5-35', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Since the flight was canceled, we had to find an _______ route.",
+        options: ["alter", "alternatively", "alternative", "alternation"],
+        correct: 2,
+        explanation: "品詞問題。名詞 route を修飾する形容詞。(C) alternative（代わりの）が正解。"
+    },
+    {
+        id: 'p5-36', part: 5, type: 'reading', contextType: 'sentence',
+        question: "_______ ensure safety, all visitors must wear a helmet.",
+        options: ["In order to", "Because", "So that", "For"],
+        correct: 0,
+        explanation: "不定詞の副詞的用法。「～するために」を強調する In order to が正解。BecauseやSo thatは接続詞。"
+    },
+    {
+        id: 'p5-37', part: 5, type: 'reading', contextType: 'sentence',
+        question: "Ms. Gomez was praised for her _______ to the project.",
+        options: ["dedicate", "dedication", "dedicated", "dedicating"],
+        correct: 1,
+        explanation: "品詞問題。所有格 her の後ろは名詞。(B) dedication（献身）が正解。"
+    },
+    {
+        id: 'p5-38', part: 5, type: 'reading', contextType: 'sentence',
+        question: "This model is _______ more expensive than the one we bought last year.",
+        options: ["very", "many", "much", "too"],
+        correct: 2,
+        explanation: "比較級の強調。比較級(more expensive)を強めることができるのは (C) much です。（veryは不可）。"
+    },
+    {
+        id: 'p5-39', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The coupon is _______ until the end of the month.",
+        options: ["value", "valid", "validate", "validity"],
+        correct: 1,
+        explanation: "語彙問題。「有効な」を意味する形容詞 (B) valid が正解。"
+    },
+    {
+        id: 'p5-40', part: 5, type: 'reading', contextType: 'sentence',
+        question: "We object to _______ extra fees for services we did not use.",
+        options: ["charge", "charged", "charging", "being charged"],
+        correct: 3,
+        explanation: "語法。object to ～（～に反対する）の to は前置詞なので、後ろは名詞か動名詞。さらに「請求される」受動の意味なので (D) being charged。"
+    },
+    {
+        id: 'p5-41', part: 5, type: 'reading', contextType: 'sentence',
+        question: "According to a _______ source, the merger will be announced next week.",
+        options: ["rely", "reliable", "reliably", "reliance"],
+        correct: 1,
+        explanation: "品詞問題。名詞 source を修飾する形容詞 (B) reliable（信頼できる）が正解。"
+    },
+    {
+        id: 'p5-42', part: 5, type: 'reading', contextType: 'sentence',
+        question: "The company plans to _______ a new line of smartphones in the spring.",
+        options: ["launch", "commence", "embark", "perform"],
+        correct: 0,
+        explanation: "語彙問題。新製品を「発売する」という文脈では (A) launch が最も適切です。"
+    },
+
+    // ---------------------------------------------------------
+    // Part 6: Text Completion (長文穴埋め) - 8問 (2セット)
+    // ---------------------------------------------------------
+    
+    // Set 1: Product Recall (製品回収のお知らせ)
+    {
+        id: 'p6-12', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Notice: Product Safety",
+        passage: "To: Our Valued Customers\n\nElectroHome is writing to inform you that we are voluntarily _______ our 'HeatWave' portable heater (Model X-500).",
+        question: "Choose the best word for the blank.",
+        options: ["recalling", "recall", "recalled", "recalls"],
+        correct: 0,
+        explanation: "現在進行形。are _______ なので、現在分詞の (A) recalling（回収している）が入ります。"
+    },
+    {
+        id: 'p6-13', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Notice: Product Safety",
+        passage: "(...continued)\nThis decision was made after discovering a potential defect in the power cord. Although no injuries have been reported, the safety of our customers is our top priority. This issue _______ units sold between Jan 2023 and Dec 2023.",
+        question: "Choose the best word for the blank.",
+        options: ["effects", "affects", "concludes", "predicts"],
+        correct: 1,
+        explanation: "動詞の語彙。「～に影響する」という意味の (B) affects が正解。effectsは主に名詞。"
+    },
+    {
+        id: 'p6-14', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Notice: Product Safety",
+        passage: "(...continued)\nIf you own an affected unit, please stop using it immediately. _______ to arrange for a free replacement.",
+        question: "Choose the best word for the blank.",
+        options: ["Contacting us", "To contact us", "Contact us", "We contact"],
+        correct: 2,
+        explanation: "命令文。文頭で指示を出しているため、動詞の原形 (C) Contact us が正解。"
+    },
+    {
+        id: 'p6-15', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Notice: Product Safety",
+        passage: "(...continued)\nWe apologize for this inconvenience and thank you for your understanding. The replacement will be shipped _______ of charge.",
+        question: "Choose the best word for the blank.",
+        options: ["free", "freedom", "freely", "frees"],
+        correct: 0,
+        explanation: "熟語。free of charge（無料で）は決まり文句です。"
+    },
+
+    // Set 2: Welcome Email (新入社員へのメール)
+    {
+        id: 'p6-16', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Email: Welcome Aboard",
+        passage: "Dear Jennifer,\n\nWelcome to the team! We are excited to have you join us. On your first day, please report to the HR department for your _______.",
+        question: "Choose the best word for the blank.",
+        options: ["orient", "oriented", "orientation", "orienting"],
+        correct: 2,
+        explanation: "品詞問題。your（所有格）の後ろなので名詞が必要です。(C) orientation（オリエンテーション）が正解。"
+    },
+    {
+        id: 'p6-17', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Email: Welcome Aboard",
+        passage: "(...continued)\nAfter that, you will be introduced to your manager, who will show you to your _______ desk.",
+        question: "Choose the best word for the blank.",
+        options: ["assign", "assigned", "assigning", "assignment"],
+        correct: 1,
+        explanation: "分詞形容詞。「割り当てられた机」なので、過去分詞 (B) assigned が正解。"
+    },
+    {
+        id: 'p6-18', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Email: Welcome Aboard",
+        passage: "(...continued)\nIf you have any questions before Monday, please _______ to email me.",
+        question: "Choose the best word for the blank.",
+        options: ["feel free", "feel happy", "feel good", "feel open"],
+        correct: 0,
+        explanation: "熟語。feel free to do ～（遠慮なく～する）はビジネスメールの定番表現です。"
+    },
+    {
+        id: 'p6-19', part: 6, type: 'reading', contextType: 'long_text',
+        contextTitle: "Email: Welcome Aboard",
+        passage: "(...continued)\nWe look forward to working with you and wish you much _______ in your new role.",
+        question: "Choose the best word for the blank.",
+        options: ["succeed", "successful", "success", "successfully"],
+        correct: 2,
+        explanation: "品詞問題。much（形容詞）の後ろなので名詞 (C) success が正解。"
+    },
+
+    // ---------------------------------------------------------
+    // Part 7: Reading Comprehension (読解問題) - 12問 (4セット)
+    // ---------------------------------------------------------
+
+    // Set 1: Train Schedule (列車時刻表と注釈)
+    {
+        id: 'p7-15', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Schedule: Express Train Service",
+        passage: `
+City A to City B - Daily Schedule
+
+Train ID | Departure | Arrival | Duration | Ticket Type
+------------------------------------------------------
+Exp-101 | 08:00 AM | 09:30 AM | 1h 30m | Standard
+Exp-202 | 09:15 AM | 10:30 AM | 1h 15m | Express Plus
+Exp-305 | 11:00 AM | 12:45 PM | 1h 45m | Standard
+Exp-404 | 01:00 PM | 02:15 PM | 1h 15m | Express Plus
+
+*Note: Express Plus trains require a seat reservation fee of $10.
+        `,
+        question: "Which train takes the least amount of time to reach City B?",
+        options: ["Exp-101", "Exp-202 and Exp-404", "Exp-305", "All take the same time"],
+        correct: 1,
+        explanation: "表の読解。Duration（所要時間）を見ると、Exp-202とExp-404が「1h 15m」で最短です。"
+    },
+    {
+        id: 'p7-16', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Schedule: Express Train Service",
+        passage: `(Refer to the schedule above...)
+*Note: Express Plus trains require a seat reservation fee of $10.`,
+        question: "What is true about the Express Plus trains?",
+        options: ["They are slower.", "They serve lunch.", "They require an extra fee.", "They run only at night."],
+        correct: 2,
+        explanation: "注釈の読解。Noteに「要予約料$10」とあるため、(C)が正解。"
+    },
+    {
+        id: 'p7-17', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Schedule: Express Train Service",
+        passage: `(Refer to the schedule above...)
+Exp-305 | 11:00 AM | 12:45 PM`,
+        question: "What time does the 11:00 AM train arrive?",
+        options: ["12:00 PM", "12:15 PM", "12:45 PM", "01:00 PM"],
+        correct: 2,
+        explanation: "表の読解。Exp-305のArrival列を見ると 12:45 PM です。"
+    },
+
+    // Set 2: Online Review (レストランの口コミ)
+    {
+        id: 'p7-18', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Review: The Italian Corner",
+        passage: `
+Rated: 3 stars out of 5
+By: James T.
+
+I visited The Italian Corner last Saturday for dinner. The atmosphere was lovely and the pasta dishes were delicious.
+However, the service was quite slow. We waited 40 minutes just to get our appetizers.
+Also, the air conditioning was too strong, making it uncomfortably cold.
+I might go back for the food, but I hope they improve their staffing speed.
+        `,
+        question: "What did the reviewer like about the restaurant?",
+        options: ["The speed of service", "The food and atmosphere", "The temperature", "The price"],
+        correct: 1,
+        explanation: "詳細読解。「The atmosphere was lovely and the pasta dishes were delicious」と述べています。"
+    },
+    {
+        id: 'p7-19', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Review: The Italian Corner",
+        passage: `(Refer to the review above...)
+However, the service was quite slow. We waited 40 minutes just to get our appetizers.`,
+        question: "What was the main complaint?",
+        options: ["The food was cold.", "The waiter was rude.", "The service was slow.", "The bill was wrong."],
+        correct: 2,
+        explanation: "詳細読解。「service was quite slow」と明記されています。"
+    },
+    {
+        id: 'p7-20', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Review: The Italian Corner",
+        passage: `(Refer to the review above...)
+I might go back for the food, but I hope they improve their staffing speed.`,
+        question: "Will the reviewer visit the restaurant again?",
+        options: ["Definitely not.", "Possibly.", "Only for lunch.", "Every week."],
+        correct: 1,
+        explanation: "推測。「I might go back（戻るかもしれない）」と言っているため、可能性を示す (B) Possibly が正解。"
+    },
+
+    // Set 3: Internal Memo (リモートワーク規定の変更)
+    {
+        id: 'p7-21', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Memo: Update on Work Policy",
+        passage: `
+From: HR Department
+To: All Employees
+Subject: Remote Work Policy Update
+
+Effective November 1, the company will implement a new hybrid work policy.
+Employees will be required to work from the office at least three days a week (Tuesday to Thursday).
+Monday and Friday can be used as remote work days.
+Exceptions can be made for employees with medical reasons, pending approval from a supervisor.
+        `,
+        question: "What change is being announced?",
+        options: ["The office is closing.", "Remote work is forbidden.", "A hybrid schedule is starting.", "Salaries are increasing."],
+        correct: 2,
+        explanation: "概要把握。「new hybrid work policy（新しいハイブリッド勤務規定）」の導入が発表されています。"
+    },
+    {
+        id: 'p7-22', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Memo: Update on Work Policy",
+        passage: `(Refer to the memo above...)
+Employees will be required to work from the office at least three days a week (Tuesday to Thursday).`,
+        question: "On which day must employees come to the office?",
+        options: ["Monday", "Wednesday", "Friday", "Sunday"],
+        correct: 1,
+        explanation: "詳細読解。出社必須は「Tuesday to Thursday」なので、選択肢の中で当てはまるのは (B) Wednesday です。"
+    },
+    {
+        id: 'p7-23', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Memo: Update on Work Policy",
+        passage: `(Refer to the memo above...)
+Exceptions can be made for employees with medical reasons, pending approval from a supervisor.`,
+        question: "Who can apply for an exception?",
+        options: ["Employees with medical reasons", "Managers only", "New employees", "People living far away"],
+        correct: 0,
+        explanation: "詳細読解。「medical reasons」がある従業員は例外が認められる可能性があると書かれています。"
+    },
+
+    // Set 4: Warranty Card (保証書)
+    {
+        id: 'p7-24', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Document: Limited Warranty",
+        passage: `
+Product: SuperView Camera 5000
+Warranty Period: 2 Years from date of purchase.
+
+This warranty covers defects in materials and workmanship.
+It does not cover damage caused by accidents, misuse, or water exposure.
+To claim warranty service, you must present the original purchase receipt.
+        `,
+        question: "How long is the warranty valid?",
+        options: ["6 months", "1 year", "2 years", "Lifetime"],
+        correct: 2,
+        explanation: "詳細読解。「Warranty Period: 2 Years」と明記されています。"
+    },
+    {
+        id: 'p7-25', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Document: Limited Warranty",
+        passage: `(Refer to the warranty card above...)
+It does not cover damage caused by accidents, misuse, or water exposure.`,
+        question: "What is NOT covered by the warranty?",
+        options: ["Material defects", "Workmanship errors", "Water damage", "Factory faults"],
+        correct: 2,
+        explanation: "否定情報の検索。「does not cover... water exposure（水濡れ）」とあるため、(C)が対象外です。"
+    },
+    {
+        id: 'p7-26', part: 7, type: 'reading', contextType: 'long_text',
+        contextTitle: "Document: Limited Warranty",
+        passage: `(Refer to the warranty card above...)
+To claim warranty service, you must present the original purchase receipt.`,
+        question: "What is required to receive service?",
+        options: ["The original box", "The purchase receipt", "An ID card", "A credit card"],
+        correct: 1,
+        explanation: "詳細読解。「present the original purchase receipt」が必要とされています。"
     }
 ];
 
