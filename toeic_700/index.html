@@ -767,28 +767,53 @@ const VOCAB_DATA = VOCAB_DATA_LIST.map((item, index) => ({
 
 // リスニングセクション (Part 1 - 4)
 const LISTENING_QUESTION_DATA = [
-    // --- Part 1: Photographs ---
+    // ==============================================================================
+    // Part 1: Photographs (写真描写問題)
+    // ==============================================================================
     {
         id: 'p1-1', part: 1, type: 'listening', contextType: 'image',
-        // ダミー画像URL (実際の実装では適切な画像を配置)
-        imageUrl: "https://placehold.co/600x400/3b82f6/white?text=Man+at+Computer",
+        // 【画像】オフィスでPCに向かう男性
+        imageUrl: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80",
         script: "(A) The man's walking around the room. (B) The man's examining the jacket. (C) The man's looking at the map. (D) The man's sitting in front of a computer.",
         question: "写真の描写として最も適切なものを選んでください。",
         options: ["(A)", "(B)", "(C)", "(D)"],
         correct: 3,
-        explanation: "男性がコンピュータの前に座って作業をしている様子を描写している(D)が正解。(A)walkingはworkingとの音のひっかけ。"
+        explanation: "男性がオフィスでコンピュータの前に座って作業をしている様子を描写している(D)が正解。(A)walkingはworkingとの音のひっかけ。"
     },
     {
         id: 'p1-2', part: 1, type: 'listening', contextType: 'image',
-        imageUrl: "https://placehold.co/600x400/22c55e/white?text=Construction+Site",
-        script: "(A) The women are wearing their protective gloves. (B) The women are touching the wall. (C) The women are forming a circle. (D) The women are working at the construction site.",
+        // 【画像】建設現場で働く人々（ヘルメット着用）
+        imageUrl: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800&q=80",
+        script: "(A) The workers are wearing their protective gloves. (B) The workers are touching the wall. (C) The workers are forming a circle. (D) The workers are working at the construction site.",
         question: "写真の描写として最も適切なものを選んでください。",
         options: ["(A)", "(B)", "(C)", "(D)"],
         correct: 3,
-        explanation: "ヘルメットや工具が見えるため、建設現場(construction site)で働いている(D)が正解。"
+        explanation: "ヘルメット（protective gear）を着用し、建設現場(construction site)で働いている様子から(D)が正解。"
+    },
+    {
+        id: 'p1-3', part: 1, type: 'listening', contextType: 'image',
+        // 【画像】倉庫で積み上げられた段ボール箱
+        imageUrl: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80",
+        script: "(A) Some boxes are being loaded onto a truck. (B) Some merchandise is stacked on shelves. (C) A man is folding some cardboard. (D) The aisle is crowded with shoppers.",
+        question: "写真の描写として最も適切なものを選んでください。",
+        options: ["(A)", "(B)", "(C)", "(D)"],
+        correct: 1,
+        explanation: "段ボール箱が棚に積み重ねられている(stacked on shelves)状態を表す(B)が正解。動作の途中ではないため、進行形の受動態(being loaded)は不正解。"
+    },
+    {
+        id: 'p1-4', part: 1, type: 'listening', contextType: 'image',
+        // 【画像】会議室で書類を指差して議論する人々
+        imageUrl: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=800&q=80",
+        script: "(A) They're shaking hands. (B) One of the people is pointing at a document. (C) They're rearranging the furniture. (D) The monitors are turned off.",
+        question: "写真の描写として最も適切なものを選んでください。",
+        options: ["(A)", "(B)", "(C)", "(D)"],
+        correct: 1,
+        explanation: "人物の一人がテーブル上の書類を指差している(pointing at a document)様子を描写する(B)が正解。"
     },
 
-    // --- Part 2: Question-Response ---
+    // ==============================================================================
+    // Part 2: Question-Response (応答問題)
+    // ==============================================================================
     {
         id: 'p2-1', part: 2, type: 'listening', contextType: 'dialogue',
         script: "Will you be visiting the client tomorrow afternoon?",
@@ -799,7 +824,7 @@ const LISTENING_QUESTION_DATA = [
             "(C) We haven't received any invitation yet."
         ],
         correct: 1,
-        explanation: "「明日の午後、顧客を訪問しますか？」という予定の質問に対し、「3時に約束がある」と答えている(B)が正解。"
+        explanation: "「明日の午後、顧客を訪問しますか？」という予定の質問に対し、「3時に約束がある（から訪問する）」と具体的に答えている(B)が正解。"
     },
     {
         id: 'p2-2', part: 2, type: 'listening', contextType: 'dialogue',
@@ -813,8 +838,46 @@ const LISTENING_QUESTION_DATA = [
         correct: 1,
         explanation: "配送が遅れている理由(Why)を聞いているので、原因(Because...)を述べている(B)が正解。"
     },
+    {
+        id: 'p2-3', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Who's in charge of organizing the company retreat this year?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: [
+            "(A) It was a great event.",
+            "(B) I think it's Mr. Tanaka in HR.",
+            "(C) Let's meet in the lobby."
+        ],
+        correct: 1,
+        explanation: "「誰が担当ですか？」という質問に対し、担当者の名前と部署を挙げている(B)が正解。(A)は時制が合わず、(C)は場所への言及で不適切。"
+    },
+    {
+        id: 'p2-4', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Why don't we try the new Italian restaurant for lunch?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: [
+            "(A) It's a bit too far from the office.",
+            "(B) No, I haven't tried it yet.",
+            "(C) The pasta was delicious."
+        ],
+        correct: 0,
+        explanation: "Why don't we...?（提案）に対し、「オフィスから遠すぎる」と理由を挙げて断っている(A)が正解。"
+    },
+    {
+        id: 'p2-5', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Did you manage to finish the quarterly report?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: [
+            "(A) It's located on the fourth quarter.",
+            "(B) Usually by email.",
+            "(C) I'm still waiting for the sales figures."
+        ],
+        correct: 2,
+        explanation: "「レポートは終わりましたか？」に対し、「まだ数字待ちです（＝終わっていない）」と状況を説明する間接応答の(C)が正解。"
+    },
 
-    // --- Part 3: Conversations ---
+    // ==============================================================================
+    // Part 3: Conversations (会話問題)
+    // ==============================================================================
     {
         id: 'p3-1', part: 3, type: 'listening', contextType: 'conversation',
         contextTitle: "Office: Copier Problem",
@@ -829,16 +892,55 @@ M: Let me see... maybe it's a paper jam. We'd better call a repairman.`,
     },
     {
         id: 'p3-2', part: 3, type: 'listening', contextType: 'conversation',
-        // 同じスクリプトを共有
-        script: `(Refer to previous conversation about the copier...)
-M: ...We'd better call a repairman.`,
+        // 同じ会話スクリプトを参照
+        script: `W: There seems to be something wrong with this copier. The red light is blinking.
+M: Is it broken again? That's the third time this week.
+W: I've got to make fifty copies by noon, so I'll use the one on the 3rd floor.
+M: Let me see... maybe it's a paper jam. We'd better call a repairman.`,
         question: "What will the man probably do next?",
         options: ["Go to a different floor", "Call a technician", "Complain to his boss", "Spend hours at his desk"],
         correct: 1,
         explanation: "男性は最後に repairman（修理工）を呼ぶと言っているため、(B) Call a technician が正解。"
     },
+    {
+        id: 'p3-3', part: 3, type: 'listening', contextType: 'conversation',
+        contextTitle: "Office: Schedule Conflict",
+        script: `W: Hi Mark. Do you have a minute? I wanted to discuss the presentation for Friday's meeting.
+M: I'm actually on my way to a client lunch right now. Can we catch up later this afternoon?
+W: Sure. I'll be in a budget meeting until 3 PM, but I'm free after that.
+M: Perfect. Stop by my desk around 3:30 then.`,
+        question: "Why is the man unable to talk right now?",
+        options: ["He is in a meeting", "He is leaving for an appointment", "He is working on a budget", "He is sick"],
+        correct: 1,
+        explanation: "男性は 'on my way to a client lunch'（顧客とのランチに向かう途中）と言っているため、(B)が正解。"
+    },
+    {
+        id: 'p3-4', part: 3, type: 'listening', contextType: 'conversation',
+        script: `W: Hi Mark. Do you have a minute? I wanted to discuss the presentation for Friday's meeting.
+M: I'm actually on my way to a client lunch right now. Can we catch up later this afternoon?
+W: Sure. I'll be in a budget meeting until 3 PM, but I'm free after that.
+M: Perfect. Stop by my desk around 3:30 then.`,
+        question: "What does the man suggest the woman do?",
+        options: ["Email him the details", "Wait for his call", "Visit his workspace", "Go to lunch with him"],
+        correct: 2,
+        explanation: "男性は 'Stop by my desk'（私のデスクに寄って）と言っている。これを 'Visit his workspace' と言い換えている(C)が正解。"
+    },
+    {
+        id: 'p3-5', part: 3, type: 'listening', contextType: 'conversation',
+        contextTitle: "Store: Item Inquiry",
+        script: `M: Excuse me, I'm looking for a waterproof jacket for hiking. I saw some in the window display.
+W: Those are our newest arrivals. Unfortunately, we're currently sold out of the medium size in blue.
+M: Oh, that's too bad. That was the color I wanted.
+W: We can order it from our warehouse, but it will take about three days to arrive. Or, we have the green one in stock.`,
+        question: "What problem does the man have?",
+        options: ["The store is closed", "An item is unavailable", "The price is too high", "He lost his receipt"],
+        correct: 1,
+        explanation: "女性が 'sold out of the medium size' と言っていることから、希望の商品が在庫切れであることがわかる。(B)が正解。"
+    },
 
-    // --- Part 4: Talks ---
+    // ==============================================================================
+    // Part 4: Talks (説明文問題)
+    // ==============================================================================
     {
         id: 'p4-1', part: 4, type: 'listening', contextType: 'monologue',
         contextTitle: "Announcement: Starlight Cruise",
@@ -847,6 +949,24 @@ M: ...We'd better call a repairman.`,
         options: ["Four meals", "Films", "A musical performance", "Fireworks"],
         correct: 2,
         explanation: "アナウンス内で 'live musical entertainment' が含まれると述べられています。"
+    },
+    {
+        id: 'p4-2', part: 4, type: 'listening', contextType: 'monologue',
+        contextTitle: "Airport Announcement",
+        script: "Attention passengers on Flight 502 to London. Due to a mechanical issue with the aircraft, our departure will be delayed by approximately two hours. Maintenance crews are working on the problem now. We apologize for the inconvenience and will provide meal vouchers at the check-in counter.",
+        question: "What is the reason for the delay?",
+        options: ["Bad weather", "A mechanical problem", "Late arrival of the crew", "Security check"],
+        correct: 1,
+        explanation: "アナウンス冒頭で 'Due to a mechanical issue'（機械的な問題により）と述べられているため、(B)が正解。"
+    },
+    {
+        id: 'p4-3', part: 4, type: 'listening', contextType: 'monologue',
+        contextTitle: "Voicemail: Appointment",
+        script: "Hi, this is Sarah from Dr. Miller's dental clinic. I'm calling to confirm your appointment for tomorrow, Wednesday at 10 AM. Please remember to bring your insurance card. If you need to reschedule, please let us know at least 24 hours in advance.",
+        question: "What is the listener asked to do?",
+        options: ["Pay a fee", "Arrive early", "Bring a document", "Call back immediately"],
+        correct: 2,
+        explanation: "電話の主は 'bring your insurance card'（保険証を持ってきて）と依頼している。これを 'Bring a document' と言い換えた(C)が正解。"
     }
 ];
 
