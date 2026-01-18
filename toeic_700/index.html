@@ -752,7 +752,7 @@
 
         // データを変換してIDを自動付与する関数
 // これにより、データが増えても id: 'v100', 'v101' と書き換える必要がなくなります
-export const VOCAB_DATA = VOCAB_DATA_LIST.map((item, index) => ({
+const VOCAB_DATA = VOCAB_DATA_LIST.map((item, index) => ({
   id: `v${index + 1}`,
   level: item.level,
   word: item.word,
