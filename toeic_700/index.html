@@ -967,6 +967,474 @@ W: We can order it from our warehouse, but it will take about three days to arri
         options: ["Pay a fee", "Arrive early", "Bring a document", "Call back immediately"],
         correct: 2,
         explanation: "電話の主は 'bring your insurance card'（保険証を持ってきて）と依頼している。これを 'Bring a document' と言い換えた(C)が正解。"
+    },
+    // ------------------------------------------------------------------
+    // Part 1: Photographs (4 New Questions)
+    // ------------------------------------------------------------------
+    {
+        id: 'add-p1-1', part: 1, type: 'listening', contextType: 'image',
+        // 【画像】講演会で話す女性と聴衆
+        imageUrl: "https://images.unsplash.com/photo-1544531320-dd40299f7672?auto=format&fit=crop&w=800&q=80",
+        script: "(A) An audience is applauding the speaker. (B) A woman is adjusting the microphone. (C) Some people are leaving the auditorium. (D) A presentation is being given.",
+        question: "写真の描写として最も適切なものを選んでください。",
+        options: ["(A)", "(B)", "(C)", "(D)"],
+        correct: 3,
+        explanation: "プレゼンテーションが行われている状況(D)が正解。(A)は拍手している描写がない場合が多く、(B)は動作の瞬間ではないため不適切。"
+    },
+    {
+        id: 'add-p1-2', part: 1, type: 'listening', contextType: 'image',
+        // 【画像】カフェでエプロンをした店員がコーヒーを淹れている
+        imageUrl: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80",
+        script: "(A) He is pouring a beverage into a cup. (B) He is washing some dishes. (C) He is setting up the tables. (D) He is paying for his meal.",
+        question: "写真の描写として最も適切なものを選んでください。",
+        options: ["(A)", "(B)", "(C)", "(D)"],
+        correct: 0,
+        explanation: "飲み物を注いでいる動作(pouring a beverage)を描写する(A)が正解。"
+    },
+    {
+        id: 'add-p1-3', part: 1, type: 'listening', contextType: 'image',
+        // 【画像】屋外のベンチで本を読む人
+        imageUrl: "https://images.unsplash.com/photo-1471970471555-19d4b113e9ed?auto=format&fit=crop&w=800&q=80",
+        script: "(A) The path is being paved. (B) A woman is sitting on a bench outdoors. (C) Leaves are being raked into a pile. (D) A bicycle has been parked near a tree.",
+        question: "写真の描写として最も適切なものを選んでください。",
+        options: ["(A)", "(B)", "(C)", "(D)"],
+        correct: 1,
+        explanation: "屋外のベンチに座っている状態を描写する(B)が正解。受け身の進行形(being paved/raked)は作業中でないと不正解。"
+    },
+    {
+        id: 'add-p1-4', part: 1, type: 'listening', contextType: 'image',
+        // 【画像】空港の荷物受取所
+        imageUrl: "https://images.unsplash.com/photo-1530521954077-a60f632ad202?auto=format&fit=crop&w=800&q=80",
+        script: "(A) The passengers are boarding the aircraft. (B) Luggage is moving on the conveyor belt. (C) The flight attendant is checking tickets. (D) The suitcases are being packed.",
+        question: "写真の描写として最も適切なものを選んでください。",
+        options: ["(A)", "(B)", "(C)", "(D)"],
+        correct: 1,
+        explanation: "ベルトコンベア上を荷物が移動している様子(B)が正解。"
+    },
+
+    // ------------------------------------------------------------------
+    // Part 2: Question-Response (20 New Questions)
+    // ------------------------------------------------------------------
+    {
+        id: 'add-p2-1', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "How long will it take to get to the airport?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) About forty minutes by taxi.", "(B) I have a heavy suitcase.", "(C) No, I haven't been there."],
+        correct: 0,
+        explanation: "所要時間(How long)を聞いているので、具体的な時間を答えている(A)が正解。"
+    },
+    {
+        id: 'add-p2-2', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Who approved the budget proposal?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) In the conference room.", "(B) The board of directors did.", "(C) It was a great proposal."],
+        correct: 1,
+        explanation: "承認者(Who)を聞いているので、取締役会(board of directors)と答えている(B)が正解。"
+    },
+    {
+        id: 'add-p2-3', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Would you like me to review your presentation slides?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) That would be very helpful, thanks.", "(B) I presented it yesterday.", "(C) The slide projector is broken."],
+        correct: 0,
+        explanation: "申し出(Would you like me to...?)に対し、感謝して受け入れている(A)が正解。"
+    },
+    {
+        id: 'add-p2-4', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Where should I put these extra chairs?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) Everyone sat down.", "(B) Please stack them in the corner.", "(C) It's a comfortable chair."],
+        correct: 1,
+        explanation: "置き場所(Where)を聞いているので、具体的な指示をしている(B)が正解。"
+    },
+    {
+        id: 'add-p2-5', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Didn't you order the office supplies last week?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) Yes, they should arrive tomorrow.", "(B) No, the office is closed.", "(C) Supplies are in the cabinet."],
+        correct: 0,
+        explanation: "否定疑問文。「注文しなかったの？（＝したよね？）」に対し、「はい（注文しました）、明日届くはずです」と答える(A)が正解。"
+    },
+    {
+        id: 'add-p2-6', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "When is the deadline for the marketing project?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) The market is open.", "(B) We have until next Friday.", "(C) I'll send it to you."],
+        correct: 1,
+        explanation: "期限(When)に対し、「来週の金曜日まである(We have until...)」と答えている(B)が正解。"
+    },
+    {
+        id: 'add-p2-7', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Do you prefer coffee or tea?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) Yes, please.", "(B) Neither, I'll just have water.", "(C) It's hot outside."],
+        correct: 1,
+        explanation: "選択疑問文(A or B)。どちらでもない(Neither)という回答パターンの(B)が正解。"
+    },
+    {
+        id: 'add-p2-8', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Why is the parking lot closed today?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) They are repaving the surface.", "(B) My car is parked nearby.", "(C) At 9:00 AM."],
+        correct: 0,
+        explanation: "理由(Why)に対し、工事中(repaving)という事情を説明している(A)が正解。"
+    },
+    {
+        id: 'add-p2-9', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "How often does the shuttle bus run?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) To the city center.", "(B) Every thirty minutes.", "(C) It's a fast bus."],
+        correct: 1,
+        explanation: "頻度(How often)を聞いているので、30分おき(Every 30 mins)と答えている(B)が正解。"
+    },
+    {
+        id: 'add-p2-10', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "I can't log in to the network.",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) I'll call IT support for you.", "(B) The internet is useful.", "(C) Login is required."],
+        correct: 0,
+        explanation: "困っている状況（平叙文）に対し、助けを申し出ている(A)が正解。"
+    },
+    {
+        id: 'add-p2-11', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Whose notebook is this on the desk?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) It looks like Susan's.", "(B) I took some notes.", "(C) It's a new desk."],
+        correct: 0,
+        explanation: "所有者(Whose)を聞いているので、推測(looks like Susan's)で答えている(A)が正解。"
+    },
+    {
+        id: 'add-p2-12', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Could you tell me how to get to the post office?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) I have some letters to mail.", "(B) Go straight and turn left.", "(C) The office is open."],
+        correct: 1,
+        explanation: "道順(How to get to...)を聞いているので、指示(Go straight...)している(B)が正解。"
+    },
+    {
+        id: 'add-p2-13', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "The meeting has been rescheduled to Room B.",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) Thanks for letting me know.", "(B) It's a big room.", "(C) I met him yesterday."],
+        correct: 0,
+        explanation: "情報の伝達（変更のお知らせ）に対し、感謝と了解を示している(A)が正解。"
+    },
+    {
+        id: 'add-p2-14', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Have you met our new regional manager yet?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) Yes, briefly this morning.", "(B) The region is large.", "(C) I managed to do it."],
+        correct: 0,
+        explanation: "「もう会った？」に対し、「今朝、手短に(briefly)」と答えている(A)が正解。"
+    },
+    {
+        id: 'add-p2-15', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Is there a pharmacy nearby?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) No, I don't need medicine.", "(B) There's one across the street.", "(C) The farm is far away."],
+        correct: 1,
+        explanation: "場所の有無(Is there...?)に対し、具体的な場所を提示している(B)が正解。"
+    },
+    {
+        id: 'add-p2-16', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Why did you bring an umbrella?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) It's supposed to rain later.", "(B) I like the color blue.", "(C) I bought it on sale."],
+        correct: 0,
+        explanation: "理由に対し、「後で雨が降る予報だから」と答えている(A)が正解。"
+    },
+    {
+        id: 'add-p2-17', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Should we take a taxi or the subway?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) The subway is faster at this hour.", "(B) The taxi driver was nice.", "(C) I have a ticket."],
+        correct: 0,
+        explanation: "選択疑問文。判断基準（地下鉄の方が速い）を提示して回答している(A)が正解。"
+    },
+    {
+        id: 'add-p2-18', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "I think we need to hire more staff.",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) I agree, the team is overworked.", "(B) The staff room is empty.", "(C) Higher than before."],
+        correct: 0,
+        explanation: "意見（もっと人を雇うべきだ）に対し、同意とその理由（過重労働だ）を述べている(A)が正解。"
+    },
+    {
+        id: 'add-p2-19', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "When will the keynote speaker arrive?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) He's already here.", "(B) It was a key decision.", "(C) In the auditorium."],
+        correct: 0,
+        explanation: "いつ(When)に対し、「もう到着しています」と期待（未来）を裏返す形で答える(A)が正解。"
+    },
+    {
+        id: 'add-p2-20', part: 2, type: 'listening', contextType: 'dialogue',
+        script: "Could you hold the elevator for me?",
+        question: "質問に対する適切な応答を選んでください。",
+        options: ["(A) Sure, hurry up.", "(B) The elevator is inspected.", "(C) I'm holding a pen."],
+        correct: 0,
+        explanation: "依頼（エレベーターを開けておいて）に対し、承諾している(A)が正解。"
+    },
+
+    // ------------------------------------------------------------------
+    // Part 3: Conversations (12 New Questions / 4 Dialogues)
+    // ------------------------------------------------------------------
+    // --- Conversation 1: Replacing an item ---
+    {
+        id: 'add-p3-1-1', part: 3, type: 'listening', contextType: 'conversation',
+        contextTitle: "Store Return",
+        script: `M: Hi, I bought this printer here last week, but it's making a strange noise when I print.
+W: I'm sorry to hear that. Do you have your receipt with you?
+M: Yes, here it is. I'd like to exchange it for the same model if possible.
+W: Let me check our stock. Ah, we have one left. I'll go get it from the back room.`,
+        question: "Why is the man at the store?",
+        options: ["To buy paper", "To return a defective item", "To apply for a job", "To pick up a photo"],
+        correct: 1,
+        explanation: "男性は異音がするプリンターを交換しに来ているため、(B)が正解。"
+    },
+    {
+        id: 'add-p3-1-2', part: 3, type: 'listening', contextType: 'conversation',
+        script: `(Refer to previous conversation)`,
+        question: "What does the woman ask for?",
+        options: ["Identification", "A credit card", "A receipt", "A warranty card"],
+        correct: 2,
+        explanation: "女性は 'Do you have your receipt?' と尋ねている。"
+    },
+    {
+        id: 'add-p3-1-3', part: 3, type: 'listening', contextType: 'conversation',
+        script: `(Refer to previous conversation)`,
+        question: "What will the woman do next?",
+        options: ["Refund the money", "Call the manager", "Go to the back room", "Repair the printer"],
+        correct: 2,
+        explanation: "最後に 'I'll go get it from the back room' と述べている。"
+    },
+
+    // --- Conversation 2: Travel Plans ---
+    {
+        id: 'add-p3-2-1', part: 3, type: 'listening', contextType: 'conversation',
+        contextTitle: "Booking a Trip",
+        script: `W: I need to book a flight to Singapore for a conference next month.
+M: Okay. There are two options: a direct flight that leaves at 8 AM, or a cheaper one with a layover.
+W: The conference starts early the next day, so I'd prefer the direct flight to get some rest.
+M: Understood. I'll book that for you. Do you need a hotel reservation as well?`,
+        question: "What is the woman planning to do?",
+        options: ["Go on a vacation", "Attend a conference", "Visit family", "Move to Singapore"],
+        correct: 1,
+        explanation: "女性は 'for a conference next month' と言っている。"
+    },
+    {
+        id: 'add-p3-2-2', part: 3, type: 'listening', contextType: 'conversation',
+        script: `(Refer to previous conversation)`,
+        question: "Why does the woman choose the direct flight?",
+        options: ["It is cheaper", "It has better food", "She wants to rest", "She likes layovers"],
+        correct: 2,
+        explanation: "直行便を選んだ理由は 'get some rest'（休みたいから）。"
+    },
+    {
+        id: 'add-p3-2-3', part: 3, type: 'listening', contextType: 'conversation',
+        script: `(Refer to previous conversation)`,
+        question: "What does the man offer to do?",
+        options: ["Book a hotel", "Drive her to the airport", "Pay for the ticket", "Cancel the meeting"],
+        correct: 0,
+        explanation: "男性は最後に 'Do you need a hotel reservation as well?' と申し出ている。"
+    },
+
+    // --- Conversation 3: Office Renovation ---
+    {
+        id: 'add-p3-3-1', part: 3, type: 'listening', contextType: 'conversation',
+        contextTitle: "Office Renovation",
+        script: `M: Have you heard? The management is planning to renovate the break room next week.
+W: Really? That's great news. The furniture in there is so old.
+M: Yes, but it means we won't be able to use the kitchen area for about three days.
+W: That's inconvenient. I guess I'll have to bring a sandwich or go out for lunch then.`,
+        question: "What will happen next week?",
+        options: ["A party will be held", "The office will move", "A room will be renovated", "New staff will arrive"],
+        correct: 2,
+        explanation: "男性が 'renovate the break room next week' と述べている。"
+    },
+    {
+        id: 'add-p3-3-2', part: 3, type: 'listening', contextType: 'conversation',
+        script: `(Refer to previous conversation)`,
+        question: "What problem does the man mention?",
+        options: ["The cost is high", "The kitchen will be closed", "The work will take a month", "The furniture is broken"],
+        correct: 1,
+        explanation: "男性は 'won't be able to use the kitchen area'（キッチンが使えなくなる）という問題を挙げている。"
+    },
+    {
+        id: 'add-p3-3-3', part: 3, type: 'listening', contextType: 'conversation',
+        script: `(Refer to previous conversation)`,
+        question: "What does the woman say she will do?",
+        options: ["Help with the painting", "Buy new furniture", "Go out for lunch", "Work from home"],
+        correct: 2,
+        explanation: "女性は対策として 'go out for lunch' と言っている。"
+    },
+
+    // --- Conversation 4: Project Deadline ---
+    {
+        id: 'add-p3-4-1', part: 3, type: 'listening', contextType: 'conversation',
+        contextTitle: "Missing Data",
+        script: `W: David, are you almost done with the sales report? The client expects it by 5 PM.
+M: I'm almost finished, but I'm still waiting for the data from the Tokyo branch. They haven't emailed it yet.
+W: You should call them immediately. It's already morning over there.
+M: Good idea. I'll call them right now to make sure we get it in time.`,
+        question: "What are the speakers discussing?",
+        options: ["A sales report", "A marketing plan", "A flight schedule", "A computer error"],
+        correct: 0,
+        explanation: "冒頭で 'sales report' について話している。"
+    },
+    {
+        id: 'add-p3-4-2', part: 3, type: 'listening', contextType: 'conversation',
+        script: `(Refer to previous conversation)`,
+        question: "What is causing the delay?",
+        options: ["The printer is broken", "Data is missing", "The internet is down", "The client cancelled"],
+        correct: 1,
+        explanation: "男性は 'waiting for the data'（データ待ち）だと言っている。"
+    },
+    {
+        id: 'add-p3-4-3', part: 3, type: 'listening', contextType: 'conversation',
+        script: `(Refer to previous conversation)`,
+        question: "What will the man do next?",
+        options: ["Email the client", "Go home", "Call the Tokyo branch", "Write the report"],
+        correct: 2,
+        explanation: "最後に 'I'll call them right now' と言っている。"
+    },
+
+    // ------------------------------------------------------------------
+    // Part 4: Talks (15 New Questions / 5 Talks)
+    // ------------------------------------------------------------------
+    // --- Talk 1: Train Announcement ---
+    {
+        id: 'add-p4-1-1', part: 4, type: 'listening', contextType: 'monologue',
+        contextTitle: "Train Station",
+        script: "May I have your attention, please. The 9:30 express train to Central Station has been delayed due to a signal failure. It will now arrive at 9:45 on Platform 4. We apologize for the delay. Passengers holding tickets for this train do not need to exchange them.",
+        question: "Where is this announcement likely taking place?",
+        options: ["At an airport", "At a train station", "On a bus", "In a taxi"],
+        correct: 1,
+        explanation: "内容（platform, train）から駅のアナウンスである。"
+    },
+    {
+        id: 'add-p4-1-2', part: 4, type: 'listening', contextType: 'monologue',
+        script: `(Refer to previous announcement)`,
+        question: "What is the cause of the delay?",
+        options: ["Weather conditions", "A signal failure", "Construction work", "A lost passenger"],
+        correct: 1,
+        explanation: "アナウンスで 'due to a signal failure' と述べている。"
+    },
+    {
+        id: 'add-p4-1-3', part: 4, type: 'listening', contextType: 'monologue',
+        script: `(Refer to previous announcement)`,
+        question: "When will the train arrive?",
+        options: ["9:30", "9:45", "10:00", "10:15"],
+        correct: 1,
+        explanation: "変更後の時刻は 'arrive at 9:45'。"
+    },
+
+    // --- Talk 2: Weather Forecast ---
+    {
+        id: 'add-p4-2-1', part: 4, type: 'listening', contextType: 'monologue',
+        contextTitle: "Weather Forecast",
+        script: "Good morning. This is your local weather update. It will be sunny and warm this morning, but expect heavy rain starting in the late afternoon. If you are planning any outdoor activities, please finish them before 3 PM. Tomorrow will be clear but significantly colder.",
+        question: "What is the weather like this morning?",
+        options: ["Rainy", "Snowy", "Sunny and warm", "Cloudy and cold"],
+        correct: 2,
+        explanation: "冒頭で 'sunny and warm this morning' と言っている。"
+    },
+    {
+        id: 'add-p4-2-2', part: 4, type: 'listening', contextType: 'monologue',
+        script: `(Refer to previous talk)`,
+        question: "What does the speaker recommend?",
+        options: ["Staying inside all day", "Finishing outdoor activities early", "Buying an umbrella", "Wearing a coat"],
+        correct: 1,
+        explanation: "午後遅くに雨が降るため 'finish them(outdoor activities) before 3 PM' と推奨している。"
+    },
+    {
+        id: 'add-p4-2-3', part: 4, type: 'listening', contextType: 'monologue',
+        script: `(Refer to previous talk)`,
+        question: "How will the weather change tomorrow?",
+        options: ["It will get hotter", "It will be colder", "It will snow", "It will be humid"],
+        correct: 1,
+        explanation: "最後に 'Tomorrow will be... significantly colder' と述べている。"
+    },
+
+    // --- Talk 3: Museum Tour Intro ---
+    {
+        id: 'add-p4-3-1', part: 4, type: 'listening', contextType: 'monologue',
+        contextTitle: "Museum Guide",
+        script: "Welcome to the National History Museum. My name is James, and I'll be your guide today. Before we begin, please note that flash photography is not permitted inside the galleries. Also, please do not touch any of the exhibits. Our tour will take approximately one hour.",
+        question: "Who is the speaker?",
+        options: ["A security guard", "A tour guide", "A receptionist", "A photographer"],
+        correct: 1,
+        explanation: "自己紹介で 'I'll be your guide today' と言っている。"
+    },
+    {
+        id: 'add-p4-3-2', part: 4, type: 'listening', contextType: 'monologue',
+        script: `(Refer to previous talk)`,
+        question: "What is prohibited in the galleries?",
+        options: ["talking", "Eating", "Flash photography", "Walking fast"],
+        correct: 2,
+        explanation: "'flash photography is not permitted'（フラッシュ撮影は禁止）と述べている。"
+    },
+    {
+        id: 'add-p4-3-3', part: 4, type: 'listening', contextType: 'monologue',
+        script: `(Refer to previous talk)`,
+        question: "How long will the tour last?",
+        options: ["30 minutes", "One hour", "Two hours", "All day"],
+        correct: 1,
+        explanation: "最後に 'approximately one hour' と述べている。"
+    },
+
+    // --- Talk 4: Store Opening Announcement ---
+    {
+        id: 'add-p4-4-1', part: 4, type: 'listening', contextType: 'monologue',
+        contextTitle: "Grand Opening",
+        script: "Attention shoppers. We are happy to announce the grand opening of our new bakery section on the ground floor. To celebrate, we are offering free samples of our chocolate cake to the first one hundred customers. Please come down and try our delicious treats.",
+        question: "What is the store announcing?",
+        options: ["A sale on clothes", "A new bakery section", "Change of business hours", "A holiday closing"],
+        correct: 1,
+        explanation: "'grand opening of our new bakery section' とアナウンスしている。"
+    },
+    {
+        id: 'add-p4-4-2', part: 4, type: 'listening', contextType: 'monologue',
+        script: `(Refer to previous talk)`,
+        question: "What is being offered for free?",
+        options: ["Coffee", "Bread", "Cake samples", "Shopping bags"],
+        correct: 2,
+        explanation: "'free samples of our chocolate cake' と述べている。"
+    },
+    {
+        id: 'add-p4-4-3', part: 4, type: 'listening', contextType: 'monologue',
+        script: `(Refer to previous talk)`,
+        question: "Who can receive the free offer?",
+        options: ["Everyone", "The first 100 customers", "Employees only", "Children only"],
+        correct: 1,
+        explanation: "'to the first one hundred customers' と限定している。"
+    },
+
+    // --- Talk 5: Voicemail Message ---
+    {
+        id: 'add-p4-5-1', part: 4, type: 'listening', contextType: 'monologue',
+        contextTitle: "Voicemail",
+        script: "Hi, Mr. Lee. This is Karen from City Library. The books you requested have arrived from another branch. You can pick them up at the front desk anytime before 8 PM today. Please bring your library card with you.",
+        question: "Why is the speaker calling?",
+        options: ["To demand payment", "To confirm an order", "To inform about requested items", "To cancel a membership"],
+        correct: 2,
+        explanation: "リクエストされた本が届いたこと(books you requested have arrived)を知らせている。"
+    },
+    {
+        id: 'add-p4-5-2', part: 4, type: 'listening', contextType: 'monologue',
+        script: `(Refer to previous talk)`,
+        question: "Where should the listener go?",
+        options: ["To the back office", "To the front desk", "To the cafeteria", "To the post office"],
+        correct: 1,
+        explanation: "'pick them up at the front desk' と指示している。"
+    },
+    {
+        id: 'add-p4-5-3', part: 4, type: 'listening', contextType: 'monologue',
+        script: `(Refer to previous talk)`,
+        question: "What must the listener bring?",
+        options: ["Money", "A library card", "Identification", "A bag"],
+        correct: 1,
+        explanation: "'bring your library card' と述べている。"
     }
 ];
 
