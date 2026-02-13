@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HAMA-STYLE OCEAN v3</title>
+    <title>HAMA-STYLE OCEAN v4</title>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho:wght@500;700;900&display=swap" rel="stylesheet">
@@ -38,27 +38,25 @@
 
         .font-serif { font-family: 'Shippori Mincho', serif; }
 
+        /* スクロールバー */
         .custom-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background-color: rgba(0, 43, 73, 0.2); border-radius: 10px; }
-
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .btn-press { transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-press { transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
         .btn-press:active { transform: scale(0.95); }
 
+        /* アニメーション */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes wave { 
             0% { transform: translateX(0) translateZ(0) scaleY(1); }
             50% { transform: translateX(-25%) translateZ(0) scaleY(0.8); }
             100% { transform: translateX(-50%) translateZ(0) scaleY(1); }
-        }
-        @keyframes kenburns {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
         }
         @keyframes cookingPulse {
             0%, 100% { transform: scale(1); opacity: 1; }
@@ -66,6 +64,7 @@
         }
 
         .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .animate-slide { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .animate-cooking { animation: cookingPulse 1.5s infinite ease-in-out; }
         
@@ -83,56 +82,65 @@
             .menu-grid-layout { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
         }
 
-        /* スクリーンセーバー画像調整: 見切れないように contain */
+        /* スクリーンセーバースライド */
         .slide-image {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             object-fit: contain; /* 全体を表示 */
-            background-color: #000;
             opacity: 0;
-            transition: opacity 1.5s ease-in-out;
+            transition: opacity 1s ease-in-out;
+            background-color: #000;
         }
         .slide-image.active { opacity: 1; }
 
-        /* NO IMAGE Placeholder */
-        .no-image-placeholder {
+        /* 画像なしプレースホルダー (デフォルトで表示、画像ロード成功で隠す) */
+        .img-container {
+            position: relative;
+            background-color: #f3f4f6;
+            overflow: hidden;
+        }
+        .placeholder {
+            position: absolute;
+            inset: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: #f3f4f6;
             color: #9ca3af;
-            width: 100%;
-            height: 100%;
+            z-index: 1;
+        }
+        .real-image {
             position: absolute;
             inset: 0;
-            z-index: 10;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 2;
+            opacity: 0; /* ロードされるまで透明 */
+            transition: opacity 0.3s;
         }
-        
-        /* 画像読み込み成功時に表示するクラス */
-        .img-loaded {
-            z-index: 20;
-            opacity: 1 !important;
+        .real-image.loaded {
+            opacity: 1;
         }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col bg-[#F0F4F8] overflow-hidden">
 
-    <!-- 1. スクリーンセーバー (広告ループ) -->
+    <!-- 1. スクリーンセーバー -->
     <div id="view-screensaver" class="hidden absolute inset-0 z-[150] bg-black cursor-pointer overflow-hidden flex flex-col" onclick="app.screensaver.stop()">
-        <!-- 画像エリア (フレックスで残りの高さを埋める) -->
+        <!-- 画像エリア -->
         <div class="flex-1 relative w-full bg-black overflow-hidden">
-            <div id="slideshow-container" class="absolute inset-0 w-full h-full flex items-center justify-center">
+            <div id="slideshow-container" class="absolute inset-0 w-full h-full">
                 <!-- JSで画像を注入 -->
             </div>
         </div>
         
-        <!-- 下部復帰エリア (白ボックス) -->
-        <div class="h-24 md:h-32 bg-white flex items-center justify-center shrink-0 shadow-[0_-5px_20px_rgba(0,0,0,0.2)] relative z-10">
+        <!-- 下部復帰エリア -->
+        <div class="h-20 md:h-24 bg-white flex items-center justify-center shrink-0 shadow-[0_-5px_20px_rgba(0,0,0,0.2)] relative z-10 border-t-4 border-[#002B49]">
             <div class="flex flex-col items-center animate-bounce">
-                <p class="text-[#002B49] text-xl md:text-3xl font-black tracking-widest flex items-center gap-4">
+                <p class="text-[#002B49] text-xl md:text-2xl font-black tracking-widest flex items-center gap-4">
                     <i class="fa-regular fa-hand-pointer"></i>
                     画面をタップして注文へ
                 </p>
@@ -142,49 +150,51 @@
 
     <!-- 2. 待機画面 (STANDBY) -->
     <div id="view-standby" class="absolute inset-0 z-50 bg-wave-pattern flex flex-col items-center justify-center text-white">
+        <!-- ロゴ (左上ワンポイント) -->
+        <div class="absolute top-6 left-6 z-[60]">
+            <img src="https://www.hama-sushi.co.jp/assets/common/img/logo_hamasushi.png" alt="はま寿司" class="w-32 md:w-48 filter drop-shadow-md">
+        </div>
+
+        <!-- 管理者ボタン -->
         <button onclick="app.auth.open()" class="absolute top-6 right-6 text-white/10 hover:text-white p-4 z-[60] transition-colors">
             <i class="fa-solid fa-lock text-2xl"></i>
         </button>
 
         <div class="relative w-full max-w-4xl mx-auto text-center px-4 flex flex-col items-center h-full justify-center">
-            <!-- ロゴ画像 -->
-            <div class="mb-12 animate-slide" style="animation-delay: 0.1s;">
-                <img src="https://www.hama-sushi.co.jp/assets/common/img/logo_hamasushi.png" alt="はま寿司" class="w-64 md:w-96 mx-auto filter drop-shadow-lg">
-            </div>
-
-            <!-- テーブル番号 -->
-            <div class="my-8 animate-slide" style="animation-delay: 0.2s;">
-                <div class="inline-flex flex-col items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-8 min-w-[280px]">
-                    <span class="text-sm md:text-base text-white/70 font-bold mb-2 tracking-widest">TABLE NO.</span>
-                    <span class="text-8xl md:text-9xl font-black text-white leading-none font-sans" style="text-shadow: 0 0 30px rgba(255,255,255,0.2);">12</span>
-                </div>
-            </div>
-
-            <!-- メッセージ（テキストなし、アニメーションのみ） -->
             
-            <!-- スタートボタン -->
-            <div class="animate-slide mt-8" style="animation-delay: 0.4s;">
-                <button onclick="app.customer.start()" class="group relative bg-white text-[#002B49] text-2xl md:text-3xl font-black py-6 px-20 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.2)] hover:shadow-[0_0_60px_rgba(255,255,255,0.4)] transition-all hover:scale-105 active:scale-95 btn-press">
-                    <span class="flex items-center gap-4">
+            <!-- 中央コンテンツ -->
+            <div class="flex flex-col items-center animate-pop">
+                <p class="text-3xl md:text-5xl font-serif font-bold text-white mb-8 tracking-widest" style="text-shadow: 0 4px 10px rgba(0,0,0,0.5);">いらっしゃいませ</p>
+                
+                <div class="mb-12 flex flex-col items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 rounded-[3rem] px-16 py-10 shadow-2xl">
+                    <span class="text-sm md:text-lg text-[#C5A059] font-bold mb-2 tracking-[0.5em] uppercase">Table No.</span>
+                    <span class="text-9xl md:text-[10rem] font-black text-white leading-none font-sans filter drop-shadow-lg">12</span>
+                </div>
+
+                <button onclick="app.customer.start()" class="group relative bg-white text-[#002B49] text-2xl md:text-4xl font-black py-6 px-24 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.3)] hover:scale-105 transition-transform flex items-center gap-6 btn-press overflow-hidden">
+                    <span class="relative z-10 flex items-center gap-4">
                         注文をはじめる
-                        <i class="fa-solid fa-arrow-right text-[#C5A059] group-hover:translate-x-1 transition-transform"></i>
+                        <i class="fa-solid fa-circle-chevron-right text-[#E60012]"></i>
                     </span>
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                 </button>
             </div>
         </div>
+        
+        <!-- 波のアニメーション -->
         <div class="absolute bottom-0 left-0 w-full h-32 overflow-hidden opacity-30 pointer-events-none">
              <div class="w-[200%] h-full bg-[url('https://www.hama-sushi.co.jp/assets/common/img/wave.svg')] bg-repeat-x bg-bottom animate-[wave_10s_linear_infinite]"></div>
         </div>
     </div>
 
-    <!-- 3. 客席注文画面 (CUSTOMER UI) -->
+    <!-- 3. 客席注文画面 -->
     <div id="view-customer" class="hidden h-full w-full flex-row bg-[#F0F4F8] overflow-hidden">
         
         <!-- 左側：メニューエリア -->
         <div class="flex-1 flex flex-col h-full min-w-0 relative z-10">
             <header class="h-16 md:h-20 bg-white border-b border-gray-100 flex items-center px-2 shrink-0 shadow-sm z-20">
-                <!-- メニューバーを見やすくするためロゴを削除し、フル幅でナビゲーションを表示 -->
-                <nav class="flex-1 flex justify-start gap-2 overflow-x-auto hide-scrollbar px-2 h-full items-center" id="category-nav">
+                <!-- ロゴなし、ナビゲーション最大化 -->
+                <nav class="flex-1 flex justify-start gap-2 overflow-x-auto hide-scrollbar px-2 h-full items-center w-full" id="category-nav">
                     <!-- JS Injected -->
                 </nav>
             </header>
@@ -235,44 +245,57 @@
         </aside>
     </div>
 
-    <!-- 4. 商品詳細＆注文モーダル (画像表示改善) -->
+    <!-- 4. 商品詳細＆注文モーダル (レイアウト変更 & 画像修正) -->
     <div id="modal-detail" class="fixed inset-0 z-[90] hidden items-center justify-center bg-[#002B49]/80 backdrop-blur-sm p-4 animate-fade">
-        <div class="bg-white rounded-[2rem] w-full max-w-4xl h-auto md:h-[500px] overflow-hidden shadow-2xl animate-pop relative flex flex-col md:flex-row">
+        <div class="bg-white rounded-[2rem] w-full max-w-4xl h-auto md:h-[550px] overflow-hidden shadow-2xl animate-pop relative flex flex-col md:flex-row">
             
-            <!-- 画像エリア -->
-            <div class="w-full md:w-1/2 h-64 md:h-full bg-gray-100 relative group shrink-0 overflow-hidden">
-                <div class="no-image-placeholder">
+            <!-- 画像エリア (左) -->
+            <div class="w-full md:w-1/2 h-64 md:h-full bg-gray-100 relative group shrink-0 img-container">
+                <div class="placeholder">
                     <i class="fa-solid fa-image text-5xl mb-2"></i>
                     <span class="text-xl font-bold">NO IMAGE</span>
                 </div>
-                <img id="detail-img" src="" class="w-full h-full object-cover absolute inset-0 opacity-0 transition-opacity duration-300" onload="this.classList.add('opacity-100')" onerror="this.classList.remove('opacity-100')">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none z-30"></div>
-                <div class="absolute bottom-0 left-0 w-full p-8 z-40">
-                    <span id="detail-cat-badge" class="inline-block px-3 py-1 bg-[#C5A059] text-white text-xs font-bold rounded mb-2">CATEGORY</span>
-                    <h3 id="detail-name" class="text-3xl md:text-4xl font-black text-white font-serif tracking-wide leading-tight text-shadow">商品名</h3>
+                <img id="detail-img" src="" class="real-image" onload="this.classList.add('loaded')" onerror="this.classList.remove('loaded')">
+                
+                <div class="absolute top-6 left-6 z-20">
+                    <span id="detail-cat-badge" class="inline-block px-4 py-1.5 bg-[#C5A059] text-white text-sm font-bold rounded shadow-md">CATEGORY</span>
                 </div>
             </div>
 
-            <!-- 操作エリア -->
-            <div class="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-between bg-white">
-                <div>
-                    <div class="flex justify-between items-end mb-8 border-b border-gray-100 pb-4">
-                        <div class="text-gray-400 font-bold text-sm">価格 (税込)</div>
-                        <div class="text-5xl font-black text-[#002B49] font-sans">¥<span id="detail-price">0</span></div>
-                    </div>
+            <!-- 操作エリア (右: 下から積み上げ) -->
+            <div class="w-full md:w-1/2 p-6 md:p-8 flex flex-col bg-white h-full relative">
+                
+                <!-- 商品名 (上部固定) -->
+                <div class="mb-4">
+                    <h3 id="detail-name" class="text-3xl md:text-4xl font-black text-[#002B49] font-serif tracking-wide leading-tight">商品名</h3>
+                </div>
 
-                    <div class="flex justify-center items-center gap-6 mb-8">
-                        <button onclick="app.order.adjustQty(-1)" class="w-20 h-20 rounded-2xl bg-[#F0F4F8] text-[#002B49] text-3xl font-bold flex items-center justify-center hover:bg-gray-200 btn-press transition-colors shadow-sm">
+                <!-- スペーサー (下部へ押し下げ) -->
+                <div class="flex-grow"></div>
+
+                <!-- 数量調整 -->
+                <div class="flex flex-col items-center mb-6">
+                    <span class="text-gray-400 font-bold text-xs mb-2 tracking-widest">QUANTITY</span>
+                    <div class="flex items-center gap-6 bg-gray-50 rounded-2xl p-2 border border-gray-100">
+                        <button onclick="app.order.adjustQty(-1)" class="w-16 h-16 rounded-xl bg-white text-[#002B49] text-2xl font-bold flex items-center justify-center hover:bg-gray-100 btn-press shadow-sm border border-gray-200">
                             <i class="fa-solid fa-minus"></i>
                         </button>
-                        <div class="text-6xl font-sans font-black w-24 text-center text-[#002B49]" id="detail-qty">1</div>
-                        <button onclick="app.order.adjustQty(1)" class="w-20 h-20 rounded-2xl bg-[#002B49] text-white text-3xl font-bold flex items-center justify-center hover:bg-[#003865] btn-press shadow-lg shadow-blue-900/20">
+                        <div class="text-5xl font-sans font-black w-20 text-center text-[#002B49]" id="detail-qty">1</div>
+                        <button onclick="app.order.adjustQty(1)" class="w-16 h-16 rounded-xl bg-[#002B49] text-white text-2xl font-bold flex items-center justify-center hover:bg-[#003865] btn-press shadow-md">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
                 </div>
 
-                <div class="flex gap-4 mt-auto">
+                <!-- 価格 -->
+                <div class="flex justify-center items-baseline gap-2 mb-8 border-b border-gray-100 pb-6">
+                    <span class="text-xl text-gray-500 font-bold">¥</span>
+                    <span id="detail-price" class="text-6xl font-black text-[#E60012] font-sans tracking-tight">0</span>
+                    <span class="text-sm text-gray-400 font-bold">(税込)</span>
+                </div>
+
+                <!-- ボタン群 -->
+                <div class="flex gap-4 shrink-0">
                     <button onclick="app.ui.closeModal('modal-detail')" class="flex-1 py-5 bg-gray-200 text-gray-600 rounded-2xl font-bold text-xl shadow-none hover:bg-gray-300 btn-press">
                         キャンセル
                     </button>
@@ -300,7 +323,6 @@
                 <p class="text-white/80 text-xl md:text-2xl font-bold tracking-widest">レーンよりお取りください</p>
             </div>
 
-            <!-- 到着商品グリッド -->
             <div class="flex-1 overflow-y-auto custom-scroll mb-8">
                 <div id="delivery-grid" class="grid grid-cols-2 md:grid-cols-3 gap-6 p-4">
                     <!-- JS injected -->
@@ -452,38 +474,50 @@
         const IMG_BASE = "https://www.hama-sushi.co.jp/assets/menu/img";
         
         const MENU_DB = [
+            // Limited
             { id: 101, cat: 'limited', name: '大とろ', price: 319, img: `${IMG_BASE}/nigiri/pho_ootoro.png` },
             { id: 102, cat: 'limited', name: '特大ぼたん海老', price: 319, img: `${IMG_BASE}/nigiri/pho_botanebi.png` },
             { id: 103, cat: 'limited', name: '生うに包み', price: 319, img: `${IMG_BASE}/gunkan/pho_namauni.png` },
             { id: 104, cat: 'limited', name: 'あわび', price: 165, img: `${IMG_BASE}/nigiri/pho_awabi.png` },
             { id: 105, cat: 'limited', name: '一本穴子', price: 528, img: `${IMG_BASE}/nigiri/pho_ipponanago.png` },
+            { id: 605, cat: 'limited', name: 'ストロベリーパフェ', price: 418, img: `${IMG_BASE}/fair/berry_cute_na_strawberry_parfait_simple.png` },
+            // Nigiri
             { id: 201, cat: 'nigiri', name: 'まぐろ', price: 110, img: `${IMG_BASE}/nigiri/pho_maguro.png` },
-            { id: 202, cat: 'nigiri', name: '特製漬けまぐろ', price: 110, img: `${IMG_BASE}/nigiri/pho_zukemaguro.png` },
+            { id: 202, cat: 'nigiri', name: '特製漬けまぐろ', price: 110, img: `${IMG_BASE}/nigiri/pho_dukemaguro.png` },
             { id: 203, cat: 'nigiri', name: 'サーモン', price: 110, img: `${IMG_BASE}/nigiri/pho_salmon.png` },
-            { id: 204, cat: 'nigiri', name: '大とろサーモン', price: 110, img: `${IMG_BASE}/nigiri/pho_ootorosalmon.png` },
-            { id: 205, cat: 'nigiri', name: '焼きとろサーモン', price: 110, img: `${IMG_BASE}/nigiri/pho_yakitorosalmon.png` },
+            { id: 204, cat: 'nigiri', name: '大とろサーモン', price: 110, img: `${IMG_BASE}/nigiri/pho_otoro_salmon.png` },
+            { id: 205, cat: 'nigiri', name: 'サーモンレアステーキ', price: 110, img: `${IMG_BASE}/nigiri/pho_z_toro_salmon_reasteak.png` },
             { id: 206, cat: 'nigiri', name: '活〆はまち', price: 132, img: `${IMG_BASE}/nigiri/pho_hamachi.png` },
             { id: 207, cat: 'nigiri', name: '真いか', price: 110, img: `${IMG_BASE}/nigiri/pho_maika.png` },
             { id: 208, cat: 'nigiri', name: 'えび', price: 110, img: `${IMG_BASE}/nigiri/pho_ebi.png` },
             { id: 209, cat: 'nigiri', name: '生えび', price: 110, img: `${IMG_BASE}/nigiri/pho_namaebi.png` },
             { id: 210, cat: 'nigiri', name: 'つぶ貝', price: 165, img: `${IMG_BASE}/nigiri/pho_tsubugai.png` },
             { id: 211, cat: 'nigiri', name: 'ほたて', price: 165, img: `${IMG_BASE}/nigiri/pho_hotate.png` },
-            { id: 212, cat: 'nigiri', name: 'たまご', price: 110, img: `${IMG_BASE}/nigiri/pho_tamago.png` },
-            { id: 213, cat: 'nigiri', name: '牛カルビ', price: 165, img: `${IMG_BASE}/nigiri/pho_gyukalbi.png` },
+            { id: 212, cat: 'nigiri', name: '旨だし卵', price: 110, img: `${IMG_BASE}/nigiri/pho_umadashitamago.png` },
+            { id: 213, cat: 'nigiri', name: '牛カルビ', price: 165, img: `${IMG_BASE}/nigiri/pho_gyukarubi.png` },
+            // Gunkan
             { id: 301, cat: 'gunkan', name: 'いくら', price: 165, img: `${IMG_BASE}/gunkan/pho_ikura.png` },
             { id: 302, cat: 'gunkan', name: 'まぐろたたき', price: 110, img: `${IMG_BASE}/gunkan/pho_negitoro.png` },
             { id: 303, cat: 'gunkan', name: 'コーン', price: 110, img: `${IMG_BASE}/gunkan/pho_corn.png` },
             { id: 304, cat: 'gunkan', name: 'シーフード', price: 110, img: `${IMG_BASE}/gunkan/pho_seafood.png` },
             { id: 305, cat: 'gunkan', name: 'ツナサラダ', price: 110, img: `${IMG_BASE}/gunkan/pho_tuna.png` },
             { id: 306, cat: 'gunkan', name: '納豆', price: 110, img: `${IMG_BASE}/gunkan/pho_natto.png` },
+            // Side
             { id: 401, cat: 'side', name: '茶碗蒸し', price: 198, img: `${IMG_BASE}/side/pho_chawanmushi.png` },
             { id: 402, cat: 'side', name: 'あさり味噌汁', price: 165, img: `${IMG_BASE}/side/pho_asarimiso.png` },
-            { id: 403, cat: 'side', name: 'ポテト', price: 176, img: `${IMG_BASE}/side/pho_potato.png` },
+            { id: 403, cat: 'side', name: 'カリカリポテト', price: 176, img: `${IMG_BASE}/side/pho_karikari_potato.png` },
             { id: 404, cat: 'side', name: 'から揚げ', price: 176, img: `${IMG_BASE}/side/pho_karaage.png` },
             { id: 405, cat: 'side', name: 'たこ焼き', price: 220, img: `${IMG_BASE}/side/pho_takoyaki.png` },
+            // Dessert
+            { id: 601, cat: 'dessert', name: '大学いも', price: 176, img: `${IMG_BASE}/dessert/pho_daigakuimo.png` },
+            { id: 602, cat: 'dessert', name: '北海道ミルクレープ', price: 220, img: `${IMG_BASE}/dessert/pho_mirukurepu.png` },
+            { id: 603, cat: 'dessert', name: 'チョコレートケーキ', price: 220, img: `${IMG_BASE}/dessert/pho_chocolatecake.png` },
+            { id: 604, cat: 'dessert', name: '三色だんご', price: 110, img: `${IMG_BASE}/dessert/pho_dango.png` },
+            // Drink
             { id: 501, cat: 'drink', name: '生ビール中', price: 528, img: `${IMG_BASE}/drink/pho_beer.png` },
             { id: 502, cat: 'drink', name: 'コーラ', price: 165, img: `${IMG_BASE}/drink/pho_cola.png` },
             { id: 503, cat: 'drink', name: 'オレンジ', price: 165, img: `${IMG_BASE}/drink/pho_orange.png` },
+            { id: 504, cat: 'drink', name: 'コーラフロート', price: 290, img: `${IMG_BASE}/dessert/pho_cola_float.png` },
         ];
 
         const CATEGORIES = [
@@ -491,6 +525,7 @@
             { id: 'nigiri', name: 'にぎり', icon: 'fa-fish' },
             { id: 'gunkan', name: '軍艦', icon: 'fa-dharmachakra' },
             { id: 'side', name: 'サイド', icon: 'fa-bowl-food' },
+            { id: 'dessert', name: 'デザート', icon: 'fa-ice-cream' },
             { id: 'drink', name: 'ドリンク', icon: 'fa-beer-mug-empty' },
         ];
 
@@ -705,13 +740,11 @@
                     app.state.currentQty = 1;
                     
                     const imgEl = document.getElementById('detail-img');
-                    // Reset Image state first
-                    imgEl.classList.remove('opacity-100'); // Hide initially
-                    imgEl.style.display = 'block';
-                    imgEl.nextElementSibling.style.display = 'none'; // Hide next element (placeholder, if using previous inline logic, but here using css/onerror)
+                    // Reset to show loading state
+                    imgEl.classList.remove('loaded');
                     
-                    // Force refresh for reliability
-                    imgEl.src = ""; 
+                    // Force refresh src to trigger onload even if cached
+                    imgEl.src = "";
                     setTimeout(() => { imgEl.src = item.img; }, 10);
 
                     document.getElementById('detail-name').innerText = item.name;
@@ -862,12 +895,12 @@
                     const items = MENU_DB.filter(i => i.cat === cat);
                     document.getElementById('menu-grid').innerHTML = items.map(item => `
                         <div class="bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer flex flex-col h-full border border-gray-100 group hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 duration-200" onclick="app.order.openDetail(${item.id})">
-                            <div class="aspect-[4/3] w-full bg-gray-50 relative overflow-hidden">
-                                <div class="no-image-placeholder">
+                            <div class="aspect-[4/3] w-full bg-gray-50 relative overflow-hidden img-container">
+                                <div class="placeholder">
                                     <i class="fa-solid fa-image text-4xl mb-2"></i>
                                     <span>NO IMAGE</span>
                                 </div>
-                                <img src="${item.img}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 relative z-10 opacity-0" onload="this.classList.add('opacity-100')" onerror="this.style.display='none';">
+                                <img src="${item.img}" class="real-image" onload="this.classList.add('loaded')" onerror="this.classList.remove('loaded')">
                             </div>
                             <div class="p-4 flex-1 flex flex-col justify-between">
                                 <h3 class="font-bold text-[#002B49] text-base md:text-lg leading-tight mb-2 font-serif">${item.name}</h3>
@@ -903,9 +936,9 @@
 
                             return `
                             <div class="flex items-center p-3 rounded-xl border gap-3 animate-fade ${bgClass}">
-                                <div class="w-16 h-12 rounded-lg bg-gray-100 shrink-0 relative overflow-hidden">
-                                    <img src="${item.img}" class="w-full h-full object-cover" onerror="this.style.display='none'">
-                                    <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-xs -z-10"><i class="fa-solid fa-image"></i></div>
+                                <div class="w-16 h-12 rounded-lg bg-gray-100 shrink-0 relative overflow-hidden img-container">
+                                    <img src="${item.img}" class="real-image loaded" onerror="this.classList.remove('loaded')">
+                                    <div class="placeholder text-xs"><i class="fa-solid fa-image"></i></div>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <div class="font-bold text-[#002B49] truncate text-sm mb-1">${item.name}</div>
@@ -942,9 +975,9 @@
                     const grid = document.getElementById('delivery-grid');
                     grid.innerHTML = items.map(item => `
                         <div class="bg-white rounded-3xl p-4 shadow-lg flex flex-col items-center animate-pop">
-                            <div class="w-full aspect-[4/3] rounded-2xl mb-4 bg-gray-100 relative overflow-hidden">
-                                 <img src="${item.img}" class="w-full h-full object-cover" onerror="this.style.display='none'">
-                                 <div class="absolute inset-0 flex items-center justify-center text-gray-400"><i class="fa-solid fa-image text-3xl"></i></div>
+                            <div class="w-full aspect-[4/3] rounded-2xl mb-4 bg-gray-100 relative overflow-hidden img-container">
+                                 <img src="${item.img}" class="real-image loaded" onerror="this.classList.remove('loaded')">
+                                 <div class="placeholder"><i class="fa-solid fa-image text-3xl"></i></div>
                             </div>
                              <div class="text-xl md:text-2xl font-black text-[#002B49] text-center font-serif leading-tight">${item.name}</div>
                         </div>
