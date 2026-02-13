@@ -334,7 +334,7 @@
         </div>
     </div>
     
-    <!-- Auth (Code abbreviated for space, logic preserved) -->
+    <!-- Auth -->
     <div id="modal-auth" class="fixed inset-0 z-[200] hidden items-center justify-center bg-[#002B49]/90 backdrop-blur-sm p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             <div id="auth-screen" class="w-full p-6 text-center">
@@ -930,6 +930,68 @@
                     document.getElementById(`slide-${app.state.currentSlide}`).classList.remove('active');
                     document.getElementById(`slide-${next}`).classList.add('active');
                     app.state.currentSlide = next;
+                }
+            },
+
+            // --- P2P LOGIC ---
+            p2p: {
+                initHost: () => {
+                    const shortId = Math.floor(1000 + Math.random() * 9000).toString();
+                    const fullId = APP_PREFIX + shortId;
+                    app.state.peer = new Peer(fullId);
+                    app.state.isHost = true;
+                    app.state.peer.on('open', (id) => {
+                        app.state.myId = shortId;
+                        document.getElementById('kitchen-id-display').innerText = shortId;
+                    });
+                    app.state.peer.on('connection', (conn) => {
+                        app.state.conn = conn;
+                        app.p2p.setupConn(conn);
+                        app.audio.play('chime');
+                        const el = document.getElementById('kitchen-connection-status');
+                        el.innerHTML = `<i class="fa-solid fa-circle text-green-400 text-sm animate-pulse"></i> Online`;
+                    });
+                },
+                showConnectUI: () => {
+                    document.getElementById('mode-select').classList.remove('flex');
+                    document.getElementById('mode-select').classList.add('hidden');
+                    document.getElementById('client-connect').classList.remove('hidden');
+                    document.getElementById('client-connect').classList.add('flex');
+                },
+                connectToHost: () => {
+                    const input = document.getElementById('target-id-input').value;
+                    if(input.length !== 4) return alert("4桁の数字を入力してください");
+                    const targetFullId = APP_PREFIX + input;
+                    const msg = document.getElementById('connect-msg');
+                    msg.innerText = "接続中...";
+                    app.state.peer = new Peer();
+                    app.state.peer.on('open', () => {
+                        const conn = app.state.peer.connect(targetFullId);
+                        app.state.conn = conn;
+                        conn.on('open', () => {
+                            msg.innerText = "接続成功！";
+                            setTimeout(() => { app.auth.close(); }, 1000);
+                            app.p2p.setupConn(conn);
+                        });
+                        conn.on('error', (err) => { msg.innerText = "接続失敗"; });
+                        setTimeout(() => { if(!conn.open) msg.innerText = "応答なし"; }, 5000);
+                    });
+                },
+                setupConn: (conn) => {
+                    conn.on('data', (data) => {
+                        if (app.state.isHost) {
+                            if (data.type === 'ORDER') app.kitchen.addOrder(data.payload);
+                            if (data.type === 'CALL') app.kitchen.showCallAlert();
+                        } else {
+                            if (data.type === 'COOKED') {
+                                app.order.markAsServed(data.payload);
+                                app.ui.triggerDelivery(data.payload);
+                            }
+                            if (data.type === 'CALL_RESOLVED') {
+                                app.order.resolveCall();
+                            }
+                        }
+                    });
                 }
             },
 
