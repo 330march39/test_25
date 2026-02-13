@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HAMA-STYLE Sushi Order System</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-navy: #0F2540; /* Deep Navy */
+            --primary-gold: #C6A87C; /* Elegant Gold */
+            --accent-red: #D32F2F;   /* Order Red */
+            --bg-body: #F5F7FA;
+            --text-main: #1A1A1A;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            user-select: none;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        /* Utility */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes laneMove {
+            0% { transform: translateX(-120%); }
+            15% { transform: translateX(0%); } /* Arrive */
+            85% { transform: translateX(0%); } /* Wait */
+            100% { transform: translateX(150%); } /* Leave */
+        }
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.4s ease-out forwards; }
+
+        /* Card Styles */
+        .menu-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .menu-card:active { transform: scale(0.97); }
+        .menu-card.selected { border: 2px solid var(--primary-gold); }
+
+        /* Category Tabs */
+        .cat-tab {
+            position: relative;
+            transition: all 0.3s;
+            opacity: 0.6;
+        }
+        .cat-tab.active {
+            opacity: 1;
+            color: var(--primary-navy);
+        }
+        .cat-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            width: 60%;
+            height: 4px;
+            background: var(--primary-gold);
+            border-radius: 4px 4px 0 0;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col">
+
+    <!-- COMMUNICATION CHANNEL ID (Hidden) -->
+    <input type="hidden" id="sys-channel-id" value="sushi_system_v1">
+
+    <!-- 1. WELCOME SCREEN -->
+    <div id="view-welcome" class="absolute inset-0 z-50 bg-[#0F2540] flex flex-col items-center justify-center text-white animate-fade">
+        <div class="text-center mb-10">
+            <div class="text-6xl text-[#C6A87C] mb-2"><i class="fa-solid fa-fish-fins"></i></div>
+            <h1 class="text-5xl font-black tracking-tighter mb-2">濱風寿司</h1>
+            <p class="text-sm tracking-[0.3em] opacity-70">PREMIUM SUSHI DINING</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl px-6">
+            <button onclick="app.startCustomer()" class="group bg-white/10 hover:bg-white/20 border border-white/10 rounded-2xl p-8 backdrop-blur-sm transition-all text-left">
+                <div class="text-2xl font-bold mb-2 text-[#C6A87C] group-hover:text-white transition-colors">
+                    <i class="fa-solid fa-utensils mr-2"></i> 客席モード
+                </div>
+                <p class="text-sm opacity-70 mb-4">お客様用注文タブレットとして起動します。</p>
+                <div class="bg-[#C6A87C] text-[#0F2540] text-center py-3 rounded-lg font-bold">
+                    入店する (Table 12)
+                </div>
+            </button>
+
+            <button onclick="app.startKitchen()" class="group bg-black/30 hover:bg-black/40 border border-white/10 rounded-2xl p-8 backdrop-blur-sm transition-all text-left">
+                <div class="text-2xl font-bold mb-2 text-gray-400 group-hover:text-white transition-colors">
+                    <i class="fa-solid fa-fire-burner mr-2"></i> 厨房モード
+                </div>
+                <p class="text-sm opacity-70 mb-4">調理スタッフ用モニターとして起動します。</p>
+                <div class="bg-gray-700 text-white text-center py-3 rounded-lg font-bold">
+                    モニター起動
+                </div>
+            </button>
+        </div>
+        <p class="absolute bottom-6 text-xs text-white/30">HAMA-STYLE SYSTEM v2.0 | REAL-TIME SYNC ACTIVE</p>
+    </div>
+
+    <!-- 2. CUSTOMER ORDER VIEW -->
+    <div id="view-customer" class="hidden flex-col h-full bg-[#F5F7FA]">
+        <!-- Header -->
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-4 shrink-0 z-20">
+            <div class="flex items-center gap-4">
+                <button onclick="location.reload()" class="text-[#0F2540] font-black text-xl tracking-widest">濱風寿司</button>
+                <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded text-sm font-bold">卓番 12</span>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="app.ui.showHistory()" class="bg-[#00897B] text-white px-5 py-2 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-transform">
+                    <i class="fa-solid fa-receipt mr-1"></i> 履歴
+                </button>
+                <button onclick="app.ui.callStaff()" class="bg-[#F5F7FA] text-[#D32F2F] border border-[#D32F2F] px-5 py-2 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-transform">
+                    <i class="fa-solid fa-bell mr-1"></i> 呼出
+                </button>
+                <button onclick="app.ui.showCheck()" class="bg-[#FBC02D] text-[#0F2540] px-5 py-2 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-transform">
+                    <i class="fa-solid fa-calculator mr-1"></i> 会計
+                </button>
+            </div>
+        </header>
+
+        <!-- Category Nav -->
+        <nav class="h-16 bg-white border-b border-gray-100 flex overflow-x-auto hide-scrollbar shrink-0" id="customer-nav">
+            <!-- JS Injected -->
+        </nav>
+
+        <!-- Menu Grid -->
+        <main class="flex-1 overflow-y-auto p-4 hide-scrollbar relative">
+            <div id="menu-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-32">
+                <!-- JS Injected -->
+            </div>
+        </main>
+
+        <!-- Footer / Cart -->
+        <footer class="h-24 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] flex items-center px-4 shrink-0 z-30 fixed bottom-0 w-full md:relative">
+            <div class="flex flex-col mr-6 min-w-[100px]">
+                <span class="text-[10px] text-gray-400 font-bold">合計金額(税込)</span>
+                <span class="text-3xl font-black text-[#0F2540] leading-none">¥<span id="cart-total">0</span></span>
+            </div>
+            
+            <div class="flex-1 flex items-center gap-2 overflow-x-auto hide-scrollbar h-full py-3" id="cart-items">
+                <div class="text-xs text-gray-300 font-bold px-4">商品を選択してください</div>
+            </div>
+
+            <button onclick="app.order.submit()" id="btn-submit" class="ml-4 bg-gray-200 text-gray-400 px-8 h-14 rounded-xl font-bold text-lg shadow-inner flex items-center gap-2 transition-all disabled:cursor-not-allowed" disabled>
+                <span>注文する</span>
+                <i class="fa-solid fa-circle-chevron-right"></i>
+            </button>
+        </footer>
+    </div>
+
+    <!-- 3. KITCHEN VIEW -->
+    <div id="view-kitchen" class="hidden flex-col h-full bg-[#1A1C20] text-gray-200">
+        <header class="h-16 bg-[#121212] flex items-center justify-between px-6 border-b border-gray-800 shadow-md shrink-0">
+            <div class="flex items-center gap-4">
+                <h2 class="text-xl font-bold text-[#C6A87C] tracking-wider"><i class="fa-solid fa-fire-burner"></i> KITCHEN MONITOR</h2>
+                <span class="bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-bold animate-pulse hidden" id="kitchen-alert">NEW ORDER</span>
+            </div>
+            <div class="flex items-center gap-6">
+                 <div class="text-2xl font-mono font-bold text-gray-400" id="kitchen-clock">12:00</div>
+                 <button onclick="location.reload()" class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded text-xs transition-colors">ログアウト</button>
+            </div>
+        </header>
+        <main class="flex-1 p-4 overflow-y-auto">
+            <div id="kitchen-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <!-- JS Injected -->
+                <div class="col-span-full flex flex-col items-center justify-center h-96 text-gray-600">
+                    <i class="fa-solid fa-check-double text-5xl mb-4"></i>
+                    <p>現在のオーダーはありません</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- OVERLAYS & MODALS -->
+    
+    <!-- Confirm Modal -->
+    <div id="modal-confirm" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-slide-up">
+            <div id="modal-confirm-title" class="bg-[#0F2540] text-white p-4 font-bold text-center text-lg">注文確認</div>
+            <div class="p-0 max-h-[50vh] overflow-y-auto bg-gray-50">
+                <ul id="confirm-list" class="divide-y divide-gray-200"></ul>
+            </div>
+            <div class="p-4 bg-white border-t border-gray-100 flex gap-3">
+                <button onclick="app.ui.closeModal('modal-confirm')" class="flex-1 py-3 rounded-lg border-2 border-gray-200 font-bold text-gray-500 hover:bg-gray-50">戻る</button>
+                <button onclick="app.order.finalize()" class="flex-1 py-3 rounded-lg bg-[#D32F2F] text-white font-bold hover:bg-red-700 shadow-lg">注文確定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check Modal -->
+    <div id="modal-check" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-slide-up">
+            <div class="bg-[#C6A87C] text-[#0F2540] p-6 text-center">
+                <p class="text-sm font-bold opacity-70 mb-1">お会計総額</p>
+                <div class="text-5xl font-black tracking-tight">¥<span id="bill-amount">0</span></div>
+            </div>
+            <div class="p-6">
+                <div class="flex justify-between text-sm text-gray-500 mb-6 border-b pb-4">
+                    <span>注文点数</span>
+                    <span class="font-bold text-gray-800" id="bill-count">0点</span>
+                </div>
+                <button onclick="app.finishSession()" class="w-full bg-[#0F2540] text-white py-4 rounded-xl font-bold shadow-lg mb-3">会計へ進む</button>
+                <button onclick="app.ui.closeModal('modal-check')" class="w-full text-gray-400 py-2 text-sm">戻る</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delivery Animation (Lane) -->
+    <div id="lane-overlay" class="fixed inset-0 pointer-events-none z-[90] hidden">
+        <div class="absolute top-1/2 w-full -translate-y-1/2">
+            <!-- Lane Track -->
+            <div class="h-32 bg-gray-200 border-y-4 border-gray-300 relative overflow-hidden flex items-center">
+                 <div class="absolute inset-0 opacity-20" style="background-image: repeating-linear-gradient(90deg, transparent, transparent 50px, #000 50px, #000 51px);"></div>
+            </div>
+            <!-- Sushi Boat -->
+            <div id="sushi-boat" class="absolute top-1/2 left-0 -translate-y-1/2 w-64 h-auto transform transition-transform">
+                <div class="relative bg-[#D32F2F] p-1 rounded-lg shadow-2xl border-b-8 border-[#B71C1C]">
+                    <div class="bg-white p-2 rounded relative">
+                        <img id="delivery-img" src="" class="w-full h-32 object-cover rounded shadow-inner" onerror="this.src='https://placehold.co/400x300?text=Sushi'">
+                        <div class="absolute -top-4 -right-4 bg-[#FBC02D] text-[#0F2540] font-black px-3 py-1 rounded-full shadow border-2 border-white animate-bounce">
+                            到着!
+                        </div>
+                    </div>
+                    <div class="text-center text-white font-bold py-1 truncate px-2" id="delivery-name">マグロ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-20 right-4 bg-[#0F2540] text-white pl-4 pr-6 py-3 rounded-lg shadow-xl translate-x-[120%] transition-transform duration-300 z-[110] flex items-center gap-3 border-l-4 border-[#C6A87C]">
+        <i class="fa-solid fa-circle-check text-[#C6A87C]"></i>
+        <div>
+            <div class="font-bold text-sm">送信完了</div>
+            <div class="text-xs opacity-70">厨房に注文を送信しました</div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /**
+         * HAMA-STYLE SYSTEM LOGIC
+         * - Uses BroadcastChannel for inter-tab communication (Kitchen <-> Customer)
+         * - Uses real Hama Sushi URL patterns with fallbacks
+         */
+
+        // --- CONFIG & DATA ---
+        // Base URL for Hama Sushi images. Using a proxy or direct if allowed. 
+        // Note: Direct access might be blocked by CORS, so 'onerror' handles fallback.
+        const IMG_BASE = "https://www.hama-sushi.co.jp/assets/menu/img";
+        const PLACEHOLDER = "https://placehold.co/400x300/e2e8f0/1e293b?text=";
+
+        const MENU_DB = [
+            // Limited
+            { id: 101, cat: 'limited', name: '大とろ', price: 319, img: `${IMG_BASE}/nigiri/pho_ootoro.png` },
+            { id: 102, cat: 'limited', name: '特大ぼたん海老', price: 319, img: `${IMG_BASE}/nigiri/pho_botanebi.png` },
+            { id: 103, cat: 'limited', name: '生うに包み', price: 319, img: `${IMG_BASE}/gunkan/pho_namauni.png` },
+            // Nigiri
+            { id: 201, cat: 'nigiri', name: 'まぐろ', price: 110, img: `${IMG_BASE}/nigiri/pho_maguro.png` },
+            { id: 202, cat: 'nigiri', name: 'サーモン', price: 110, img: `${IMG_BASE}/nigiri/pho_salmon.png` },
+            { id: 203, cat: 'nigiri', name: '活〆はまち', price: 132, img: `${IMG_BASE}/nigiri/pho_hamachi.png` },
+            { id: 204, cat: 'nigiri', name: 'えび', price: 110, img: `${IMG_BASE}/nigiri/pho_ebi.png` },
+            { id: 205, cat: 'nigiri', name: '真いか', price: 110, img: `${IMG_BASE}/nigiri/pho_maika.png` },
+            { id: 206, cat: 'nigiri', name: 'えんがわ', price: 165, img: `${IMG_BASE}/nigiri/pho_engawa.png` },
+            { id: 207, cat: 'nigiri', name: 'つぶ貝', price: 165, img: `${IMG_BASE}/nigiri/pho_tsubugai.png` },
+            { id: 208, cat: 'nigiri', name: 'あじ', price: 165, img: `${IMG_BASE}/nigiri/pho_aji.png` },
+            // Gunkan
+            { id: 301, cat: 'gunkan', name: 'いくら', price: 165, img: `${IMG_BASE}/gunkan/pho_ikura.png` },
+            { id: 302, cat: 'gunkan', name: 'まぐろたたき', price: 110, img: `${IMG_BASE}/gunkan/pho_negitoro.png` },
+            { id: 303, cat: 'gunkan', name: 'コーン', price: 110, img: `${IMG_BASE}/gunkan/pho_corn.png` },
+            { id: 304, cat: 'gunkan', name: 'ツナサラダ', price: 110, img: `${IMG_BASE}/gunkan/pho_tuna.png` },
+            // Side
+            { id: 401, cat: 'side', name: '茶碗蒸し', price: 198, img: `${IMG_BASE}/side/pho_chawanmushi.png` },
+            { id: 402, cat: 'side', name: 'あさり味噌汁', price: 165, img: `${IMG_BASE}/side/pho_asarimiso.png` },
+            { id: 403, cat: 'side', name: 'カリカリポテト', price: 176, img: `${IMG_BASE}/side/pho_potato.png` },
+            // Drink
+            { id: 501, cat: 'drink', name: '生ビール', price: 528, img: `${IMG_BASE}/drink/pho_beer.png` },
+            { id: 502, cat: 'drink', name: 'コーラ', price: 165, img: `${IMG_BASE}/drink/pho_cola.png` },
+        ];
+
+        const CATEGORIES = [
+            { id: 'limited', name: 'おすすめ', icon: 'fa-star' },
+            { id: 'nigiri', name: 'にぎり', icon: 'fa-fish' },
+            { id: 'gunkan', name: '軍艦・巻物', icon: 'fa-dharmachakra' },
+            { id: 'side', name: 'サイド', icon: 'fa-bowl-food' },
+            { id: 'drink', name: 'ドリンク', icon: 'fa-beer-mug-empty' },
+        ];
+
+        // --- APP CONTROLLER ---
+        const app = {
+            state: {
+                mode: null, // 'customer' or 'kitchen'
+                cart: [],
+                history: [], // Local history for customer
+                kitchenOrders: [], // Orders received in kitchen
+                activeCat: 'limited',
+            },
+            
+            // Broadcast Channel for Sync
+            channel: new BroadcastChannel('hama_sync_channel'),
+
+            init: () => {
+                app.ui.renderCategories();
+                app.ui.renderMenu('limited');
+                app.channel.onmessage = app.handleMessage;
+                
+                // Clock for kitchen
+                setInterval(() => {
+                    const now = new Date();
+                    const el = document.getElementById('kitchen-clock');
+                    if(el) el.innerText = now.toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
+                }, 1000);
+            },
+
+            startCustomer: () => {
+                app.state.mode = 'customer';
+                app.ui.switchView('customer');
+                app.audio.play('welcome');
+            },
+
+            startKitchen: () => {
+                app.state.mode = 'kitchen';
+                app.ui.switchView('kitchen');
+                // Request current state from other tabs (optional for advanced, skipping for simple demo)
+            },
+
+            handleMessage: (event) => {
+                const { type, payload } = event.data;
+                console.log("Received:", type, payload);
+
+                if (app.state.mode === 'kitchen') {
+                    if (type === 'NEW_ORDER') {
+                        app.kitchen.addOrder(payload);
+                    }
+                } else if (app.state.mode === 'customer') {
+                    if (type === 'ORDER_READY' && payload.tableId === 12) {
+                        app.ui.triggerDelivery(payload.item);
+                    }
+                }
+            },
+
+            // --- ORDERING LOGIC ---
+            order: {
+                add: (id) => {
+                    const item = MENU_DB.find(i => i.id === id);
+                    app.state.cart.push({...item, cartId: Date.now() + Math.random()});
+                    app.ui.updateCart();
+                    app.audio.play('tap');
+                },
+                remove: (index) => {
+                    app.state.cart.splice(index, 1);
+                    app.ui.updateCart();
+                    app.audio.play('tap');
+                },
+                submit: () => {
+                    if(app.state.cart.length === 0) return;
+                    
+                    const list = document.getElementById('confirm-list');
+                    list.innerHTML = app.state.cart.map(item => `
+                        <li class="flex justify-between items-center py-3 px-4">
+                            <div class="flex items-center gap-3">
+                                <img src="${item.img}" class="w-12 h-8 object-cover rounded" onerror="this.src='${PLACEHOLDER}${item.name}'">
+                                <span class="font-bold text-gray-700">${item.name}</span>
+                            </div>
+                            <span class="font-bold">¥${item.price}</span>
+                        </li>
+                    `).join('');
+                    
+                    document.getElementById('modal-confirm-title').innerText = "注文確認";
+                    // Reset confirm button visibility just in case
+                    const confirmBtn = document.querySelector('#modal-confirm button[onclick="app.order.finalize()"]');
+                    if(confirmBtn) confirmBtn.style.display = 'block';
+
+                    app.ui.showModal('modal-confirm');
+                },
+                finalize: () => {
+                    // Send to kitchen via BroadcastChannel
+                    const orderBatch = {
+                        tableId: 12,
+                        items: [...app.state.cart],
+                        time: new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'})
+                    };
+
+                    // Local History
+                    app.state.history.push(...app.state.cart);
+                    
+                    // Broadcast
+                    app.channel.postMessage({ type: 'NEW_ORDER', payload: orderBatch });
+                    
+                    // Clear Cart & UI
+                    app.state.cart = [];
+                    app.ui.updateCart();
+                    app.ui.closeModal('modal-confirm');
+                    app.ui.showToast();
+                    app.audio.play('success');
+
+                    // If we are testing on same screen (not separate tabs), simulate kitchen update
+                    if (app.state.mode === 'customer') {
+                        // Normally kitchen receives this, but for single-tab demo users:
+                        // console.log("Sent to kitchen channel");
+                    }
+                }
+            },
+
+            // --- KITCHEN LOGIC ---
+            kitchen: {
+                addOrder: (batch) => {
+                    app.audio.play('chime');
+                    const alert = document.getElementById('kitchen-alert');
+                    alert.classList.remove('hidden');
+                    setTimeout(() => alert.classList.add('hidden'), 5000);
+
+                    // Flatten items to individual cards for kitchen
+                    batch.items.forEach(item => {
+                        app.state.kitchenOrders.push({
+                            ...item,
+                            tableId: batch.tableId,
+                            time: batch.time,
+                            status: 'cooking'
+                        });
+                    });
+                    app.kitchen.render();
+                },
+                complete: (index) => {
+                    const order = app.state.kitchenOrders[index];
+                    app.state.kitchenOrders.splice(index, 1);
+                    app.kitchen.render();
+                    
+                    // Notify Customer
+                    app.channel.postMessage({ 
+                        type: 'ORDER_READY', 
+                        payload: { tableId: order.tableId, item: order } 
+                    });
+                },
+                render: () => {
+                    const grid = document.getElementById('kitchen-grid');
+                    if(app.state.kitchenOrders.length === 0) {
+                        grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center h-96 text-gray-600"><i class="fa-solid fa-check-double text-5xl mb-4"></i><p>現在のオーダーはありません</p></div>`;
+                        return;
+                    }
+                    grid.innerHTML = app.state.kitchenOrders.map((item, idx) => `
+                        <div class="bg-[#2C2F36] rounded-xl p-4 border-l-4 border-[#D32F2F] animate-fade shadow-lg">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="bg-[#C6A87C] text-[#0F2540] px-2 py-1 rounded font-bold">T-${item.tableId}</span>
+                                <span class="text-gray-400 font-mono text-sm">${item.time}</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-4 text-white">${item.name}</h3>
+                            <button onclick="app.kitchen.complete(${idx})" class="w-full bg-[#0F2540] hover:bg-[#1a3b61] text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-bell-concierge"></i> 調理完了
+                            </button>
+                        </div>
+                    `).join('');
+                }
+            },
+
+            // --- UI HELPERS ---
+            ui: {
+                switchView: (id) => {
+                    document.getElementById('view-welcome').classList.add('hidden');
+                    document.getElementById('view-customer').classList.remove('flex');
+                    document.getElementById('view-customer').classList.add('hidden');
+                    document.getElementById('view-kitchen').classList.remove('flex');
+                    document.getElementById('view-kitchen').classList.add('hidden');
+
+                    const target = document.getElementById(`view-${id}`);
+                    target.classList.remove('hidden');
+                    target.classList.add('flex');
+                },
+                renderCategories: () => {
+                    document.getElementById('customer-nav').innerHTML = CATEGORIES.map(c => `
+                        <button onclick="app.ui.setCategory('${c.id}')" class="cat-tab ${c.id === app.state.activeCat ? 'active' : ''} flex-shrink-0 px-6 h-full flex items-center justify-center gap-2 font-bold text-sm text-gray-500 hover:bg-gray-50">
+                            <i class="fa-solid ${c.icon}"></i> ${c.name}
+                        </button>
+                    `).join('');
+                },
+                setCategory: (id) => {
+                    app.state.activeCat = id;
+                    app.ui.renderCategories();
+                    app.ui.renderMenu(id);
+                    app.audio.play('tap');
+                },
+                renderMenu: (cat) => {
+                    const items = MENU_DB.filter(i => i.cat === cat);
+                    document.getElementById('menu-grid').innerHTML = items.map(item => `
+                        <div class="menu-card cursor-pointer group" onclick="app.order.add(${item.id})">
+                            <div class="h-32 overflow-hidden relative">
+                                <img src="${item.img}" 
+                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                                     onerror="this.onerror=null; this.src='${PLACEHOLDER}${encodeURIComponent(item.name)}'">
+                                <div class="absolute bottom-0 right-0 bg-white/90 px-2 py-1 text-xs font-bold rounded-tl-lg">¥${item.price}</div>
+                            </div>
+                            <div class="p-3">
+                                <h3 class="font-bold text-gray-800 text-sm mb-1 line-clamp-2">${item.name}</h3>
+                            </div>
+                        </div>
+                    `).join('');
+                },
+                updateCart: () => {
+                    const container = document.getElementById('cart-items');
+                    const totalEl = document.getElementById('cart-total');
+                    const btn = document.getElementById('btn-submit');
+                    
+                    const total = app.state.cart.reduce((s, i) => s + i.price, 0);
+                    totalEl.innerText = total.toLocaleString();
+
+                    if(app.state.cart.length > 0) {
+                        btn.disabled = false;
+                        btn.classList.remove('bg-gray-200', 'text-gray-400');
+                        btn.classList.add('bg-[#D32F2F]', 'text-white', 'hover:bg-red-700');
+                        
+                        container.innerHTML = app.state.cart.map((item, idx) => `
+                            <div class="relative w-16 h-full flex-shrink-0 animate-fade group cursor-pointer" onclick="app.order.remove(${idx})">
+                                <img src="${item.img}" class="w-full h-full object-cover rounded-lg border border-gray-200" onerror="this.src='${PLACEHOLDER}${item.name}'">
+                                <div class="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-xmark text-white"></i>
+                                </div>
+                            </div>
+                        `).join('');
+                        container.scrollLeft = container.scrollWidth;
+                    } else {
+                        btn.disabled = true;
+                        btn.classList.add('bg-gray-200', 'text-gray-400');
+                        btn.classList.remove('bg-[#D32F2F]', 'text-white', 'hover:bg-red-700');
+                        container.innerHTML = `<div class="text-xs text-gray-400 flex items-center h-full px-4">注文する商品をタップ</div>`;
+                    }
+                },
+                showModal: (id) => {
+                    const el = document.getElementById(id);
+                    el.classList.remove('hidden');
+                    el.classList.add('flex');
+                },
+                closeModal: (id) => {
+                    const el = document.getElementById(id);
+                    el.classList.add('hidden');
+                    el.classList.remove('flex');
+                },
+                showToast: () => {
+                    const t = document.getElementById('toast');
+                    t.classList.remove('translate-x-[120%]');
+                    setTimeout(() => t.classList.add('translate-x-[120%]'), 3000);
+                },
+                triggerDelivery: (item) => {
+                    const overlay = document.getElementById('lane-overlay');
+                    const boat = document.getElementById('sushi-boat');
+                    const img = document.getElementById('delivery-img');
+                    const name = document.getElementById('delivery-name');
+
+                    img.src = item.img;
+                    name.innerText = item.name;
+                    
+                    // Reset Animation Hack
+                    overlay.classList.remove('hidden');
+                    boat.style.animation = 'none';
+                    boat.offsetHeight; // Reflow
+                    boat.style.animation = 'laneMove 5s linear forwards';
+                    
+                    app.audio.speak(`まもなく、${item.name}が到着します`);
+                    
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        app.audio.play('success');
+                    }, 5000);
+                },
+                showHistory: () => {
+                    if(app.state.history.length === 0) {
+                        alert("注文履歴はありません");
+                        return;
+                    }
+                    const list = document.getElementById('confirm-list');
+                    list.innerHTML = app.state.history.map(item => `
+                        <li class="flex justify-between items-center py-3 px-4">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-gray-200 text-xs px-2 py-1 rounded">済</span>
+                                <span class="font-bold text-gray-700">${item.name}</span>
+                            </div>
+                            <span class="font-bold">¥${item.price}</span>
+                        </li>
+                    `).join('');
+                    
+                    document.getElementById('modal-confirm-title').innerText = "注文履歴";
+                    // Hide confirm button
+                    document.querySelector('#modal-confirm button[onclick="app.order.finalize()"]').style.display = 'none';
+                    app.ui.showModal('modal-confirm');
+                },
+                showCheck: () => {
+                    const total = app.state.history.reduce((s, i) => s + i.price, 0);
+                    document.getElementById('bill-amount').innerText = total.toLocaleString();
+                    document.getElementById('bill-count').innerText = app.state.history.length + '点';
+                    app.ui.showModal('modal-check');
+                },
+                callStaff: () => {
+                    if(confirm("店員を呼び出しますか？")) {
+                        app.audio.play('chime');
+                        app.audio.speak("店員をお呼びしています");
+                    }
+                }
+            },
+
+            finishSession: () => {
+                app.audio.speak("ありがとうございました");
+                alert("お会計が完了しました");
+                location.reload();
+            },
+
+            // --- AUDIO ENGINE ---
+            audio: {
+                ctx: new (window.AudioContext || window.webkitAudioContext)(),
+                play: (type) => {
+                    if(app.audio.ctx.state === 'suspended') app.audio.ctx.resume();
+                    const osc = app.audio.ctx.createOscillator();
+                    const gain = app.audio.ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(app.audio.ctx.destination);
+                    const now = app.audio.ctx.currentTime;
+
+                    if(type === 'tap') {
+                        osc.frequency.setValueAtTime(800, now);
+                        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.05);
+                        gain.gain.setValueAtTime(0.05, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                        osc.start(now); osc.stop(now + 0.05);
+                    }
+                    if(type === 'success') {
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(523, now);
+                        osc.frequency.setValueAtTime(659, now + 0.1);
+                        gain.gain.setValueAtTime(0.1, now);
+                        gain.gain.linearRampToValueAtTime(0, now + 0.5);
+                        osc.start(now); osc.stop(now + 0.5);
+                    }
+                    if(type === 'chime') {
+                        osc.frequency.setValueAtTime(880, now);
+                        gain.gain.setValueAtTime(0.1, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+                        osc.start(now); osc.stop(now + 1.5);
+                    }
+                },
+                speak: (text) => {
+                    if('speechSynthesis' in window) {
+                        const u = new SpeechSynthesisUtterance(text);
+                        u.lang = 'ja-JP';
+                        window.speechSynthesis.speak(u);
+                    }
+                }
+            }
+        };
+
+        window.onload = app.init;
+    </script>
+</body>
+</html>
