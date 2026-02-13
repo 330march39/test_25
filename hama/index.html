@@ -128,20 +128,8 @@
 <body class="h-screen w-screen flex flex-col bg-[#F0F4F8] overflow-hidden">
 
     <!-- 1. スクリーンセーバー (修正版: 絶対配置) -->
-    <div id="view-screensaver" class="hidden fixed inset-0 z-[150] bg-white cursor-pointer flex flex-col h-screen w-screen" onclick="app.screensaver.stop()">
-        <div class="flex-1 relative w-full overflow-hidden bg-black">
-             <div id="slideshow-container" class="absolute inset-0 w-full h-full"></div>
-        </div>
-        
-        <div class="h-auto py-8 bg-white flex items-center justify-center shrink-0 z-20 relative border-t-8 border-[#002B49]">
-            <div class="flex flex-col items-center animate-bounce">
-                <p class="text-[#002B49] text-3xl md:text-4xl font-black tracking-widest flex items-center gap-4">
-                    <i class="fa-regular fa-hand-pointer"></i>
-                    <span data-t="screensaver_text">画面をタップして注文へ</span>
-                </p>
-                <p class="text-[#C5A059] text-base font-bold mt-2 tracking-[0.5em]">TOUCH SCREEN</p>
-            </div>
-        </div>
+    <div id="view-screensaver" class="hidden fixed inset-0 z-[150] bg-black cursor-pointer" onclick="app.screensaver.stop()">
+        <div id="slideshow-container" class="absolute inset-0 w-full h-full bg-black"></div>
     </div>
 
     <!-- 2. 待機画面 -->
@@ -275,7 +263,7 @@
                 </div>
 
                 <div class="flex gap-4 shrink-0">
-                    <button onclick="app.ui.closeModal('modal-detail')" class="flex-1 py-5 bg-white border-2 border-gray-200 text-gray-500 rounded-2xl font-bold text-xl hover:bg-gray-50 hover:border-gray-300 btn-press transition-all" data-t="cancel">もどる</button>
+                    <button onclick="app.ui.closeModal('modal-detail')" class="flex-1 py-5 bg-white border-2 border-gray-200 text-gray-500 rounded-2xl font-bold text-xl hover:bg-gray-50 hover:border-gray-300 btn-press transition-all" data-t="cancel">キャンセル</button>
                     <button onclick="app.order.confirm()" class="flex-[2] py-5 bg-gradient-to-r from-[#E60012] to-[#ff4d4d] text-white rounded-2xl font-black text-xl shadow-lg flex items-center justify-center gap-3 btn-press hover:shadow-xl hover:brightness-110 transition-all">
                         <span data-t="order">注文する</span> <i class="fa-solid fa-utensils"></i>
                     </button>
@@ -489,7 +477,7 @@
             { id: 602, cat: 'dessert', name: '北海道ミルクレープ', nameEn: 'Milk Crepe', price: 220, img: `${IMG_BASE}/dessert/pho_mirukurepu.png` },
             { id: 603, cat: 'dessert', name: 'チョコレートケーキ', nameEn: 'Chocolate Cake', price: 220, img: `${IMG_BASE}/dessert/pho_choco_cake.png` },
             { id: 604, cat: 'dessert', name: '三色だんご', nameEn: 'Dango', price: 110, img: `${IMG_BASE}/dessert/pho_dango.png` },
-            { id: 605, cat: 'dessert', name: 'コーヒーゼリー', nameEn: 'Coffee Jelly', price: 176, img: `${IMG_BASE}/dessert/pho_coffee_jelly_icecream.png` },
+            { id: 607, cat: 'dessert', name: 'コーヒーゼリー', nameEn: 'Coffee Jelly', price: 176, img: `${IMG_BASE}/dessert/pho_coffee_jelly_icecream.png` },
             { id: 606, cat: 'dessert', name: 'はまアイス(バニラ)', nameEn: 'Vanilla Ice Cream', price: 110, img: `${IMG_BASE}/dessert/pho_hama_ice_vanilla.png` },
             { id: 501, cat: 'drink', name: '生ビール中', nameEn: 'Draft Beer (M)', price: 528, img: `${IMG_BASE}/dessert/pho_beer_mug.png` },
             { id: 502, cat: 'drink', name: 'ペプシコーラ', nameEn: 'Pepsi Cola', price: 165, img: `${IMG_BASE}/dessert/pho_pepsi.png` },
