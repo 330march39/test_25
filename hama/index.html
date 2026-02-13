@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HAMA-STYLE OCEAN v7</title>
+    <title>HAMA-STYLE OCEAN v8</title>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho:wght@500;700;900&display=swap" rel="stylesheet">
@@ -38,7 +38,7 @@
 
         .font-serif { font-family: 'Shippori Mincho', serif; }
 
-        /* スクロールバー */
+        /* Scrollbar */
         .custom-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -49,8 +49,7 @@
         .btn-press { transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1); }
         .btn-press:active { transform: scale(0.95); }
 
-        /* アニメーション */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Animations */
         @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes wave { 
@@ -62,12 +61,9 @@
             0%, 100% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.1); opacity: 0.8; }
         }
-        @keyframes flashBorder {
-            0%, 100% { border-color: #C5A059; }
-            50% { border-color: #E60012; }
-        }
+        @keyframes flashBorder { 0%, 100% { border-color: #C5A059; } 50% { border-color: #E60012; } }
+        @keyframes kenburns { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
 
-        .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
         .animate-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .animate-slide { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .animate-cooking { animation: cookingPulse 1.5s infinite ease-in-out; }
@@ -87,22 +83,20 @@
             .menu-grid-layout { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
         }
 
-        /* スクリーンセーバー */
+        /* Screensaver */
+        #slideshow-container { position: absolute; inset: 0; width: 100%; height: 100%; }
         .slide-image {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             object-fit: contain;
-            object-position: center; 
+            object-position: top center;
             opacity: 0;
-            transition: opacity 1.5s ease-in-out;
-            pointer-events: none;
+            transition: opacity 1.5s;
+            background: #000;
         }
         .slide-image.active { opacity: 1; }
 
-        /* 画像コンテナ */
+        /* Images */
         .img-container {
             position: relative;
             background-color: #ffffff;
@@ -112,63 +106,51 @@
             justify-content: center;
         }
         .real-image {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
+            max-width: 100%; max-height: 100%;
+            width: auto; height: auto;
             object-fit: contain;
-            opacity: 0;
-            transition: opacity 0.3s;
+            opacity: 0; transition: opacity 0.3s;
         }
         .real-image.loaded { opacity: 1; }
-        
         .menu-item-hidden { display: none !important; }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col bg-[#F0F4F8] overflow-hidden">
 
-    <!-- 1. スクリーンセーバー (画像表示修正) -->
-    <div id="view-screensaver" class="hidden absolute inset-0 z-[150] bg-black cursor-pointer flex flex-col" onclick="app.screensaver.stop()">
-        <!-- 画像エリア -->
-        <div class="flex-1 relative w-full bg-black overflow-hidden">
-            <div id="slideshow-container" class="absolute inset-0 w-full h-full">
-                <!-- JSで画像を注入 -->
-            </div>
+    <!-- 1. スクリーンセーバー (修正版: 絶対配置) -->
+    <div id="view-screensaver" class="hidden absolute inset-0 z-[150] bg-black cursor-pointer" onclick="app.screensaver.stop()">
+        <!-- 上部画像エリア -->
+        <div class="absolute top-0 left-0 w-full h-[calc(100%-6rem)] bg-black">
+            <div id="slideshow-container"></div>
         </div>
-        
-        <!-- 下部復帰エリア -->
-        <div class="h-auto py-6 bg-white flex items-center justify-center shrink-0 z-20 border-t-4 border-[#002B49] shadow-[0_-5px_20px_rgba(0,0,0,0.3)]">
+        <!-- 下部テキストエリア -->
+        <div class="absolute bottom-0 left-0 w-full h-24 bg-white flex items-center justify-center border-t-4 border-[#002B49] z-20">
             <div class="flex flex-col items-center animate-bounce">
-                <p class="text-[#002B49] text-xl md:text-3xl font-black tracking-widest flex items-center gap-4">
+                <p class="text-[#002B49] text-2xl font-black tracking-widest flex items-center gap-4">
                     <i class="fa-regular fa-hand-pointer"></i>
-                    画面をタップして注文へ
+                    <span data-t="screensaver_text">画面をタップして注文へ</span>
                 </p>
             </div>
         </div>
     </div>
 
-    <!-- 2. 待機画面 (STANDBY) -->
+    <!-- 2. 待機画面 -->
     <div id="view-standby" class="absolute inset-0 z-50 bg-wave-pattern flex flex-col items-center justify-center text-white">
-        <!-- ロゴ -->
         <div class="absolute top-6 left-6 z-[60]">
-            <img src="https://www.hama-sushi.co.jp/assets/common/img/logo_hamasushi.png" alt="はま寿司" class="w-32 md:w-48 filter drop-shadow-md">
+            <img src="https://www.hama-sushi.co.jp/assets/common/img/logo_hamasushi.png" alt="logo" class="w-32 md:w-48 filter drop-shadow-md">
         </div>
-
-        <!-- 管理者ボタン -->
-        <button onclick="app.auth.open()" class="absolute top-6 right-6 text-white/10 hover:text-white p-4 z-[60] transition-colors">
-            <i class="fa-solid fa-lock text-2xl"></i>
-        </button>
+        <button onclick="app.auth.open()" class="absolute top-6 right-6 text-white/10 hover:text-white p-4 z-[60] transition-colors"><i class="fa-solid fa-lock text-2xl"></i></button>
 
         <div class="relative w-full max-w-4xl mx-auto text-center px-4 flex flex-col items-center h-full justify-center">
             <div class="flex flex-col items-center animate-pop">
-                <p class="text-3xl md:text-5xl font-serif font-bold text-white mb-8 tracking-widest" style="text-shadow: 0 4px 10px rgba(0,0,0,0.5);">いらっしゃいませ</p>
+                <p class="text-3xl md:text-5xl font-serif font-bold text-white mb-8 tracking-widest" style="text-shadow: 0 4px 10px rgba(0,0,0,0.5);" data-t="welcome">いらっしゃいませ</p>
                 <div class="mb-12 flex flex-col items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 rounded-[3rem] px-16 py-10 shadow-2xl">
-                    <span class="text-sm md:text-lg text-[#C5A059] font-bold mb-2 tracking-[0.5em] uppercase">Table No.</span>
+                    <span class="text-sm md:text-lg text-[#C5A059] font-bold mb-2 tracking-[0.5em] uppercase" data-t="table">TABLE NO.</span>
                     <span class="text-9xl md:text-[10rem] font-black text-white leading-none font-sans filter drop-shadow-lg">12</span>
                 </div>
                 <button onclick="app.customer.start()" class="group relative bg-white text-[#002B49] text-2xl md:text-4xl font-black py-6 px-24 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.3)] hover:scale-105 transition-transform flex items-center gap-6 btn-press overflow-hidden">
                     <span class="relative z-10 flex items-center gap-4">
-                        注文をはじめる
+                        <span data-t="start">注文をはじめる</span>
                         <i class="fa-solid fa-circle-chevron-right text-[#E60012]"></i>
                     </span>
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
@@ -186,16 +168,11 @@
         <!-- 左側：メニューエリア -->
         <div class="flex-1 flex flex-col h-full min-w-0 relative z-10">
             <header class="h-16 md:h-20 bg-white border-b border-gray-100 flex items-center px-2 shrink-0 shadow-sm z-20">
-                <nav class="flex-1 flex justify-start gap-2 overflow-x-auto hide-scrollbar px-2 h-full items-center w-full" id="category-nav">
-                    <!-- JS Injected -->
-                </nav>
+                <nav class="flex-1 flex justify-start gap-2 overflow-x-auto hide-scrollbar px-2 h-full items-center w-full" id="category-nav"></nav>
             </header>
-
             <main class="flex-1 overflow-y-auto p-4 md:p-6 custom-scroll bg-[#F0F4F8] relative">
                 <div class="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#E1F5FE] to-transparent -z-10 pointer-events-none"></div>
-                <div id="menu-grid" class="menu-grid-layout pb-24 animate-fade">
-                    <!-- JS Injected -->
-                </div>
+                <div id="menu-grid" class="menu-grid-layout pb-24 animate-slide"></div>
             </main>
         </div>
 
@@ -205,88 +182,78 @@
                 <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/seigaiha.png')] opacity-10"></div>
                 
                 <div class="flex flex-col relative z-10 cursor-pointer" onclick="app.ui.switchView('standby')">
-                    <span class="text-[10px] text-[#C5A059] font-bold tracking-widest">TABLE</span>
+                    <span class="text-[10px] text-[#C5A059] font-bold tracking-widest" data-t="table">TABLE</span>
                     <span class="text-3xl font-black leading-none font-sans">12</span>
                 </div>
 
                 <div class="flex items-center gap-2 relative z-10">
-                    <!-- 言語選択プルダウン -->
-                    <select class="bg-white/10 border border-white/20 text-white text-xs rounded px-1 py-2 focus:outline-none">
-                        <option value="ja" class="text-black">日本語</option>
-                        <option value="en" class="text-black">English</option>
+                    <!-- 言語切り替え -->
+                    <select onchange="app.ui.setLang(this.value)" class="bg-white/10 border border-white/20 text-white text-xs rounded px-1 py-2 focus:outline-none">
+                        <option value="ja">日本語</option>
+                        <option value="en">English</option>
                     </select>
-
-                    <!-- 呼出ボタン -->
+                    <!-- 呼出 -->
                     <button onclick="app.ui.openCallModal()" id="btn-call" class="bg-white/10 border border-white/20 hover:bg-white/20 text-white px-3 py-2 rounded-lg font-bold flex items-center gap-2 btn-press transition-colors text-sm whitespace-nowrap">
-                        <i class="fa-solid fa-bell"></i> 呼出
+                        <i class="fa-solid fa-bell"></i> <span data-t="call">呼出</span>
                     </button>
                 </div>
             </div>
 
             <div class="bg-gray-50 px-5 py-3 border-b border-gray-100 flex justify-between items-center shrink-0">
                 <span class="font-bold text-[#002B49] flex items-center gap-2 text-sm">
-                    <i class="fa-solid fa-clock-rotate-left text-[#C5A059]"></i> 注文履歴
+                    <i class="fa-solid fa-clock-rotate-left text-[#C5A059]"></i> <span data-t="history">注文履歴</span>
                 </span>
             </div>
 
             <div class="flex-1 overflow-y-auto p-4 custom-scroll bg-white" id="sidebar-content">
-                <div id="view-history-list" class="space-y-4">
-                    <!-- History Injected -->
-                </div>
+                <div id="view-history-list" class="space-y-4"></div>
             </div>
 
             <div class="bg-gray-50 border-t border-gray-200 p-5 shrink-0 z-30">
                 <div class="flex justify-between items-end mb-4 px-1">
-                    <span class="text-gray-500 font-bold text-xs tracking-wider">合計金額 (税込)</span>
+                    <span class="text-gray-500 font-bold text-xs tracking-wider" data-t="total">合計金額 (税込)</span>
                     <span class="text-3xl md:text-4xl font-black text-[#002B49] tracking-tight font-sans">¥<span id="cart-total">0</span></span>
                 </div>
                 <button onclick="app.ui.showCheck()" class="w-full py-4 bg-gradient-to-r from-[#C5A059] to-[#D4AF37] text-white rounded-xl font-black text-lg shadow-lg flex items-center justify-center gap-3 btn-press hover:shadow-xl hover:brightness-110 transition-all">
-                    <i class="fa-solid fa-calculator"></i> お会計へ進む
+                    <i class="fa-solid fa-calculator"></i> <span data-t="checkout">お会計へ進む</span>
                 </button>
             </div>
         </aside>
     </div>
 
-    <!-- 4. 商品詳細＆注文モーダル (レイアウト比率変更) -->
+    <!-- 4. 詳細画面 (画像拡大 & レイアウト) -->
     <div id="modal-detail" class="fixed inset-0 z-[90] hidden items-center justify-center bg-[#002B49]/80 backdrop-blur-sm p-4 animate-fade">
-        <div class="bg-white rounded-[2rem] w-full max-w-5xl h-auto md:h-[600px] overflow-hidden shadow-2xl animate-pop relative flex flex-col md:flex-row">
+        <div class="bg-white rounded-[2rem] w-full max-w-5xl h-auto md:h-[650px] overflow-hidden shadow-2xl animate-pop relative flex flex-col md:flex-row">
             
-            <!-- 画像エリア (左: 比率を約40%に縮小し画像を大きく) -->
-            <div class="w-full md:w-5/12 h-64 md:h-full bg-white relative shrink-0 img-container p-2 md:p-4">
-                <img id="detail-img" src="" class="real-image max-h-full max-w-full" onload="this.classList.add('loaded')">
+            <!-- 画像 (左40%) -->
+            <div class="w-full md:w-[40%] h-64 md:h-full bg-white relative shrink-0 img-container">
+                <img id="detail-img" src="" class="real-image max-h-[90%] max-w-[90%]" onload="this.classList.add('loaded')">
                 <div class="absolute top-4 left-4 z-20">
-                    <span id="detail-cat-badge" class="inline-block px-4 py-1.5 bg-[#C5A059] text-white text-sm font-bold rounded shadow-md">CATEGORY</span>
+                    <span id="detail-cat-badge" class="inline-block px-4 py-1.5 bg-[#C5A059] text-white text-sm font-bold rounded shadow-md">CAT</span>
                 </div>
             </div>
 
-            <!-- 操作エリア (右: 比率を約60%に拡大) -->
-            <div class="w-full md:w-7/12 p-6 md:p-8 flex flex-col bg-gray-50 h-full relative border-l border-gray-100">
+            <!-- 操作 (右60%) -->
+            <div class="w-full md:w-[60%] p-6 md:p-8 flex flex-col bg-gray-50 h-full relative border-l border-gray-100">
                 
-                <!-- 商品名 & 注意書き -->
                 <div class="mb-auto">
-                    <h3 id="detail-name" class="text-3xl md:text-4xl font-black text-[#002B49] font-serif tracking-wide leading-tight mb-2">商品名</h3>
+                    <h3 id="detail-name" class="text-3xl md:text-4xl font-black text-[#002B49] font-serif tracking-wide leading-tight mb-2">Item Name</h3>
                     <p id="detail-warning" class="text-[#E60012] font-bold text-base hidden">
-                        <i class="fa-solid fa-clock"></i> ご注文を受けてから調理するためお時間をいただきます
+                        <i class="fa-solid fa-clock"></i> <span data-t="fried_warning">調理にお時間をいただきます</span>
                     </p>
                 </div>
 
-                <!-- 数量と価格 -->
                 <div class="flex flex-col gap-6 mb-8 p-6 bg-white rounded-3xl shadow-sm border border-gray-100">
                     <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-2">
-                        <span class="text-gray-500 font-bold text-sm tracking-widest">数量</span>
+                        <span class="text-gray-500 font-bold text-sm tracking-widest" data-t="quantity">数量</span>
                         <div class="flex items-center gap-4">
-                            <button onclick="app.order.adjustQty(-1)" class="w-12 h-12 rounded-full bg-gray-100 text-[#002B49] text-xl font-bold flex items-center justify-center hover:bg-gray-200 btn-press border border-gray-300">
-                                <i class="fa-solid fa-minus"></i>
-                            </button>
+                            <button onclick="app.order.adjustQty(-1)" class="w-12 h-12 rounded-full bg-gray-100 text-[#002B49] text-xl font-bold flex items-center justify-center hover:bg-gray-200 btn-press border border-gray-300"><i class="fa-solid fa-minus"></i></button>
                             <div class="text-4xl font-sans font-black w-16 text-center text-[#002B49]" id="detail-qty">1</div>
-                            <button onclick="app.order.adjustQty(1)" class="w-12 h-12 rounded-full bg-[#002B49] text-white text-xl font-bold flex items-center justify-center hover:bg-[#003865] btn-press shadow-md">
-                                <i class="fa-solid fa-plus"></i>
-                            </button>
+                            <button onclick="app.order.adjustQty(1)" class="w-12 h-12 rounded-full bg-[#002B49] text-white text-xl font-bold flex items-center justify-center hover:bg-[#003865] btn-press shadow-md"><i class="fa-solid fa-plus"></i></button>
                         </div>
                     </div>
-                    
                     <div class="flex justify-between items-baseline">
-                        <span class="text-gray-500 font-bold text-sm tracking-widest">価格(税込)</span>
+                        <span class="text-gray-500 font-bold text-sm tracking-widest" data-t="price">価格</span>
                         <div class="flex items-baseline gap-1">
                             <span class="text-xl text-[#E60012] font-bold">¥</span>
                             <span id="detail-price" class="text-5xl font-black text-[#E60012] font-sans tracking-tight">0</span>
@@ -294,14 +261,10 @@
                     </div>
                 </div>
 
-                <!-- ボタン群 -->
                 <div class="flex gap-4 shrink-0">
-                    <button onclick="app.ui.closeModal('modal-detail')" class="flex-1 py-5 bg-white border-2 border-gray-300 text-gray-500 rounded-2xl font-bold text-xl shadow-sm hover:bg-gray-100 btn-press">
-                        キャンセル
-                    </button>
+                    <button onclick="app.ui.closeModal('modal-detail')" class="flex-1 py-5 bg-white border-2 border-gray-300 text-gray-500 rounded-2xl font-bold text-xl shadow-sm hover:bg-gray-100 btn-press" data-t="cancel">キャンセル</button>
                     <button onclick="app.order.confirm()" class="flex-[2] py-5 bg-[#E60012] text-white rounded-2xl font-black text-xl shadow-lg flex items-center justify-center gap-3 btn-press hover:bg-[#ff1a1a] transition-colors">
-                        <span>注文する</span>
-                        <i class="fa-solid fa-utensils"></i>
+                        <span data-t="order">注文する</span> <i class="fa-solid fa-utensils"></i>
                     </button>
                 </div>
             </div>
@@ -312,237 +275,215 @@
     <div id="modal-delivery" class="fixed inset-0 z-[250] hidden bg-[#002B49] flex-col items-center justify-center animate-fade overflow-hidden">
         <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/seigaiha.png')]"></div>
         <div class="absolute -top-20 -left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
-        <div class="absolute -bottom-20 -right-20 w-96 h-96 bg-[#C5A059]/20 rounded-full blur-3xl"></div>
-
         <div class="relative z-10 w-full max-w-6xl px-4 flex flex-col h-full py-8">
             <div class="text-center mb-6 shrink-0">
-                <div class="inline-block animate-bounce mb-2">
-                    <i class="fa-solid fa-bell text-5xl md:text-6xl text-[#C5A059]"></i>
-                </div>
-                <h2 class="text-4xl md:text-6xl font-black text-white font-serif mb-2 drop-shadow-md">商品が到着します</h2>
-                <p class="text-white/80 text-xl font-bold tracking-widest">レーンよりお取りください</p>
+                <div class="inline-block animate-bounce mb-2"><i class="fa-solid fa-bell text-5xl md:text-6xl text-[#C5A059]"></i></div>
+                <h2 class="text-4xl md:text-6xl font-black text-white font-serif mb-2 drop-shadow-md" data-t="arriving">商品が到着します</h2>
+                <p class="text-white/80 text-xl font-bold tracking-widest" data-t="take">レーンよりお取りください</p>
             </div>
-
             <div class="flex-1 overflow-y-auto custom-scroll mb-6 bg-white/5 rounded-3xl border border-white/10 p-4">
-                <div id="delivery-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- JS injected -->
-                </div>
+                <div id="delivery-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
             </div>
-            
             <button onclick="app.ui.closeDelivery()" class="w-full max-w-2xl mx-auto py-6 bg-white text-[#002B49] text-3xl font-black rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.5)] hover:scale-105 transition-transform flex items-center justify-center gap-4 shrink-0 border-4 border-[#C5A059] animate-border">
-                <i class="fa-solid fa-check-circle"></i> 商品を受け取りました
+                <i class="fa-solid fa-check-circle"></i> <span data-t="received">商品を受け取りました</span>
             </button>
         </div>
     </div>
 
-    <!-- 6. 厨房画面 (呼出解決機能追加) -->
+    <!-- 6. Kitchen -->
     <div id="view-kitchen" class="hidden flex-col h-full bg-[#1a202c] text-white">
         <header class="h-20 bg-[#002B49] flex items-center justify-between px-8 shadow-md shrink-0 z-50">
             <div class="flex items-center gap-6">
-                <h2 class="text-2xl font-bold text-[#C5A059] tracking-widest flex items-center gap-3">
-                    <i class="fa-solid fa-fire-burner"></i> KITCHEN
-                </h2>
+                <h2 class="text-2xl font-bold text-[#C5A059] tracking-widest flex items-center gap-3"><i class="fa-solid fa-fire-burner"></i> KITCHEN</h2>
                 <div class="bg-black/30 px-4 py-2 rounded-lg border border-white/10 flex items-center gap-4">
-                    <div class="flex flex-col items-start">
-                        <span class="text-[10px] text-blue-200 uppercase tracking-widest">Kitchen ID</span>
-                        <span id="kitchen-id-display" class="font-bold text-xl tracking-widest text-white leading-none">----</span>
-                    </div>
-                    <div class="w-px h-8 bg-white/20"></div>
-                    <div class="flex flex-col items-start">
-                        <span class="text-[10px] text-green-300 uppercase tracking-widest">Connection</span>
-                        <span id="kitchen-connection-status" class="font-bold text-xl text-white leading-none"><i class="fa-solid fa-circle text-gray-500 text-sm"></i> Offline</span>
-                    </div>
+                    <span id="kitchen-id-display" class="font-bold text-xl tracking-widest text-white leading-none">----</span>
+                    <span id="kitchen-connection-status" class="font-bold text-xl text-white leading-none"><i class="fa-solid fa-circle text-gray-500 text-sm"></i> Offline</span>
                 </div>
             </div>
-            <div class="flex items-center gap-6">
-                 <div class="text-3xl font-mono font-bold text-gray-400" id="kitchen-clock">00:00</div>
-                 <button onclick="location.reload()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded font-bold text-sm transition-colors">終了</button>
-            </div>
+            <div class="flex items-center gap-6"><div class="text-3xl font-mono font-bold text-gray-400" id="kitchen-clock">00:00</div></div>
         </header>
-        
-        <!-- 呼出アラート（ボタン追加） -->
         <div id="kitchen-alert-overlay" class="absolute inset-0 z-[150] hidden flex-col items-center justify-center bg-red-900/95 animate-fade pointer-events-auto">
             <div class="animate-bounce mb-8"><i class="fa-solid fa-bell text-9xl text-white"></i></div>
             <h1 class="text-8xl font-black text-white tracking-widest mb-12">12番 呼出</h1>
-            <button onclick="app.kitchen.resolveCall()" class="px-16 py-8 bg-white text-red-900 rounded-2xl font-black text-4xl shadow-2xl hover:scale-105 transition-transform flex items-center gap-4">
-                <i class="fa-solid fa-check-double"></i> 対応完了
-            </button>
+            <button onclick="app.kitchen.resolveCall()" class="px-16 py-8 bg-white text-red-900 rounded-2xl font-black text-4xl shadow-2xl hover:scale-105 transition-transform flex items-center gap-4"><i class="fa-solid fa-check-double"></i> 対応完了</button>
         </div>
-        
-        <main class="flex-1 p-6 overflow-y-auto relative bg-[#1a202c]">
-            <div id="kitchen-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-        </main>
+        <main class="flex-1 p-6 overflow-y-auto relative bg-[#1a202c]"><div id="kitchen-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div></main>
     </div>
 
-    <!-- Auth & Modals -->
-    <div id="modal-auth" class="fixed inset-0 z-[200] hidden items-center justify-center bg-[#002B49]/90 backdrop-blur-sm animate-fade p-4">
-        <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div id="auth-screen" class="w-full">
-                <div class="bg-[#002B49] p-6 text-center">
-                    <h3 class="text-[#C5A059] font-bold text-xl mb-1">STAFF AUTH</h3>
-                    <p class="text-white/40 text-xs">PASS: 9999</p>
-                </div>
-                <div class="p-6">
-                    <div class="flex justify-center gap-3 mb-6">
-                        <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-2xl font-bold text-[#002B49]" id="pin-1"></div>
-                        <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-2xl font-bold text-[#002B49]" id="pin-2"></div>
-                        <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-2xl font-bold text-[#002B49]" id="pin-3"></div>
-                        <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-2xl font-bold text-[#002B49]" id="pin-4"></div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-3">
-                        <!-- Keypad buttons (1-9, CLR, 0, BACK) -->
-                        <button onclick="app.auth.type(1)" class="h-14 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-bold text-xl text-gray-700">1</button>
-                        <button onclick="app.auth.type(2)" class="h-14 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-bold text-xl text-gray-700">2</button>
-                        <button onclick="app.auth.type(3)" class="h-14 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-bold text-xl text-gray-700">3</button>
-                        <button onclick="app.auth.type(4)" class="h-14 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-bold text-xl text-gray-700">4</button>
-                        <button onclick="app.auth.type(5)" class="h-14 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-bold text-xl text-gray-700">5</button>
-                        <button onclick="app.auth.type(6)" class="h-14 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-bold text-xl text-gray-700">6</button>
-                        <button onclick="app.auth.type(7)" class="h-14 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-bold text-xl text-gray-700">7</button>
-                        <button onclick="app.auth.type(8)" class="h-14 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-bold text-xl text-gray-700">8</button>
-                        <button onclick="app.auth.type(9)" class="h-14 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-bold text-xl text-gray-700">9</button>
-                        <button onclick="app.auth.clear()" class="h-14 rounded-lg bg-red-50 border border-red-100 hover:bg-red-100 font-bold text-lg text-red-500">CLR</button>
-                        <button onclick="app.auth.type(0)" class="h-14 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-bold text-xl text-gray-700">0</button>
-                        <button onclick="app.auth.close()" class="h-14 rounded-lg bg-gray-100 border border-gray-200 hover:bg-gray-200 font-bold text-lg text-gray-500">BACK</button>
-                    </div>
-                </div>
-            </div>
-            <div id="mode-select" class="hidden w-full flex-col h-full bg-white relative z-50">
-                <div class="bg-[#002B49] p-4 text-white font-bold flex justify-between items-center shrink-0">
-                    <span>SYSTEM MENU</span>
-                    <button onclick="app.auth.close()" class="text-white/70 hover:text-white px-2"><i class="fa-solid fa-times text-xl"></i></button>
-                </div>
-                <div class="p-6 flex flex-col gap-4 flex-1 justify-center">
-                    <button onclick="app.kitchen.startHost()" class="group w-full py-6 bg-[#002B49] text-[#C5A059] rounded-xl font-bold shadow-lg flex flex-col items-center gap-2 hover:bg-[#003865] btn-press">
-                        <i class="fa-solid fa-server text-3xl"></i>
-                        <span class="text-lg">厨房モード起動</span>
-                    </button>
-                    <button onclick="app.p2p.showConnectUI()" class="group w-full py-6 bg-white border-2 border-[#002B49] text-[#002B49] rounded-xl font-bold shadow-md flex flex-col items-center gap-2 hover:bg-gray-50 btn-press">
-                        <i class="fa-solid fa-tablet-screen-button text-3xl"></i>
-                        <span class="text-lg">客席接続設定</span>
-                    </button>
-                </div>
-            </div>
-            <div id="client-connect" class="hidden w-full flex-col h-full bg-white relative z-50">
-                 <div class="bg-[#002B49] p-4 text-white font-bold flex justify-between items-center shrink-0">
-                    <span>接続設定</span>
-                    <button onclick="app.auth.close()" class="text-white/70 hover:text-white px-2"><i class="fa-solid fa-times text-xl"></i></button>
-                </div>
-                <div class="p-8">
-                    <p class="text-gray-600 mb-4 font-bold text-center">厨房端末のID(4桁)を入力</p>
-                    <input type="tel" id="target-id-input" maxlength="4" placeholder="1234" class="w-full border-4 border-gray-300 rounded-xl p-4 text-4xl font-mono text-center tracking-[0.5em] mb-6 focus:border-[#002B49] outline-none">
-                    <button onclick="app.p2p.connectToHost()" class="w-full bg-[#002B49] text-white py-4 rounded-xl font-bold text-xl shadow-lg hover:bg-[#003865] btn-press">
-                        接続する
-                    </button>
-                    <p id="connect-msg" class="text-center mt-4 text-sm font-bold text-[#00689D] min-h-[1.5em]"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- お会計 & 呼出 -->
+    <!-- Modals -->
     <div id="modal-check" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade">
          <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-pop">
-            <div class="bg-gradient-to-r from-[#C5A059] to-[#D4AF37] p-6 text-center">
-                <h3 class="text-white font-black text-2xl font-serif">お会計の確認</h3>
-            </div>
+            <div class="bg-gradient-to-r from-[#C5A059] to-[#D4AF37] p-6 text-center"><h3 class="text-white font-black text-2xl font-serif" data-t="payment_confirm">お会計の確認</h3></div>
             <div class="p-10 text-center">
-                <p class="text-gray-500 text-lg mb-2 font-bold tracking-widest">PAYMENT AMOUNT</p>
+                <p class="text-gray-500 text-lg mb-2 font-bold tracking-widest" data-t="payment_amount">お支払い総額</p>
                 <p class="text-6xl font-black text-[#002B49] mb-8 tracking-tight font-sans">¥<span id="check-total">0</span></p>
-                <div class="flex justify-center items-center gap-2 mb-10 text-gray-500">
-                    <span>合計点数:</span>
-                    <span id="check-count" class="font-bold text-xl text-gray-800">0</span>
-                    <span>点</span>
-                </div>
-                <button onclick="app.customer.finishEat()" class="w-full py-5 bg-[#E60012] text-white rounded-xl font-bold text-2xl shadow-lg hover:bg-[#ff1a1a] btn-press mb-4">
-                    会計を確定して退店
-                </button>
-                <button onclick="app.ui.closeModal('modal-check')" class="w-full py-4 bg-gray-100 text-gray-600 rounded-xl font-bold text-lg hover:bg-gray-200">
-                    まだ注文する
-                </button>
+                <div class="flex justify-center items-center gap-2 mb-10 text-gray-500"><span data-t="count">合計点数</span>: <span id="check-count" class="font-bold text-xl text-gray-800">0</span> <span data-t="items">点</span></div>
+                <button onclick="app.customer.finishEat()" class="w-full py-5 bg-[#E60012] text-white rounded-xl font-bold text-2xl shadow-lg hover:bg-[#ff1a1a] btn-press mb-4" data-t="finish">会計を確定して退店</button>
+                <button onclick="app.ui.closeModal('modal-check')" class="w-full py-4 bg-gray-100 text-gray-600 rounded-xl font-bold text-lg hover:bg-gray-200" data-t="continue">まだ注文する</button>
             </div>
         </div>
     </div>
     <div id="modal-call" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade">
          <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden animate-pop p-8 text-center border-t-8 border-[#002B49]">
-            <div class="w-20 h-20 bg-[#F0F4F8] rounded-full flex items-center justify-center mx-auto mb-6 text-[#002B49]">
-                <i class="fa-solid fa-bell text-4xl"></i>
-            </div>
-            <h3 class="text-xl font-black text-[#002B49] mb-8 font-serif">店員をお呼びしますか？</h3>
+            <div class="w-20 h-20 bg-[#F0F4F8] rounded-full flex items-center justify-center mx-auto mb-6 text-[#002B49]"><i class="fa-solid fa-bell text-4xl"></i></div>
+            <h3 class="text-xl font-black text-[#002B49] mb-8 font-serif" data-t="call_confirm">店員をお呼びしますか？</h3>
             <div class="flex gap-4">
-                <button onclick="app.ui.closeModal('modal-call')" class="flex-1 py-3 border border-gray-300 rounded-lg text-gray-600 font-bold hover:bg-gray-50">いいえ</button>
-                <button onclick="app.order.callStaff()" class="flex-1 py-3 bg-[#002B49] text-white rounded-lg font-bold shadow hover:bg-[#003865]">呼び出す</button>
+                <button onclick="app.ui.closeModal('modal-call')" class="flex-1 py-3 border border-gray-300 rounded-lg text-gray-600 font-bold hover:bg-gray-50" data-t="no">いいえ</button>
+                <button onclick="app.order.callStaff()" class="flex-1 py-3 bg-[#002B49] text-white rounded-lg font-bold shadow hover:bg-[#003865]" data-t="yes_call">呼び出す</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Auth (Code abbreviated for space, logic preserved) -->
+    <div id="modal-auth" class="fixed inset-0 z-[200] hidden items-center justify-center bg-[#002B49]/90 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div id="auth-screen" class="w-full p-6 text-center">
+                <h3 class="text-[#002B49] font-bold text-xl mb-4">STAFF AUTH (9999)</h3>
+                <div class="flex justify-center gap-2 mb-4"><div class="w-10 h-10 bg-gray-200 rounded" id="pin-1"></div><div class="w-10 h-10 bg-gray-200 rounded" id="pin-2"></div><div class="w-10 h-10 bg-gray-200 rounded" id="pin-3"></div><div class="w-10 h-10 bg-gray-200 rounded" id="pin-4"></div></div>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="app.auth.type(1)" class="h-12 bg-gray-100 rounded font-bold">1</button><button onclick="app.auth.type(2)" class="h-12 bg-gray-100 rounded font-bold">2</button><button onclick="app.auth.type(3)" class="h-12 bg-gray-100 rounded font-bold">3</button>
+                    <button onclick="app.auth.type(4)" class="h-12 bg-gray-100 rounded font-bold">4</button><button onclick="app.auth.type(5)" class="h-12 bg-gray-100 rounded font-bold">5</button><button onclick="app.auth.type(6)" class="h-12 bg-gray-100 rounded font-bold">6</button>
+                    <button onclick="app.auth.type(7)" class="h-12 bg-gray-100 rounded font-bold">7</button><button onclick="app.auth.type(8)" class="h-12 bg-gray-100 rounded font-bold">8</button><button onclick="app.auth.type(9)" class="h-12 bg-gray-100 rounded font-bold">9</button>
+                    <button onclick="app.auth.clear()" class="h-12 bg-red-100 text-red-600 rounded font-bold">C</button><button onclick="app.auth.type(0)" class="h-12 bg-gray-100 rounded font-bold">0</button><button onclick="app.auth.close()" class="h-12 bg-gray-200 rounded font-bold">Back</button>
+                </div>
+            </div>
+            <div id="mode-select" class="hidden w-full p-6 flex-col gap-4">
+                <button onclick="app.kitchen.startHost()" class="w-full py-4 bg-[#002B49] text-white rounded-xl font-bold">Kitchen Mode</button>
+                <button onclick="app.p2p.showConnectUI()" class="w-full py-4 border-2 border-[#002B49] text-[#002B49] rounded-xl font-bold">Client Connect</button>
+            </div>
+            <div id="client-connect" class="hidden w-full p-6 text-center">
+                <input type="tel" id="target-id-input" class="w-full border-2 p-3 text-2xl text-center rounded mb-4" placeholder="ID">
+                <button onclick="app.p2p.connectToHost()" class="w-full py-3 bg-[#002B49] text-white rounded font-bold">Connect</button>
+                <p id="connect-msg" class="mt-2 text-sm font-bold"></p>
             </div>
         </div>
     </div>
 
     <!-- JAVASCRIPT -->
     <script>
-        const APP_PREFIX = "hama-ultimate-v7-"; 
+        const APP_PREFIX = "hama-ultimate-v8-"; 
         const IMG_BASE = "https://www.hama-sushi.co.jp/assets/menu/img";
         
-        const MENU_DB = [
-            // Limited & Fair
-            { id: 101, cat: 'limited', name: '大とろ', price: 319, img: `${IMG_BASE}/nigiri/pho_ootoro.png` },
-            { id: 102, cat: 'limited', name: '特大ぼたん海老', price: 319, img: `${IMG_BASE}/nigiri/pho_botanebi.png` },
-            { id: 103, cat: 'limited', name: '生うに包み', price: 319, img: `${IMG_BASE}/gunkan/pho_namauni.png` },
-            { id: 104, cat: 'limited', name: 'あわび', price: 165, img: `${IMG_BASE}/nigiri/pho_awabi.png` },
-            { id: 105, cat: 'limited', name: '一本穴子', price: 528, img: `${IMG_BASE}/nigiri/pho_ni_anago.png` },
-            { id: 106, cat: 'limited', name: '特製辛味噌担々麺', price: 506, img: `${IMG_BASE}/fair/tokusei_karamiso_tantanmen.png` },
-            { id: 107, cat: 'limited', name: '厳選まぐろ中とろ', price: 165, img: `${IMG_BASE}/fair/gensen_maguro_chutoro.png` },
-            { id: 108, cat: 'limited', name: '北海道産赤イカのウニ和えつつみ', price: 110, img: `${IMG_BASE}/fair/hokkaidousan_akaika_no_uniae_tsutsumi.png` },
-            { id: 605, cat: 'limited', name: 'ストロベリーパフェ', price: 418, img: `${IMG_BASE}/fair/berry_cute_na_strawberry_parfait_simple.png` },
-            
-            // Nigiri
-            { id: 201, cat: 'nigiri', name: 'まぐろ', price: 110, img: `${IMG_BASE}/nigiri/pho_maguro.png` },
-            { id: 202, cat: 'nigiri', name: '特製漬けまぐろ', price: 110, img: `${IMG_BASE}/nigiri/pho_dukemaguro.png` },
-            { id: 203, cat: 'nigiri', name: 'サーモン', price: 110, img: `${IMG_BASE}/nigiri/pho_salmon.png` },
-            { id: 204, cat: 'nigiri', name: '大とろサーモン', price: 110, img: `${IMG_BASE}/nigiri/pho_otoro_salmon.png` },
-            { id: 205, cat: 'nigiri', name: 'サーモンレアステーキ', price: 110, img: `${IMG_BASE}/nigiri/pho_z_toro_salmon_reasteak.png` },
-            { id: 206, cat: 'nigiri', name: '活〆はまち', price: 132, img: `${IMG_BASE}/nigiri/pho_hamachi.png` },
-            { id: 207, cat: 'nigiri', name: '真いか', price: 110, img: `${IMG_BASE}/nigiri/pho_maika.png` },
-            { id: 208, cat: 'nigiri', name: 'えび', price: 110, img: `${IMG_BASE}/nigiri/pho_ebi.png` },
-            { id: 209, cat: 'nigiri', name: '生えび', price: 110, img: `${IMG_BASE}/nigiri/pho_namaebi.png` },
-            { id: 210, cat: 'nigiri', name: 'つぶ貝', price: 165, img: `${IMG_BASE}/nigiri/pho_tsubugai.png` },
-            { id: 211, cat: 'nigiri', name: 'ほたて', price: 165, img: `${IMG_BASE}/nigiri/pho_hotate.png` },
-            { id: 212, cat: 'nigiri', name: '旨だし卵', price: 110, img: `${IMG_BASE}/nigiri/pho_umadashitamago.png` },
-            { id: 213, cat: 'nigiri', name: '牛カルビ', price: 165, img: `${IMG_BASE}/nigiri/pho_gyukarubi.png` },
-            // Gunkan
-            { id: 301, cat: 'gunkan', name: 'いくら', price: 165, img: `${IMG_BASE}/gunkan/pho_ikura.png` },
-            { id: 302, cat: 'gunkan', name: 'まぐろたたき', price: 110, img: `${IMG_BASE}/gunkan/pho_negitoro.png` },
-            { id: 303, cat: 'gunkan', name: 'コーン', price: 110, img: `${IMG_BASE}/gunkan/pho_corn.png` },
-            { id: 304, cat: 'gunkan', name: 'シーフード', price: 110, img: `${IMG_BASE}/gunkan/pho_seafood.png` },
-            { id: 305, cat: 'gunkan', name: 'ツナサラダ', price: 110, img: `${IMG_BASE}/gunkan/pho_tuna.png` },
-            { id: 306, cat: 'gunkan', name: '納豆', price: 110, img: `${IMG_BASE}/gunkan/pho_natto.png` },
-            // Side
-            { id: 401, cat: 'side', name: '茶碗蒸し', price: 198, img: `${IMG_BASE}/side/pho_chawanmushi.png` },
-            { id: 402, cat: 'side', name: 'あさり味噌汁', price: 165, img: `${IMG_BASE}/side/pho_asarimiso.png` },
-            { id: 403, cat: 'side', name: 'カリカリポテト', price: 176, img: `${IMG_BASE}/side/pho_karikari_potato.png` },
-            { id: 404, cat: 'side', name: 'から揚げ', price: 176, img: `${IMG_BASE}/side/pho_karaage.png` },
-            { id: 405, cat: 'side', name: '旨だしたこ焼き', price: 220, img: `${IMG_BASE}/side/pho_umadasitakoyaki.png` },
-            { id: 406, cat: 'side', name: '醤油ラーメン', price: 385, img: `${IMG_BASE}/side/syoyu_ramen.png` },
-            { id: 407, cat: 'side', name: '厚焼き卵', price: 110, img: `${IMG_BASE}/side/pho_atsuyaki_tamago.png` },
-            // Dessert
-            { id: 601, cat: 'dessert', name: '大学いも', price: 176, img: `${IMG_BASE}/dessert/pho_daigakuimo.png` },
-            { id: 602, cat: 'dessert', name: '北海道ミルクレープ', price: 220, img: `${IMG_BASE}/dessert/pho_mirukurepu.png` },
-            { id: 603, cat: 'dessert', name: 'チョコレートケーキ', price: 220, img: `${IMG_BASE}/dessert/pho_choco_cake.png` },
-            { id: 604, cat: 'dessert', name: '三色だんご', price: 110, img: `${IMG_BASE}/dessert/pho_dango.png` },
-            { id: 605, cat: 'dessert', name: 'コーヒーゼリー', price: 176, img: `${IMG_BASE}/dessert/pho_coffee_jelly_icecream.png` },
-            { id: 606, cat: 'dessert', name: 'はまアイス(バニラ)', price: 110, img: `${IMG_BASE}/dessert/pho_hama_ice_vanilla.png` },
-            // Drink
-            { id: 501, cat: 'drink', name: '生ビール中', price: 528, img: `${IMG_BASE}/dessert/pho_beer_mug.png` },
-            { id: 502, cat: 'drink', name: 'ペプシコーラ', price: 165, img: `${IMG_BASE}/dessert/pho_pepsi.png` },
-            { id: 503, cat: 'drink', name: 'オレンジ', price: 165, img: `${IMG_BASE}/dessert/pho_orange.png` },
-            { id: 504, cat: 'drink', name: 'コーラフロート', price: 290, img: `${IMG_BASE}/dessert/pho_cola_float.png` },
-            { id: 505, cat: 'drink', name: 'コーヒー', price: 165, img: `${IMG_BASE}/dessert/pho_coffee.png` },
-        ];
+        // --- TRANSLATIONS ---
+        const TRANSLATIONS = {
+            ja: {
+                welcome: "いらっしゃいませ",
+                table: "TABLE NO.",
+                start: "注文をはじめる",
+                history: "注文履歴",
+                call: "呼出",
+                calling: "呼出中",
+                total: "合計金額 (税込)",
+                checkout: "お会計へ進む",
+                cancel: "キャンセル",
+                order: "注文する",
+                quantity: "数量",
+                price: "価格(税込)",
+                cooking: "調理中",
+                served: "提供済",
+                arriving: "商品が到着します",
+                take: "レーンよりお取りください",
+                received: "商品を受け取りました",
+                payment_confirm: "お会計の確認",
+                payment_amount: "お支払い総額",
+                count: "合計点数",
+                items: "点",
+                finish: "会計を確定して退店",
+                continue: "まだ注文する",
+                call_confirm: "店員をお呼びしますか？",
+                no: "いいえ",
+                yes_call: "呼び出す",
+                fried_warning: "ご注文を受けてから調理するためお時間をいただきます",
+                screensaver_text: "画面をタップして注文へ"
+            },
+            en: {
+                welcome: "Welcome",
+                table: "TABLE NO.",
+                start: "Start Ordering",
+                history: "Order History",
+                call: "Call Staff",
+                calling: "Calling...",
+                total: "Total (Tax Inc.)",
+                checkout: "Checkout",
+                cancel: "Cancel",
+                order: "Order",
+                quantity: "Qty",
+                price: "Price (Tax Inc.)",
+                cooking: "Cooking",
+                served: "Served",
+                arriving: "Your Order is Arriving",
+                take: "Please take from the lane",
+                received: "Received",
+                payment_confirm: "Payment Confirmation",
+                payment_amount: "Total Amount",
+                count: "Total Items",
+                items: "items",
+                finish: "Confirm & Pay",
+                continue: "Continue Ordering",
+                call_confirm: "Call Staff?",
+                no: "No",
+                yes_call: "Yes",
+                fried_warning: "This item is cooked to order and may take some time.",
+                screensaver_text: "Tap screen to order"
+            }
+        };
 
         const CATEGORIES = [
-            { id: 'limited', name: 'おすすめ', icon: 'fa-star' },
-            { id: 'nigiri', name: 'にぎり', icon: 'fa-fish' },
-            { id: 'gunkan', name: '軍艦', icon: 'fa-dharmachakra' },
-            { id: 'side', name: 'サイド', icon: 'fa-bowl-food' },
-            { id: 'dessert', name: 'デザート', icon: 'fa-ice-cream' },
-            { id: 'drink', name: 'ドリンク', icon: 'fa-beer-mug-empty' },
+            { id: 'limited', name: 'おすすめ', nameEn: 'Recommended', icon: 'fa-star' },
+            { id: 'nigiri', name: 'にぎり', nameEn: 'Nigiri', icon: 'fa-fish' },
+            { id: 'gunkan', name: '軍艦', nameEn: 'Gunkan', icon: 'fa-dharmachakra' },
+            { id: 'side', name: 'サイド', nameEn: 'Side Dish', icon: 'fa-bowl-food' },
+            { id: 'dessert', name: 'デザート', nameEn: 'Dessert', icon: 'fa-ice-cream' },
+            { id: 'drink', name: 'ドリンク', nameEn: 'Drink', icon: 'fa-beer-mug-empty' },
+        ];
+
+        const MENU_DB = [
+            { id: 101, cat: 'limited', name: '大とろ', nameEn: 'Fatty Tuna', price: 319, img: `${IMG_BASE}/nigiri/pho_ootoro.png` },
+            { id: 102, cat: 'limited', name: '特大ぼたん海老', nameEn: 'Large Botan Shrimp', price: 319, img: `${IMG_BASE}/nigiri/pho_botanebi.png` },
+            { id: 103, cat: 'limited', name: '生うに包み', nameEn: 'Sea Urchin Wrap', price: 319, img: `${IMG_BASE}/gunkan/pho_namauni.png` },
+            { id: 104, cat: 'limited', name: 'あわび', nameEn: 'Abalone', price: 165, img: `${IMG_BASE}/nigiri/pho_awabi.png` },
+            { id: 105, cat: 'limited', name: '一本穴子', nameEn: 'Whole Conger Eel', price: 528, img: `${IMG_BASE}/nigiri/pho_ni_anago.png` },
+            { id: 106, cat: 'limited', name: '特製辛味噌担々麺', nameEn: 'Spicy Miso Ramen', price: 506, img: `${IMG_BASE}/fair/tokusei_karamiso_tantanmen.png` },
+            { id: 107, cat: 'limited', name: '厳選まぐろ中とろ', nameEn: 'Medium Fatty Tuna', price: 165, img: `${IMG_BASE}/fair/gensen_maguro_chutoro.png` },
+            { id: 108, cat: 'limited', name: '北海道産赤イカのウニ和えつつみ', nameEn: 'Squid with Urchin', price: 110, img: `${IMG_BASE}/fair/hokkaidousan_akaika_no_uniae_tsutsumi.png` },
+            { id: 605, cat: 'limited', name: 'ストロベリーパフェ', nameEn: 'Strawberry Parfait', price: 418, img: `${IMG_BASE}/fair/berry_cute_na_strawberry_parfait_simple.png` },
+            { id: 201, cat: 'nigiri', name: 'まぐろ', nameEn: 'Tuna', price: 110, img: `${IMG_BASE}/nigiri/pho_maguro.png` },
+            { id: 202, cat: 'nigiri', name: '特製漬けまぐろ', nameEn: 'Marinated Tuna', price: 110, img: `${IMG_BASE}/nigiri/pho_dukemaguro.png` },
+            { id: 203, cat: 'nigiri', name: 'サーモン', nameEn: 'Salmon', price: 110, img: `${IMG_BASE}/nigiri/pho_salmon.png` },
+            { id: 204, cat: 'nigiri', name: '大とろサーモン', nameEn: 'Fatty Salmon', price: 110, img: `${IMG_BASE}/nigiri/pho_otoro_salmon.png` },
+            { id: 205, cat: 'nigiri', name: 'サーモンレアステーキ', nameEn: 'Seared Salmon', price: 110, img: `${IMG_BASE}/nigiri/pho_z_toro_salmon_reasteak.png` },
+            { id: 206, cat: 'nigiri', name: '活〆はまち', nameEn: 'Young Yellowtail', price: 132, img: `${IMG_BASE}/nigiri/pho_hamachi.png` },
+            { id: 207, cat: 'nigiri', name: '真いか', nameEn: 'Squid', price: 110, img: `${IMG_BASE}/nigiri/pho_maika.png` },
+            { id: 208, cat: 'nigiri', name: 'えび', nameEn: 'Shrimp', price: 110, img: `${IMG_BASE}/nigiri/pho_ebi.png` },
+            { id: 209, cat: 'nigiri', name: '生えび', nameEn: 'Raw Shrimp', price: 110, img: `${IMG_BASE}/nigiri/pho_namaebi.png` },
+            { id: 210, cat: 'nigiri', name: 'つぶ貝', nameEn: 'Whelk', price: 165, img: `${IMG_BASE}/nigiri/pho_tsubugai.png` },
+            { id: 211, cat: 'nigiri', name: 'ほたて', nameEn: 'Scallop', price: 165, img: `${IMG_BASE}/nigiri/pho_hotate.png` },
+            { id: 212, cat: 'nigiri', name: '旨だし卵', nameEn: 'Egg Omelet', price: 110, img: `${IMG_BASE}/nigiri/pho_umadashitamago.png` },
+            { id: 213, cat: 'nigiri', name: '牛カルビ', nameEn: 'Beef Kalbi', price: 165, img: `${IMG_BASE}/nigiri/pho_gyukarubi.png` },
+            { id: 301, cat: 'gunkan', name: 'いくら', nameEn: 'Salmon Roe', price: 165, img: `${IMG_BASE}/gunkan/pho_ikura.png` },
+            { id: 302, cat: 'gunkan', name: 'まぐろたたき', nameEn: 'Minced Tuna', price: 110, img: `${IMG_BASE}/gunkan/pho_negitoro.png` },
+            { id: 303, cat: 'gunkan', name: 'コーン', nameEn: 'Corn Mayo', price: 110, img: `${IMG_BASE}/gunkan/pho_corn.png` },
+            { id: 304, cat: 'gunkan', name: 'シーフード', nameEn: 'Seafood Salad', price: 110, img: `${IMG_BASE}/gunkan/pho_seafood.png` },
+            { id: 305, cat: 'gunkan', name: 'ツナサラダ', nameEn: 'Tuna Salad', price: 110, img: `${IMG_BASE}/gunkan/pho_tuna.png` },
+            { id: 306, cat: 'gunkan', name: '納豆', nameEn: 'Natto', price: 110, img: `${IMG_BASE}/gunkan/pho_natto.png` },
+            { id: 401, cat: 'side', name: '茶碗蒸し', nameEn: 'Steamed Egg Custard', price: 198, img: `${IMG_BASE}/side/pho_chawanmushi.png` },
+            { id: 402, cat: 'side', name: 'あさり味噌汁', nameEn: 'Clam Miso Soup', price: 165, img: `${IMG_BASE}/side/pho_asarimiso.png` },
+            { id: 403, cat: 'side', name: 'カリカリポテト', nameEn: 'Crispy Fries', price: 176, img: `${IMG_BASE}/side/pho_karikari_potato.png` },
+            { id: 404, cat: 'side', name: 'から揚げ', nameEn: 'Fried Chicken', price: 176, img: `${IMG_BASE}/side/pho_karaage.png` },
+            { id: 405, cat: 'side', name: '旨だしたこ焼き', nameEn: 'Takoyaki', price: 220, img: `${IMG_BASE}/side/pho_umadasitakoyaki.png` },
+            { id: 406, cat: 'side', name: '醤油ラーメン', nameEn: 'Soy Ramen', price: 385, img: `${IMG_BASE}/side/syoyu_ramen.png` },
+            { id: 407, cat: 'side', name: '厚焼き卵', nameEn: 'Thick Omelet', price: 110, img: `${IMG_BASE}/side/pho_atsuyaki_tamago.png` },
+            { id: 601, cat: 'dessert', name: '大学いも', nameEn: 'Candied Sweet Potato', price: 176, img: `${IMG_BASE}/dessert/pho_daigakuimo.png` },
+            { id: 602, cat: 'dessert', name: '北海道ミルクレープ', nameEn: 'Milk Crepe', price: 220, img: `${IMG_BASE}/dessert/pho_mirukurepu.png` },
+            { id: 603, cat: 'dessert', name: 'チョコレートケーキ', nameEn: 'Chocolate Cake', price: 220, img: `${IMG_BASE}/dessert/pho_choco_cake.png` },
+            { id: 604, cat: 'dessert', name: '三色だんご', nameEn: 'Dango', price: 110, img: `${IMG_BASE}/dessert/pho_dango.png` },
+            { id: 605, cat: 'dessert', name: 'コーヒーゼリー', nameEn: 'Coffee Jelly', price: 176, img: `${IMG_BASE}/dessert/pho_coffee_jelly_icecream.png` },
+            { id: 606, cat: 'dessert', name: 'はまアイス(バニラ)', nameEn: 'Vanilla Ice Cream', price: 110, img: `${IMG_BASE}/dessert/pho_hama_ice_vanilla.png` },
+            { id: 501, cat: 'drink', name: '生ビール中', nameEn: 'Draft Beer (M)', price: 528, img: `${IMG_BASE}/dessert/pho_beer_mug.png` },
+            { id: 502, cat: 'drink', name: 'ペプシコーラ', nameEn: 'Pepsi Cola', price: 165, img: `${IMG_BASE}/dessert/pho_pepsi.png` },
+            { id: 503, cat: 'drink', name: 'オレンジ', nameEn: 'Orange Juice', price: 165, img: `${IMG_BASE}/dessert/pho_orange.png` },
+            { id: 504, cat: 'drink', name: 'コーラフロート', nameEn: 'Cola Float', price: 290, img: `${IMG_BASE}/dessert/pho_cola_float.png` },
+            { id: 505, cat: 'drink', name: 'コーヒー', nameEn: 'Coffee', price: 165, img: `${IMG_BASE}/dessert/pho_coffee.png` },
         ];
 
         const AD_IMAGES = [
@@ -558,6 +499,7 @@
 
         const app = {
             state: {
+                lang: 'ja',
                 history: [],
                 activeCat: 'limited',
                 activeItem: null,
@@ -582,112 +524,159 @@
                 setInterval(app.ui.updateClock, 1000);
             },
 
-            requestFullscreen: () => {
-                const doc = document.documentElement;
-                if (doc.requestFullscreen) doc.requestFullscreen().catch(() => {});
-                else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen().catch(() => {});
-            },
+            // --- HELPER: Translate ---
+            t: (key) => TRANSLATIONS[app.state.lang][key] || key,
+            
+            // --- Helper: Get Item Name (Lang Aware) ---
+            getItemName: (item) => app.state.lang === 'en' ? (item.nameEn || item.name) : item.name,
 
-            screensaver: {
-                init: () => {
-                    const container = document.getElementById('slideshow-container');
-                    AD_IMAGES.forEach((src, idx) => {
-                        const img = document.createElement('img');
-                        img.src = src;
-                        img.className = `slide-image ${idx === 0 ? 'active' : ''}`;
-                        img.id = `slide-${idx}`;
-                        container.appendChild(img);
+            // --- UI HELPERS ---
+            ui: {
+                setLang: (lang) => {
+                    app.state.lang = lang;
+                    // Update Text Elements
+                    document.querySelectorAll('[data-t]').forEach(el => {
+                        el.innerText = app.t(el.dataset.t);
                     });
-                    setInterval(() => {
-                        const customerView = document.getElementById('view-customer');
-                        const isCustomerActive = !customerView.classList.contains('hidden');
-                        const noModals = document.querySelectorAll('[id^="modal-"]:not(.hidden)').length === 0;
-                        if (isCustomerActive && noModals && !app.state.screensaverActive) {
-                            app.state.idleTime++;
-                            if (app.state.idleTime >= 30) app.screensaver.start();
-                        }
-                    }, 1000);
-                    ['click', 'touchstart', 'mousemove', 'scroll'].forEach(evt => {
-                        document.addEventListener(evt, () => { app.state.idleTime = 0; });
-                    });
+                    // Re-render components
+                    app.ui.renderCategories();
+                    app.ui.renderMenu(app.state.activeCat);
+                    app.ui.updateHistory();
+                    
+                    // Update Dynamic Button Text
+                    if(app.state.isCalling) {
+                        document.getElementById('btn-call').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${app.t('calling')}`;
+                    } else {
+                        document.getElementById('btn-call').innerHTML = `<i class="fa-solid fa-bell"></i> ${app.t('call')}`;
+                    }
                 },
-                start: () => {
-                    app.state.screensaverActive = true;
-                    document.getElementById('view-screensaver').classList.remove('hidden');
-                    app.state.slideInterval = setInterval(app.screensaver.nextSlide, 5000);
+                switchView: (id) => {
+                    document.querySelectorAll('body > div[id^="view-"]').forEach(el => el.classList.add('hidden'));
+                    document.querySelectorAll('body > div[id^="view-"]').forEach(el => el.classList.remove('flex'));
+                    const target = document.getElementById(`view-${id}`);
+                    target.classList.remove('hidden');
+                    target.classList.add('flex');
+                    if(id === 'customer') target.classList.add('flex-row');
+                    if(id === 'standby' || id === 'kitchen') target.classList.add('flex-col');
                 },
-                stop: () => {
-                    app.state.screensaverActive = false;
-                    app.state.idleTime = 0;
-                    document.getElementById('view-screensaver').classList.add('hidden');
-                    clearInterval(app.state.slideInterval);
+                renderCategories: () => {
+                    document.getElementById('category-nav').innerHTML = CATEGORIES.map(c => `
+                        <button onclick="app.ui.setCategory('${c.id}')" class="group h-10 md:h-12 px-4 md:px-5 flex items-center justify-center gap-2 font-bold text-sm md:text-base transition-all rounded-full whitespace-nowrap border border-transparent ${c.id === app.state.activeCat ? 'bg-[#002B49] text-white shadow-md' : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-700'}">
+                            <i class="fa-solid ${c.icon} ${c.id === app.state.activeCat ? 'text-[#C5A059]' : 'text-gray-400'}"></i> ${app.state.lang === 'en' ? c.nameEn : c.name}
+                        </button>
+                    `).join('');
                 },
-                nextSlide: () => {
-                    const next = (app.state.currentSlide + 1) % AD_IMAGES.length;
-                    document.getElementById(`slide-${app.state.currentSlide}`).classList.remove('active');
-                    document.getElementById(`slide-${next}`).classList.add('active');
-                    app.state.currentSlide = next;
-                }
-            },
+                setCategory: (id) => {
+                    app.state.activeCat = id;
+                    app.ui.renderCategories();
+                    app.ui.renderMenu(id);
+                    app.audio.play('tap');
+                },
+                renderMenu: (cat) => {
+                    const items = MENU_DB.filter(i => i.cat === cat);
+                    document.getElementById('menu-grid').innerHTML = items.map(item => `
+                        <div class="bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer flex flex-col h-full border border-gray-100 group hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 duration-200 menu-item-container" onclick="app.order.openDetail(${item.id})">
+                            <div class="aspect-[4/3] w-full bg-gray-50 relative overflow-hidden img-container">
+                                <img src="${item.img}" class="real-image" onload="this.classList.add('loaded')" onerror="this.closest('.menu-item-container').style.display='none'">
+                            </div>
+                            <div class="p-4 flex-1 flex flex-col justify-between">
+                                <h3 class="font-bold text-[#002B49] text-base md:text-lg leading-tight mb-2 font-serif">${app.getItemName(item)}</h3>
+                                <div class="flex items-end justify-between">
+                                    <span class="text-xs text-gray-400 font-bold bg-gray-100 px-2 py-1 rounded">税込</span>
+                                    <span class="text-xl md:text-2xl font-black text-[#E60012] font-sans">¥${item.price}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                },
+                updateHistory: () => {
+                    const total = app.state.history.reduce((s, i) => s + i.price, 0);
+                    document.getElementById('cart-total').innerText = total.toLocaleString();
 
-            p2p: {
-                initHost: () => {
-                    const shortId = Math.floor(1000 + Math.random() * 9000).toString();
-                    const fullId = APP_PREFIX + shortId;
-                    app.state.peer = new Peer(fullId);
-                    app.state.isHost = true;
-                    app.state.peer.on('open', (id) => {
-                        app.state.myId = shortId;
-                        document.getElementById('kitchen-id-display').innerText = shortId;
-                    });
-                    app.state.peer.on('connection', (conn) => {
-                        app.state.conn = conn;
-                        app.p2p.setupConn(conn);
-                        app.audio.play('chime');
-                        const el = document.getElementById('kitchen-connection-status');
-                        el.innerHTML = `<i class="fa-solid fa-circle text-green-400 text-sm animate-pulse"></i> Online`;
-                    });
+                    const histList = document.getElementById('view-history-list');
+                    if(app.state.history.length === 0) {
+                        histList.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-gray-300"><i class="fa-solid fa-utensils text-4xl mb-3 opacity-50"></i></div>`;
+                    } else {
+                        const histRev = [...app.state.history].reverse();
+                        histList.innerHTML = histRev.map(item => {
+                            const isCooking = item.status === 'cooking';
+                            const statusIcon = isCooking 
+                                ? '<i class="fa-solid fa-fire-burner text-[#E60012] animate-cooking"></i>' 
+                                : '<i class="fa-solid fa-circle-check text-green-500"></i>';
+                            const statusText = isCooking ? app.t('cooking') : app.t('served');
+                            const bgClass = isCooking ? 'bg-orange-50 border-orange-100' : 'bg-gray-50 border-gray-100 opacity-60';
+
+                            return `
+                            <div class="flex gap-4 p-3 rounded-xl border border-gray-200 bg-white shadow-sm mb-2">
+                                <div class="flex flex-col w-24 shrink-0">
+                                    <div class="w-full h-16 rounded-lg bg-gray-100 overflow-hidden mb-2">
+                                        <img src="${item.img}" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="text-[10px] text-center font-bold ${isCooking ? 'text-[#E60012]' : 'text-green-600'} bg-gray-100 rounded py-1">
+                                        ${statusIcon} ${statusText}
+                                    </div>
+                                </div>
+                                <div class="flex flex-col justify-center flex-1">
+                                    <div class="font-bold text-[#002B49] text-base mb-1 leading-tight">${app.getItemName(item)}</div>
+                                    <div class="font-black text-lg text-gray-800">¥${item.price}</div>
+                                </div>
+                            </div>
+                        `}).join('');
+                    }
                 },
-                showConnectUI: () => {
-                    document.getElementById('mode-select').classList.remove('flex');
-                    document.getElementById('mode-select').classList.add('hidden');
-                    document.getElementById('client-connect').classList.remove('hidden');
-                    document.getElementById('client-connect').classList.add('flex');
+                showCheck: () => {
+                    const total = app.state.history.reduce((s, i) => s + i.price, 0);
+                    document.getElementById('check-total').innerText = total.toLocaleString();
+                    document.getElementById('check-count').innerText = app.state.history.length;
+                    app.ui.openModal('modal-check');
                 },
-                connectToHost: () => {
-                    const input = document.getElementById('target-id-input').value;
-                    if(input.length !== 4) return alert("4桁の数字を入力してください");
-                    const targetFullId = APP_PREFIX + input;
-                    const msg = document.getElementById('connect-msg');
-                    msg.innerText = "接続中...";
-                    app.state.peer = new Peer();
-                    app.state.peer.on('open', () => {
-                        const conn = app.state.peer.connect(targetFullId);
-                        app.state.conn = conn;
-                        conn.on('open', () => {
-                            msg.innerText = "接続成功！";
-                            setTimeout(() => { app.auth.close(); }, 1000);
-                            app.p2p.setupConn(conn);
-                        });
-                        conn.on('error', (err) => { msg.innerText = "接続失敗"; });
-                        setTimeout(() => { if(!conn.open) msg.innerText = "応答なし"; }, 5000);
-                    });
+                openModal: (id) => {
+                    document.getElementById(id).classList.remove('hidden');
+                    document.getElementById(id).classList.add('flex');
                 },
-                setupConn: (conn) => {
-                    conn.on('data', (data) => {
-                        if (app.state.isHost) {
-                            if (data.type === 'ORDER') app.kitchen.addOrder(data.payload);
-                            if (data.type === 'CALL') app.kitchen.showCallAlert();
-                        } else {
-                            if (data.type === 'COOKED') {
-                                app.order.markAsServed(data.payload);
-                                app.ui.triggerDelivery(data.payload);
-                            }
-                            if (data.type === 'CALL_RESOLVED') {
-                                app.order.resolveCall();
-                            }
-                        }
-                    });
+                openCallModal: () => {
+                    app.audio.play('tap');
+                    app.ui.openModal('modal-call');
+                },
+                closeModal: (id) => {
+                    document.getElementById(id).classList.add('hidden');
+                    document.getElementById(id).classList.remove('flex');
+                },
+                triggerDelivery: (payload) => {
+                    const items = Array.isArray(payload) ? payload : [payload];
+                    const grid = document.getElementById('delivery-grid');
+                    const modal = document.getElementById('modal-delivery');
+                    
+                    const newItemsHtml = items.map(item => `
+                        <div class="bg-white rounded-3xl p-4 shadow-lg flex flex-col items-center animate-pop">
+                            <div class="w-full aspect-[4/3] rounded-2xl mb-4 bg-gray-100 relative overflow-hidden img-container">
+                                 <img src="${item.img}" class="real-image loaded" onerror="this.classList.remove('loaded')">
+                            </div>
+                             <div class="text-xl md:text-2xl font-black text-[#002B49] text-center font-serif leading-tight">${app.getItemName(item)}</div>
+                        </div>
+                    `).join('');
+
+                    if (modal.classList.contains('hidden')) {
+                        grid.innerHTML = newItemsHtml;
+                        app.ui.openModal('modal-delivery');
+                    } else {
+                        grid.insertAdjacentHTML('beforeend', newItemsHtml);
+                        setTimeout(() => { grid.parentElement.scrollTop = grid.parentElement.scrollHeight; }, 100);
+                    }
+
+                    app.audio.play('melody');
+                    setTimeout(() => { app.audio.speak(app.t('arriving')); }, 1000);
+                },
+                closeDelivery: () => {
+                    app.ui.closeModal('modal-delivery');
+                    app.audio.play('success');
+                    app.audio.speak(app.t('received')); // Fixed to read correct lang
+                },
+                updateClock: () => {
+                    const now = new Date();
+                    const t = now.toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
+                    const el = document.getElementById('kitchen-clock');
+                    if(el) el.innerText = t;
                 }
             },
 
@@ -741,11 +730,12 @@
                 start: () => {
                     app.requestFullscreen();
                     app.audio.play('welcome');
-                    app.audio.speak("いらっしゃいませ。濱のおいしさを、そのままに。");
+                    app.audio.speak(app.t('welcome'));
                     app.ui.switchView('customer');
                 },
                 finishEat: () => {
-                    app.audio.speak("本日はご来店、ありがとうございました。");
+                    const msg = app.state.lang === 'en' ? "Thank you very much." : "本日はご来店、ありがとうございました。";
+                    app.audio.speak(msg);
                     app.ui.closeModal('modal-check');
                     app.state.history = [];
                     app.ui.updateHistory();
@@ -764,12 +754,15 @@
                     imgEl.src = "";
                     setTimeout(() => { imgEl.src = item.img; }, 10);
 
-                    document.getElementById('detail-name').innerText = item.name;
+                    document.getElementById('detail-name').innerText = app.getItemName(item);
                     document.getElementById('detail-price').innerText = item.price;
                     document.getElementById('detail-qty').innerText = 1;
-                    document.getElementById('detail-cat-badge').innerText = CATEGORIES.find(c=>c.id === item.cat).name;
+                    
+                    const catName = app.state.lang === 'en' 
+                        ? CATEGORIES.find(c=>c.id === item.cat).nameEn 
+                        : CATEGORIES.find(c=>c.id === item.cat).name;
+                    document.getElementById('detail-cat-badge').innerText = catName;
 
-                    // 揚げ物判定 (ポテト403, から揚げ404, たこ焼き405)
                     const friedIds = [403, 404, 405];
                     const warningEl = document.getElementById('detail-warning');
                     if (friedIds.includes(item.id)) {
@@ -796,23 +789,19 @@
                     for(let i=0; i<qty; i++) {
                         itemsToSend.push({ ...item, uid: Date.now() + Math.random() + i, status: 'cooking' });
                     }
-
                     const data = {
                         tableId: 12,
                         items: itemsToSend,
                         time: new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'})
                     };
-
                     app.state.history.push(...itemsToSend);
-
                     if(app.state.conn && app.state.conn.open) {
                         app.state.conn.send({ type: 'ORDER', payload: data });
                     }
-
                     app.ui.closeModal('modal-detail');
                     app.ui.updateHistory();
                     app.audio.play('success');
-                    app.audio.speak("ご注文ありがとうございます。");
+                    app.audio.speak(app.t('order')); 
                 },
                 markAsServed: (servedItems) => {
                     const items = Array.isArray(servedItems) ? servedItems : [servedItems];
@@ -829,22 +818,22 @@
                     }
                     app.audio.play('chime');
                     app.state.isCalling = true;
-                    
                     const btn = document.getElementById('btn-call');
-                    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> 呼出中`;
+                    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${app.t('calling')}`;
                     btn.classList.remove('bg-white/10');
                     btn.classList.add('bg-[#E60012]', 'border-transparent');
                 },
                 resolveCall: () => {
                     app.state.isCalling = false;
                     const btn = document.getElementById('btn-call');
-                    btn.innerHTML = `<i class="fa-solid fa-bell"></i> 呼出`;
+                    btn.innerHTML = `<i class="fa-solid fa-bell"></i> ${app.t('call')}`;
                     btn.classList.add('bg-white/10');
                     btn.classList.remove('bg-[#E60012]', 'border-transparent');
                     app.audio.play('success');
                 }
             },
 
+            // --- KITCHEN LOGIC ---
             kitchen: {
                 startHost: () => {
                     app.auth.close();
@@ -874,7 +863,6 @@
                             <i class="fa-solid fa-bell-concierge"></i> 調理完了
                         </button>
                     `;
-
                     card.querySelector('button').onclick = () => {
                         card.style.opacity = '0.5';
                         card.querySelector('button').innerText = "提供済み";
@@ -902,143 +890,49 @@
                 }
             },
 
-            ui: {
-                switchView: (id) => {
-                    document.querySelectorAll('body > div[id^="view-"]').forEach(el => el.classList.add('hidden'));
-                    document.querySelectorAll('body > div[id^="view-"]').forEach(el => el.classList.remove('flex'));
-                    const target = document.getElementById(`view-${id}`);
-                    target.classList.remove('hidden');
-                    target.classList.add('flex');
-                    if(id === 'customer') target.classList.add('flex-row');
-                    if(id === 'standby' || id === 'kitchen') target.classList.add('flex-col');
-                },
-                renderCategories: () => {
-                    document.getElementById('category-nav').innerHTML = CATEGORIES.map(c => `
-                        <button onclick="app.ui.setCategory('${c.id}')" class="group h-10 md:h-12 px-4 md:px-5 flex items-center justify-center gap-2 font-bold text-sm md:text-base transition-all rounded-full whitespace-nowrap border border-transparent ${c.id === app.state.activeCat ? 'bg-[#002B49] text-white shadow-md' : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-700'}">
-                            <i class="fa-solid ${c.icon} ${c.id === app.state.activeCat ? 'text-[#C5A059]' : 'text-gray-400'}"></i> ${c.name}
-                        </button>
-                    `).join('');
-                },
-                setCategory: (id) => {
-                    app.state.activeCat = id;
-                    app.ui.renderCategories();
-                    app.ui.renderMenu(id);
-                    app.audio.play('tap');
-                },
-                renderMenu: (cat) => {
-                    const items = MENU_DB.filter(i => i.cat === cat);
-                    document.getElementById('menu-grid').innerHTML = items.map(item => `
-                        <div class="bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer flex flex-col h-full border border-gray-100 group hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95 duration-200 menu-item-container" onclick="app.order.openDetail(${item.id})">
-                            <div class="aspect-[4/3] w-full bg-gray-50 relative overflow-hidden img-container">
-                                <img src="${item.img}" class="real-image" onload="this.classList.add('loaded')" onerror="this.closest('.menu-item-container').style.display='none'">
-                            </div>
-                            <div class="p-4 flex-1 flex flex-col justify-between">
-                                <h3 class="font-bold text-[#002B49] text-base md:text-lg leading-tight mb-2 font-serif">${item.name}</h3>
-                                <div class="flex items-end justify-between">
-                                    <span class="text-xs text-gray-400 font-bold bg-gray-100 px-2 py-1 rounded">税込</span>
-                                    <span class="text-xl md:text-2xl font-black text-[#E60012] font-sans">¥${item.price}</span>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                },
-                updateHistory: () => {
-                    const total = app.state.history.reduce((s, i) => s + i.price, 0);
-                    document.getElementById('cart-total').innerText = total.toLocaleString();
-
-                    const histList = document.getElementById('view-history-list');
-                    if(app.state.history.length === 0) {
-                        histList.innerHTML = `
-                            <div class="flex flex-col items-center justify-center h-64 text-gray-300">
-                                <i class="fa-solid fa-utensils text-4xl mb-3 opacity-50"></i>
-                                <p class="text-sm font-bold">メニューから<br>ご注文ください</p>
-                            </div>
-                        `;
-                    } else {
-                        const histRev = [...app.state.history].reverse();
-                        histList.innerHTML = histRev.map(item => {
-                            const isCooking = item.status === 'cooking';
-                            const statusIcon = isCooking 
-                                ? '<i class="fa-solid fa-fire-burner text-[#E60012] animate-cooking"></i>' 
-                                : '<i class="fa-solid fa-circle-check text-green-500"></i>';
-                            const statusText = isCooking ? '調理中' : '提供済';
-                            const bgClass = isCooking ? 'bg-orange-50 border-orange-100' : 'bg-gray-50 border-gray-100 opacity-60';
-
-                            return `
-                            <div class="flex items-center p-3 rounded-xl border gap-3 animate-fade ${bgClass}">
-                                <div class="w-16 h-12 rounded-lg bg-gray-100 shrink-0 relative overflow-hidden img-container">
-                                    <img src="${item.img}" class="real-image loaded" onerror="this.classList.remove('loaded')">
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="font-bold text-[#002B49] truncate text-sm mb-1">${item.name}</div>
-                                    <div class="flex items-center gap-2 text-xs font-bold text-gray-500">
-                                        ${statusIcon}
-                                        <span>${statusText}</span>
-                                    </div>
-                                </div>
-                                <div class="font-bold text-gray-800 whitespace-nowrap">¥${item.price}</div>
-                            </div>
-                        `}).join('');
-                    }
-                },
-                showCheck: () => {
-                    const total = app.state.history.reduce((s, i) => s + i.price, 0);
-                    document.getElementById('check-total').innerText = total.toLocaleString();
-                    document.getElementById('check-count').innerText = app.state.history.length;
-                    app.ui.openModal('modal-check');
-                },
-                openModal: (id) => {
-                    document.getElementById(id).classList.remove('hidden');
-                    document.getElementById(id).classList.add('flex');
-                },
-                openCallModal: () => {
-                    app.audio.play('tap');
-                    app.ui.openModal('modal-call');
-                },
-                closeModal: (id) => {
-                    document.getElementById(id).classList.add('hidden');
-                    document.getElementById(id).classList.remove('flex');
-                },
-                triggerDelivery: (payload) => {
-                    const items = Array.isArray(payload) ? payload : [payload];
-                    const grid = document.getElementById('delivery-grid');
-                    const modal = document.getElementById('modal-delivery');
-                    
-                    const newItemsHtml = items.map(item => `
-                        <div class="bg-white rounded-3xl p-4 shadow-lg flex flex-col items-center animate-pop">
-                            <div class="w-full aspect-[4/3] rounded-2xl mb-4 bg-gray-100 relative overflow-hidden img-container">
-                                 <img src="${item.img}" class="real-image loaded" onerror="this.classList.remove('loaded')">
-                            </div>
-                             <div class="text-xl md:text-2xl font-black text-[#002B49] text-center font-serif leading-tight">${item.name}</div>
-                        </div>
-                    `).join('');
-
-                    if (modal.classList.contains('hidden')) {
-                        grid.innerHTML = newItemsHtml;
-                        app.ui.openModal('modal-delivery');
-                    } else {
-                        grid.insertAdjacentHTML('beforeend', newItemsHtml);
-                        const container = grid.parentElement;
-                        setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
-                    }
-
-                    app.audio.play('melody');
-                    setTimeout(() => {
-                         app.audio.speak("商品が到着します。");
+            // --- SCREENSAVER ---
+            screensaver: {
+                init: () => {
+                    const container = document.getElementById('slideshow-container');
+                    AD_IMAGES.forEach((src, idx) => {
+                        const img = document.createElement('img');
+                        img.src = src;
+                        img.className = `slide-image ${idx === 0 ? 'active' : ''}`;
+                        img.id = `slide-${idx}`;
+                        container.appendChild(img);
+                    });
+                    setInterval(() => {
+                        const customerView = document.getElementById('view-customer');
+                        const isCustomerActive = !customerView.classList.contains('hidden');
+                        const noModals = document.querySelectorAll('[id^="modal-"]:not(.hidden)').length === 0;
+                        if (isCustomerActive && noModals && !app.state.screensaverActive) {
+                            app.state.idleTime++;
+                            if (app.state.idleTime >= 30) app.screensaver.start();
+                        }
                     }, 1000);
+                    ['click', 'touchstart', 'mousemove', 'scroll'].forEach(evt => {
+                        document.addEventListener(evt, () => { app.state.idleTime = 0; });
+                    });
                 },
-                closeDelivery: () => {
-                    app.ui.closeModal('modal-delivery');
-                    app.audio.play('success');
-                    app.audio.speak("ありがとうございました。");
+                start: () => {
+                    app.state.screensaverActive = true;
+                    document.getElementById('view-screensaver').classList.remove('hidden');
+                    app.state.slideInterval = setInterval(app.screensaver.nextSlide, 5000);
                 },
-                updateClock: () => {
-                    const now = new Date();
-                    const t = now.toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
-                    const el = document.getElementById('kitchen-clock');
-                    if(el) el.innerText = t;
+                stop: () => {
+                    app.state.screensaverActive = false;
+                    app.state.idleTime = 0;
+                    document.getElementById('view-screensaver').classList.add('hidden');
+                    clearInterval(app.state.slideInterval);
+                },
+                nextSlide: () => {
+                    const next = (app.state.currentSlide + 1) % AD_IMAGES.length;
+                    document.getElementById(`slide-${app.state.currentSlide}`).classList.remove('active');
+                    document.getElementById(`slide-${next}`).classList.add('active');
+                    app.state.currentSlide = next;
                 }
             },
+
             audio: {
                 ctx: null,
                 init: () => { if(!app.audio.ctx) app.audio.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -1085,7 +979,6 @@
                          gain.gain.linearRampToValueAtTime(0, now + 0.3);
                          osc.start(now); osc.stop(now + 0.3);
                     } else if (type === 'melody') {
-                        // Simple Arpeggio: C - E - G - C
                         const notes = [523.25, 659.25, 783.99, 1046.50];
                         const now = ctx.currentTime;
                         notes.forEach((freq, i) => {
@@ -1101,7 +994,7 @@
                             osc.start(now + i * 0.15);
                             osc.stop(now + i * 0.15 + 0.5);
                         });
-                        return; // return early to avoid stop call below
+                        return;
                     }
                 },
                 speak: (text) => {
@@ -1112,6 +1005,12 @@
                         window.speechSynthesis.speak(u);
                     }
                 }
+            },
+            
+            requestFullscreen: () => {
+                const doc = document.documentElement;
+                if (doc.requestFullscreen) doc.requestFullscreen().catch(() => {});
+                else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen().catch(() => {});
             }
         };
 
