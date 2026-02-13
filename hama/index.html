@@ -600,35 +600,53 @@
 
                     const histList = document.getElementById('view-history-list');
                     if(app.state.history.length === 0) {
-                        histList.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-gray-300"><i class="fa-solid fa-utensils text-4xl mb-3 opacity-50"></i></div>`;
+                        // 履歴がない場合のデザイン
+                        histList.innerHTML = `
+                            <div class="flex flex-col items-center justify-center h-64 text-gray-300 gap-4">
+                                <i class="fa-solid fa-utensils text-5xl opacity-30"></i>
+                                <span class="text-sm font-bold opacity-50">注文履歴はありません</span>
+                            </div>`;
                     } else {
                         const histRev = [...app.state.history].reverse();
                         histList.innerHTML = histRev.map(item => {
                             const isCooking = item.status === 'cooking';
-                            // 調理中はアイコン変更 & アニメーションクラス付与
-                            const statusIcon = isCooking 
-                                ? '<i class="fa-solid fa-fire-burner text-[#E60012] animate-bounce"></i>' 
-                                : '<i class="fa-solid fa-circle-check text-green-500"></i>';
-                            const statusText = isCooking ? app.t('cooking') : app.t('served');
                             
-                            // 調理中のカードデザイン変更 (animate-cooking-cardを追加)
+                            // ステータス表示設定
+                            const statusIcon = isCooking 
+                                ? '<i class="fa-solid fa-fire-burner animate-bounce"></i>' 
+                                : '<i class="fa-solid fa-check"></i>';
+                            const statusText = isCooking ? app.t('cooking') : app.t('served');
+                            const statusClass = isCooking 
+                                ? 'text-[#E60012] bg-red-50 border-red-100' 
+                                : 'text-green-600 bg-green-50 border-green-100';
+
+                            // カード全体のスタイル（調理中は強調）
                             const cardClass = isCooking 
-                                ? 'bg-orange-50 border-orange-200 animate-cooking-card' 
-                                : 'bg-gray-50 border-gray-100 opacity-60';
+                                ? 'bg-white border-l-4 border-l-[#E60012] border-y border-r border-gray-100 shadow-md animate-cooking-card' 
+                                : 'bg-gray-50 border border-gray-200 opacity-70';
 
                             return `
-                            <div class="flex gap-3 p-3 rounded-xl border ${cardClass} shadow-sm mb-2 transition-all">
-                                <div class="flex flex-col w-20 shrink-0">
-                                    <div class="w-full h-14 rounded-lg bg-white overflow-hidden mb-1 border border-gray-100">
+                            <div class="flex gap-4 p-4 rounded-xl ${cardClass} mb-3 transition-all min-h-[120px]">
+                                
+                                <div class="flex flex-col w-24 shrink-0 gap-2">
+                                    <div class="w-full aspect-video rounded-lg bg-white overflow-hidden border border-gray-100 relative shadow-sm">
                                         <img src="${item.img}" class="w-full h-full object-cover">
                                     </div>
-                                    <div class="text-[10px] text-center font-bold ${isCooking ? 'text-[#E60012]' : 'text-green-600'} bg-white/80 rounded py-0.5 shadow-sm border border-gray-100">
-                                        ${statusIcon} ${statusText}
+                                    <div class="text-xs text-center font-black ${statusClass} rounded py-1 px-1 border tracking-tighter flex items-center justify-center gap-1 shadow-sm">
+                                        ${statusIcon} <span>${statusText}</span>
                                     </div>
                                 </div>
-                                <div class="flex-1 flex justify-between items-center">
-                                    <div class="font-bold text-[#002B49] text-sm leading-tight pr-2 flex-1">${app.getItemName(item)}</div>
-                                    <div class="font-black text-lg text-gray-800 shrink-0 text-right">¥${item.price}</div>
+
+                                <div class="flex-1 flex flex-col justify-between">
+                                    
+                                    <div class="font-bold text-[#002B49] text-lg leading-snug tracking-tight">
+                                        ${app.getItemName(item)}
+                                    </div>
+                                    
+                                    <div class="flex justify-end items-end w-full mt-2">
+                                        <span class="text-xs font-bold text-gray-400 mb-1.5 mr-1">¥</span>
+                                        <span class="font-black text-3xl text-[#002B49] leading-none tracking-tight font-sans">${item.price.toLocaleString()}</span>
+                                    </div>
                                 </div>
                             </div>
                         `}).join('');
