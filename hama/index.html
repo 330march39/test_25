@@ -98,11 +98,11 @@
         .slide-image {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: contain;    /* 画像全体を表示（横幅または縦幅に合わせる） */
-            object-position: top;   /* 上に詰めて表示 */
+            object-fit: cover; /* ここを cover にすることで横幅いっぱい・隙間なしになります */
+            object-position: center;
             opacity: 0;
             transition: opacity 1.5s;
-            background: #fff;       /* 画像ロード前や余白は白 */
+            background: #000;
         }
         .slide-image.active { opacity: 1; }
 
@@ -128,18 +128,18 @@
 <body class="h-screen w-screen flex flex-col bg-[#F0F4F8] overflow-hidden">
 
     <!-- 1. スクリーンセーバー (修正版: 絶対配置) -->
-    <div id="view-screensaver" class="hidden fixed inset-0 z-[150] bg-white cursor-pointer flex flex-col" onclick="app.screensaver.stop()">
-        <div class="flex-1 relative w-full overflow-hidden bg-white">
+    <div id="view-screensaver" class="hidden fixed inset-0 z-[150] bg-white cursor-pointer flex flex-col h-screen w-screen" onclick="app.screensaver.stop()">
+        <div class="flex-1 relative w-full overflow-hidden bg-black">
              <div id="slideshow-container" class="absolute inset-0 w-full h-full"></div>
         </div>
         
-        <div class="h-32 bg-white flex items-start justify-center pt-4 shrink-0 z-20 relative">
+        <div class="h-auto py-8 bg-white flex items-center justify-center shrink-0 z-20 relative border-t-8 border-[#002B49]">
             <div class="flex flex-col items-center animate-bounce">
-                <p class="text-[#002B49] text-2xl md:text-3xl font-black tracking-widest flex items-center gap-4">
+                <p class="text-[#002B49] text-3xl md:text-4xl font-black tracking-widest flex items-center gap-4">
                     <i class="fa-regular fa-hand-pointer"></i>
                     <span data-t="screensaver_text">画面をタップして注文へ</span>
                 </p>
-                <p class="text-[#C5A059] text-sm font-bold mt-2 tracking-widest">TOUCH SCREEN</p>
+                <p class="text-[#C5A059] text-base font-bold mt-2 tracking-[0.5em]">TOUCH SCREEN</p>
             </div>
         </div>
     </div>
@@ -153,11 +153,14 @@
 
         <div class="relative w-full max-w-4xl mx-auto text-center px-4 flex flex-col items-center h-full justify-center">
             <div class="flex flex-col items-center animate-pop">
-                <p class="text-3xl md:text-5xl font-serif font-bold text-white mb-8 tracking-widest" style="text-shadow: 0 4px 10px rgba(0,0,0,0.5);" data-t="welcome">いらっしゃいませ</p>
-                <div class="mb-12 flex flex-col items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 rounded-[3rem] px-16 py-10 shadow-2xl">
-                    <span class="text-sm md:text-lg text-[#C5A059] font-bold mb-2 tracking-[0.5em] uppercase" data-t="table">TABLE NO.</span>
-                    <span class="text-9xl md:text-[10rem] font-black text-white leading-none font-sans filter drop-shadow-lg">12</span>
+                <p class="text-3xl md:text-5xl font-serif font-bold text-white mb-10 tracking-widest" style="text-shadow: 0 4px 10px rgba(0,0,0,0.5);" data-t="welcome">いらっしゃいませ</p>
+                
+                <div class="mb-12 w-64 h-64 md:w-80 md:h-80 rounded-full border-[6px] border-white/20 bg-white/10 backdrop-blur-md flex flex-col items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.15)] animate-pulse-slow relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent"></div>
+                    <span class="text-sm md:text-lg text-[#C5A059] font-bold mb-0 tracking-[0.5em] uppercase relative z-10" data-t="table">TABLE</span>
+                    <span class="text-8xl md:text-9xl font-black text-white leading-none font-sans filter drop-shadow-lg relative z-10 -mt-2">12</span>
                 </div>
+
                 <button onclick="app.customer.start()" class="group relative bg-white text-[#002B49] text-2xl md:text-4xl font-black py-6 px-24 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.3)] hover:scale-105 transition-transform flex items-center gap-6 btn-press overflow-hidden">
                     <span class="relative z-10 flex items-center gap-4">
                         <span data-t="start">注文をはじめる</span>
@@ -233,51 +236,47 @@
 
     <!-- 4. 詳細画面 (画像拡大 & レイアウト) -->
     <div id="modal-detail" class="fixed inset-0 z-[90] hidden items-center justify-center bg-[#002B49]/80 backdrop-blur-sm p-4 animate-fade">
-        <div class="bg-white rounded-[2.5rem] w-full max-w-4xl h-auto md:h-[550px] overflow-hidden shadow-2xl animate-pop relative flex flex-col md:flex-row">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-5xl h-auto md:h-[600px] overflow-hidden shadow-2xl animate-pop relative flex flex-col md:flex-row">
             
-            <div class="w-full md:w-[40%] h-56 md:h-full bg-white relative shrink-0 img-container p-6 flex items-center justify-center">
-                <img id="detail-img" src="" class="real-image max-w-full max-h-full object-contain drop-shadow-xl" onload="this.classList.add('loaded')">
-                </div>
+            <div class="w-full md:w-[50%] h-64 md:h-full bg-white relative shrink-0 img-container p-4 flex items-center justify-center">
+                <img id="detail-img" src="" class="real-image w-full h-full object-contain drop-shadow-2xl" onload="this.classList.add('loaded')">
+            </div>
 
-            <div class="w-full md:w-[60%] px-8 pb-8 pt-12 flex flex-col bg-gray-50 h-full relative border-l border-gray-100">
+            <div class="w-full md:w-[50%] px-8 pb-8 pt-12 flex flex-col bg-gray-50 h-full relative border-l border-gray-100">
                 
-                <button onclick="app.ui.closeModal('modal-detail')" class="absolute top-6 right-6 text-gray-400 hover:text-[#002B49] text-2xl transition-colors">
-                    <i class="fa-solid fa-circle-xmark"></i>
-                </button>
-
                 <div class="mb-auto">
-                    <div class="mb-3">
-                        <span id="detail-cat-badge" class="inline-block px-3 py-1 bg-[#C5A059] text-white text-xs font-bold rounded tracking-wider shadow-sm">CAT</span>
+                    <div class="mb-4">
+                        <span id="detail-cat-badge" class="inline-block px-4 py-1.5 bg-[#C5A059] text-white text-sm font-bold rounded tracking-wider shadow-sm">CAT</span>
                     </div>
 
-                    <h3 id="detail-name" class="text-2xl md:text-3xl font-black text-[#002B49] font-serif tracking-wide leading-tight mb-3">Item Name</h3>
+                    <h3 id="detail-name" class="text-3xl md:text-4xl font-black text-[#002B49] font-serif tracking-wide leading-tight mb-4">Item Name</h3>
                     
-                    <p id="detail-warning" class="text-[#E60012] font-bold text-sm hidden bg-red-50 inline-block px-3 py-1 rounded-lg border border-red-100">
+                    <p id="detail-warning" class="text-[#E60012] font-bold text-sm hidden bg-red-50 inline-block px-3 py-2 rounded-lg border border-red-100 mb-2">
                         <i class="fa-solid fa-clock"></i> <span data-t="fried_warning">調理にお時間をいただきます</span>
                     </p>
                 </div>
 
-                <div class="flex flex-col gap-4 mb-6 p-5 bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100">
-                    <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-1">
+                <div class="flex flex-col gap-5 mb-8 p-6 bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100">
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-1">
                         <span class="text-gray-400 font-bold text-sm tracking-widest" data-t="quantity">数量</span>
-                        <div class="flex items-center gap-4">
-                            <button onclick="app.order.adjustQty(-1)" class="w-10 h-10 rounded-full bg-gray-100 text-[#002B49] text-lg font-bold flex items-center justify-center hover:bg-gray-200 btn-press border border-gray-200 transition-colors"><i class="fa-solid fa-minus"></i></button>
-                            <div class="text-3xl font-sans font-black w-12 text-center text-[#002B49]" id="detail-qty">1</div>
-                            <button onclick="app.order.adjustQty(1)" class="w-10 h-10 rounded-full bg-[#002B49] text-white text-lg font-bold flex items-center justify-center hover:bg-[#003865] btn-press shadow-md transition-colors"><i class="fa-solid fa-plus"></i></button>
+                        <div class="flex items-center gap-5">
+                            <button onclick="app.order.adjustQty(-1)" class="w-12 h-12 rounded-full bg-gray-100 text-[#002B49] text-xl font-bold flex items-center justify-center hover:bg-gray-200 btn-press border border-gray-200 transition-colors"><i class="fa-solid fa-minus"></i></button>
+                            <div class="text-4xl font-sans font-black w-16 text-center text-[#002B49]" id="detail-qty">1</div>
+                            <button onclick="app.order.adjustQty(1)" class="w-12 h-12 rounded-full bg-[#002B49] text-white text-xl font-bold flex items-center justify-center hover:bg-[#003865] btn-press shadow-md transition-colors"><i class="fa-solid fa-plus"></i></button>
                         </div>
                     </div>
                     <div class="flex justify-between items-baseline">
                         <span class="text-gray-400 font-bold text-sm tracking-widest" data-t="price">価格</span>
                         <div class="flex items-baseline gap-1">
-                            <span class="text-lg text-[#E60012] font-bold">¥</span>
-                            <span id="detail-price" class="text-5xl font-black text-[#E60012] font-sans tracking-tight">0</span>
+                            <span class="text-xl text-[#E60012] font-bold">¥</span>
+                            <span id="detail-price" class="text-6xl font-black text-[#E60012] font-sans tracking-tight">0</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex gap-3 shrink-0">
-                    <button onclick="app.ui.closeModal('modal-detail')" class="flex-1 py-4 bg-white border-2 border-gray-200 text-gray-500 rounded-2xl font-bold text-lg hover:bg-gray-50 hover:border-gray-300 btn-press transition-all" data-t="cancel">もどる</button>
-                    <button onclick="app.order.confirm()" class="flex-[2] py-4 bg-gradient-to-r from-[#E60012] to-[#ff4d4d] text-white rounded-2xl font-black text-lg shadow-lg flex items-center justify-center gap-2 btn-press hover:shadow-xl hover:brightness-110 transition-all">
+                <div class="flex gap-4 shrink-0">
+                    <button onclick="app.ui.closeModal('modal-detail')" class="flex-1 py-5 bg-white border-2 border-gray-200 text-gray-500 rounded-2xl font-bold text-xl hover:bg-gray-50 hover:border-gray-300 btn-press transition-all" data-t="cancel">もどる</button>
+                    <button onclick="app.order.confirm()" class="flex-[2] py-5 bg-gradient-to-r from-[#E60012] to-[#ff4d4d] text-white rounded-2xl font-black text-xl shadow-lg flex items-center justify-center gap-3 btn-press hover:shadow-xl hover:brightness-110 transition-all">
                         <span data-t="order">注文する</span> <i class="fa-solid fa-utensils"></i>
                     </button>
                 </div>
