@@ -63,6 +63,15 @@
         }
         @keyframes flashBorder { 0%, 100% { border-color: #C5A059; } 50% { border-color: #E60012; } }
         @keyframes kenburns { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
+        /* 既存の cookingPulse を強化 */
+        @keyframes cookingBgPulse {
+            0% { background-color: #fff; border-color: #fed7aa; }
+            50% { background-color: #fff7ed; border-color: #E60012; box-shadow: 0 0 10px rgba(230, 0, 18, 0.3); }
+            100% { background-color: #fff; border-color: #fed7aa; }
+        }
+        .animate-cooking-card {
+            animation: cookingBgPulse 2s infinite ease-in-out;
+        }
 
         .animate-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .animate-slide { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -88,8 +97,8 @@
         .slide-image {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: contain;
-            object-position: top center;
+            object-fit: cover; /* ここを変更: contain -> cover */
+            object-position: center;
             opacity: 0;
             transition: opacity 1.5s;
             background: #000;
@@ -118,13 +127,11 @@
 <body class="h-screen w-screen flex flex-col bg-[#F0F4F8] overflow-hidden">
 
     <!-- 1. スクリーンセーバー (修正版: 絶対配置) -->
-    <div id="view-screensaver" class="hidden absolute inset-0 z-[150] bg-black cursor-pointer" onclick="app.screensaver.stop()">
-        <!-- 上部画像エリア -->
-        <div class="absolute top-0 left-0 w-full h-[calc(100%-6rem)] bg-black">
-            <div id="slideshow-container"></div>
+    <div id="view-screensaver" class="hidden fixed inset-0 z-[150] bg-black cursor-pointer flex flex-col" onclick="app.screensaver.stop()">
+        <div class="flex-1 relative w-full bg-black overflow-hidden">
+             <div id="slideshow-container" class="absolute inset-0 w-full h-full"></div>
         </div>
-        <!-- 下部テキストエリア -->
-        <div class="absolute bottom-0 left-0 w-full h-24 bg-white flex items-center justify-center border-t-4 border-[#002B49] z-20">
+        <div class="h-24 bg-white flex items-center justify-center border-t-4 border-[#002B49] shrink-0 z-20 relative shadow-[0_-5px_20px_rgba(0,0,0,0.2)]">
             <div class="flex flex-col items-center animate-bounce">
                 <p class="text-[#002B49] text-2xl font-black tracking-widest flex items-center gap-4">
                     <i class="fa-regular fa-hand-pointer"></i>
@@ -223,54 +230,51 @@
 
     <!-- 4. 詳細画面 (画像拡大 & レイアウト) -->
     <div id="modal-detail" class="fixed inset-0 z-[90] hidden items-center justify-center bg-[#002B49]/80 backdrop-blur-sm p-4 animate-fade">
-        <div class="bg-white rounded-[2rem] w-full max-w-5xl h-auto md:h-[650px] overflow-hidden shadow-2xl animate-pop relative flex flex-col md:flex-row">
+        <div class="bg-white rounded-[2rem] w-full max-w-4xl h-auto md:h-[500px] overflow-hidden shadow-2xl animate-pop relative flex flex-col md:flex-row">
             
-            <!-- 画像 (左40%) -->
-            <div class="w-full md:w-[40%] h-64 md:h-full bg-white relative shrink-0 img-container">
-                <img id="detail-img" src="" class="real-image max-h-[90%] max-w-[90%]" onload="this.classList.add('loaded')">
+            <div class="w-full md:w-[40%] h-48 md:h-full bg-white relative shrink-0 img-container p-4">
+                <img id="detail-img" src="" class="real-image w-full h-full object-contain" onload="this.classList.add('loaded')">
                 <div class="absolute top-4 left-4 z-20">
                     <span id="detail-cat-badge" class="inline-block px-4 py-1.5 bg-[#C5A059] text-white text-sm font-bold rounded shadow-md">CAT</span>
                 </div>
             </div>
 
-            <!-- 操作 (右60%) -->
-            <div class="w-full md:w-[60%] p-6 md:p-8 flex flex-col bg-gray-50 h-full relative border-l border-gray-100">
+            <div class="w-full md:w-[60%] p-6 flex flex-col bg-gray-50 h-full relative border-l border-gray-100">
                 
                 <div class="mb-auto">
-                    <h3 id="detail-name" class="text-3xl md:text-4xl font-black text-[#002B49] font-serif tracking-wide leading-tight mb-2">Item Name</h3>
-                    <p id="detail-warning" class="text-[#E60012] font-bold text-base hidden">
+                    <h3 id="detail-name" class="text-2xl md:text-3xl font-black text-[#002B49] font-serif tracking-wide leading-tight mb-2">Item Name</h3>
+                    <p id="detail-warning" class="text-[#E60012] font-bold text-sm hidden">
                         <i class="fa-solid fa-clock"></i> <span data-t="fried_warning">調理にお時間をいただきます</span>
                     </p>
                 </div>
 
-                <div class="flex flex-col gap-6 mb-8 p-6 bg-white rounded-3xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-2">
+                <div class="flex flex-col gap-4 mb-6 p-5 bg-white rounded-3xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-1">
                         <span class="text-gray-500 font-bold text-sm tracking-widest" data-t="quantity">数量</span>
                         <div class="flex items-center gap-4">
-                            <button onclick="app.order.adjustQty(-1)" class="w-12 h-12 rounded-full bg-gray-100 text-[#002B49] text-xl font-bold flex items-center justify-center hover:bg-gray-200 btn-press border border-gray-300"><i class="fa-solid fa-minus"></i></button>
-                            <div class="text-4xl font-sans font-black w-16 text-center text-[#002B49]" id="detail-qty">1</div>
-                            <button onclick="app.order.adjustQty(1)" class="w-12 h-12 rounded-full bg-[#002B49] text-white text-xl font-bold flex items-center justify-center hover:bg-[#003865] btn-press shadow-md"><i class="fa-solid fa-plus"></i></button>
+                            <button onclick="app.order.adjustQty(-1)" class="w-10 h-10 rounded-full bg-gray-100 text-[#002B49] text-lg font-bold flex items-center justify-center hover:bg-gray-200 btn-press border border-gray-300"><i class="fa-solid fa-minus"></i></button>
+                            <div class="text-3xl font-sans font-black w-12 text-center text-[#002B49]" id="detail-qty">1</div>
+                            <button onclick="app.order.adjustQty(1)" class="w-10 h-10 rounded-full bg-[#002B49] text-white text-lg font-bold flex items-center justify-center hover:bg-[#003865] btn-press shadow-md"><i class="fa-solid fa-plus"></i></button>
                         </div>
                     </div>
                     <div class="flex justify-between items-baseline">
                         <span class="text-gray-500 font-bold text-sm tracking-widest" data-t="price">価格</span>
                         <div class="flex items-baseline gap-1">
-                            <span class="text-xl text-[#E60012] font-bold">¥</span>
-                            <span id="detail-price" class="text-5xl font-black text-[#E60012] font-sans tracking-tight">0</span>
+                            <span class="text-lg text-[#E60012] font-bold">¥</span>
+                            <span id="detail-price" class="text-4xl font-black text-[#E60012] font-sans tracking-tight">0</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex gap-4 shrink-0">
-                    <button onclick="app.ui.closeModal('modal-detail')" class="flex-1 py-5 bg-white border-2 border-gray-300 text-gray-500 rounded-2xl font-bold text-xl shadow-sm hover:bg-gray-100 btn-press" data-t="cancel">キャンセル</button>
-                    <button onclick="app.order.confirm()" class="flex-[2] py-5 bg-[#E60012] text-white rounded-2xl font-black text-xl shadow-lg flex items-center justify-center gap-3 btn-press hover:bg-[#ff1a1a] transition-colors">
+                <div class="flex gap-3 shrink-0">
+                    <button onclick="app.ui.closeModal('modal-detail')" class="flex-1 py-4 bg-white border-2 border-gray-300 text-gray-500 rounded-2xl font-bold text-lg shadow-sm hover:bg-gray-100 btn-press" data-t="cancel">キャンセル</button>
+                    <button onclick="app.order.confirm()" class="flex-[2] py-4 bg-[#E60012] text-white rounded-2xl font-black text-lg shadow-lg flex items-center justify-center gap-2 btn-press hover:bg-[#ff1a1a] transition-colors">
                         <span data-t="order">注文する</span> <i class="fa-solid fa-utensils"></i>
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
     <!-- 5. 商品到着全画面 -->
     <div id="modal-delivery" class="fixed inset-0 z-[250] hidden bg-[#002B49] flex-col items-center justify-center animate-fade overflow-hidden">
         <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/seigaiha.png')]"></div>
@@ -484,6 +488,11 @@
             { id: 503, cat: 'drink', name: 'オレンジ', nameEn: 'Orange Juice', price: 165, img: `${IMG_BASE}/dessert/pho_orange.png` },
             { id: 504, cat: 'drink', name: 'コーラフロート', nameEn: 'Cola Float', price: 290, img: `${IMG_BASE}/dessert/pho_cola_float.png` },
             { id: 505, cat: 'drink', name: 'コーヒー', nameEn: 'Coffee', price: 165, img: `${IMG_BASE}/dessert/pho_coffee.png` },
+            { id: 307, cat: 'gunkan', name: 'かっぱ巻', nameEn: 'Cucumber Roll', price: 110, img: "https://www.hama-sushi.co.jp/assets/menu/img/gunkan/pho_kapamaki.png" },
+            { id: 308, cat: 'gunkan', name: 'まぐろたたき巻', nameEn: 'Minced Tuna Roll', price: 110, img: "https://www.hama-sushi.co.jp/assets/menu/img/gunkan/pho_maguro_tekka_maki.png" },
+            { id: 109, cat: 'limited', name: '三陸産 大切り銀鮭', nameEn: 'Large Silver Salmon', price: 165, img: "https://www.hama-sushi.co.jp/assets/menu/img/fair/sanrikusan_tairiku_oogiri_ginjake.png" },
+            { id: 110, cat: 'limited', name: '広島県産 牡蠣のカキフライつつみ', nameEn: 'Fried Oyster Wrap', price: 110, img: "https://www.hama-sushi.co.jp/assets/menu/img/fair/hiroshimakensan_kaki_no_kakihurai_tsutsumi.png" },
+            { id: 111, cat: 'limited', name: 'いわて牛五ツ星握り', nameEn: 'Iwate Beef Nigiri', price: 319, img: "https://www.hama-sushi.co.jp/assets/menu/img/fair/iwategyu_itsutsuboshi_nigiri1.png" }
         ];
 
         const AD_IMAGES = [
@@ -600,25 +609,30 @@
                         const histRev = [...app.state.history].reverse();
                         histList.innerHTML = histRev.map(item => {
                             const isCooking = item.status === 'cooking';
+                            // 調理中はアイコン変更 & アニメーションクラス付与
                             const statusIcon = isCooking 
-                                ? '<i class="fa-solid fa-fire-burner text-[#E60012] animate-cooking"></i>' 
+                                ? '<i class="fa-solid fa-fire-burner text-[#E60012] animate-bounce"></i>' 
                                 : '<i class="fa-solid fa-circle-check text-green-500"></i>';
                             const statusText = isCooking ? app.t('cooking') : app.t('served');
-                            const bgClass = isCooking ? 'bg-orange-50 border-orange-100' : 'bg-gray-50 border-gray-100 opacity-60';
+                            
+                            // 調理中のカードデザイン変更 (animate-cooking-cardを追加)
+                            const cardClass = isCooking 
+                                ? 'bg-orange-50 border-orange-200 animate-cooking-card' 
+                                : 'bg-gray-50 border-gray-100 opacity-60';
 
                             return `
-                            <div class="flex gap-4 p-3 rounded-xl border border-gray-200 bg-white shadow-sm mb-2">
-                                <div class="flex flex-col w-24 shrink-0">
-                                    <div class="w-full h-16 rounded-lg bg-gray-100 overflow-hidden mb-2">
+                            <div class="flex gap-3 p-3 rounded-xl border ${cardClass} shadow-sm mb-2 transition-all">
+                                <div class="flex flex-col w-20 shrink-0">
+                                    <div class="w-full h-14 rounded-lg bg-white overflow-hidden mb-1 border border-gray-100">
                                         <img src="${item.img}" class="w-full h-full object-cover">
                                     </div>
-                                    <div class="text-[10px] text-center font-bold ${isCooking ? 'text-[#E60012]' : 'text-green-600'} bg-gray-100 rounded py-1">
+                                    <div class="text-[10px] text-center font-bold ${isCooking ? 'text-[#E60012]' : 'text-green-600'} bg-white/80 rounded py-0.5 shadow-sm border border-gray-100">
                                         ${statusIcon} ${statusText}
                                     </div>
                                 </div>
-                                <div class="flex flex-col justify-center flex-1">
-                                    <div class="font-bold text-[#002B49] text-base mb-1 leading-tight">${app.getItemName(item)}</div>
-                                    <div class="font-black text-lg text-gray-800">¥${item.price}</div>
+                                <div class="flex-1 flex justify-between items-center">
+                                    <div class="font-bold text-[#002B49] text-sm leading-tight pr-2 flex-1">${app.getItemName(item)}</div>
+                                    <div class="font-black text-lg text-gray-800 shrink-0 text-right">¥${item.price}</div>
                                 </div>
                             </div>
                         `}).join('');
