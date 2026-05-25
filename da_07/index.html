@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>さわってわかる！グラフとアルゴリズムの世界</title>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"M PLUS Rounded 1c"', 'sans-serif'],
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            background-attachment: fixed;
+            color: #334155;
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #ec4899, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        ruby rt {
+            font-size: 0.6em;
+            color: #64748b;
+        }
+        /* スクロールバーのカスタマイズ */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.5); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.8); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Lucide Icons (SVG Components) ---
+        const IconNetwork = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>
+        );
+        const IconLightbulb = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+        );
+        const IconCheck = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        );
+        const IconRoute = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>
+        );
+
+        // --- UI Components ---
+        const Section = ({ title, icon: Icon, children, color = "blue" }) => {
+            const colorClasses = {
+                blue: "from-blue-400 to-indigo-500",
+                pink: "from-pink-400 to-rose-500",
+                purple: "from-purple-400 to-fuchsia-500",
+                green: "from-emerald-400 to-teal-500",
+                orange: "from-orange-400 to-amber-500"
+            };
+            return (
+                <section className="glass-card rounded-3xl p-6 md:p-10 mb-12 relative overflow-hidden group">
+                    <div className={`absolute top-0 left-0 w-2 h-full bg-gradient-to-b ${colorClasses[color]}`}></div>
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className={`p-4 rounded-2xl bg-gradient-to-br ${colorClasses[color]} text-white shadow-lg transform group-hover:scale-110 transition-transform`}>
+                            <Icon className="w-8 h-8" />
+                        </div>
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-800">{title}</h2>
+                    </div>
+                    <div className="space-y-6 text-lg">
+                        {children}
+                    </div>
+                </section>
+            );
+        };
+
+        const TipBox = ({ title, children }) => (
+            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-6 relative mt-8 transform hover:-translate-y-1 transition-transform shadow-md">
+                <div className="absolute -top-5 left-6 bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold py-1 px-4 rounded-full shadow-sm flex items-center gap-2">
+                    <IconLightbulb className="w-5 h-5" />
+                    {title}
+                </div>
+                <div className="mt-2 text-yellow-900 leading-relaxed">
+                    {children}
+                </div>
+            </div>
+        );
+
+        const Quiz = ({ question, options, explanation }) => {
+            const [selected, setSelected] = useState(null);
+            
+            return (
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100 shadow-inner mt-8">
+                    <h3 className="text-xl font-bold text-indigo-800 mb-4 flex items-center gap-2">
+                        <span className="text-2xl">🤔</span> あなたならどうする？
+                    </h3>
+                    <p className="font-semibold text-gray-700 mb-4">{question}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {options.map((opt, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setSelected(idx)}
+                                className={`p-4 rounded-xl text-left transition-all font-medium border-2 
+                                    ${selected === idx 
+                                        ? (opt.correct ? 'bg-green-100 border-green-500 text-green-800 shadow-md' : 'bg-red-100 border-red-500 text-red-800 shadow-md')
+                                        : 'bg-white border-transparent hover:border-indigo-300 hover:shadow-md text-gray-600'
+                                    }`}
+                            >
+                                {opt.text}
+                            </button>
+                        ))}
+                    </div>
+                    {selected !== null && (
+                        <div className={`mt-6 p-4 rounded-xl animate-fade-in ${options[selected].correct ? 'bg-green-50 text-green-900' : 'bg-red-50 text-red-900'}`}>
+                            <p className="font-bold mb-2 flex items-center gap-2">
+                                {options[selected].correct ? <><IconCheck className="text-green-500"/> なるほど！その通り！</> : 'おっと！別の見方もあるかも？'}
+                            </p>
+                            <p>{explanation}</p>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- Simulators ---
+
+        // 1. 隣接行列シミュレーター
+        const MatrixSimulator = () => {
+            const [edges, setEdges] = useState({ AB: false, BC: false, CA: false });
+
+            const toggleEdge = (edge) => {
+                setEdges(prev => ({ ...prev, [edge]: !prev[edge] }));
+            };
+
+            const getNodeStyle = (name) => "w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl shadow-lg z-10 transition-colors " + 
+                "bg-gradient-to-br from-blue-400 to-indigo-500 text-white";
+
+            const getEdgeStyle = (isActive) => `absolute bg-gray-300 transform origin-left transition-all duration-300 ${isActive ? 'bg-indigo-500 h-2 shadow-[0_0_10px_rgba(99,102,241,0.8)]' : 'h-1 opacity-30'}`;
+
+            return (
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm my-8 flex flex-col md:flex-row gap-8 items-center justify-center">
+                    {/* グラフ描画エリア */}
+                    <div className="relative w-64 h-64 bg-gray-50 rounded-xl flex-shrink-0 border-2 border-dashed border-gray-200">
+                        {/* エッジ */}
+                        <div className={getEdgeStyle(edges.AB)} style={{ width: '130px', top: '40px', left: '128px', transform: 'rotate(60deg)' }}></div>
+                        <div className={getEdgeStyle(edges.BC)} style={{ width: '150px', top: '150px', left: '50px', transform: 'rotate(0deg)' }}></div>
+                        <div className={getEdgeStyle(edges.CA)} style={{ width: '130px', top: '150px', left: '50px', transform: 'rotate(-60deg)' }}></div>
+                        
+                        {/* ノード */}
+                        <div className="absolute" style={{ top: '20px', left: '100px' }}><div className={getNodeStyle('A')}>A</div></div>
+                        <div className="absolute" style={{ top: '130px', left: '30px' }}><div className={getNodeStyle('B')}>B</div></div>
+                        <div className="absolute" style={{ top: '130px', left: '170px' }}><div className={getNodeStyle('C')}>C</div></div>
+
+                        {/* 操作ボタン */}
+                        <div className="absolute -bottom-16 left-0 w-full flex justify-center gap-2">
+                            <button onClick={() => toggleEdge('AB')} className={`px-3 py-1 rounded-full text-sm font-bold transition ${edges.AB ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-500'}`}>A-B</button>
+                            <button onClick={() => toggleEdge('BC')} className={`px-3 py-1 rounded-full text-sm font-bold transition ${edges.BC ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-500'}`}>B-C</button>
+                            <button onClick={() => toggleEdge('CA')} className={`px-3 py-1 rounded-full text-sm font-bold transition ${edges.CA ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-500'}`}>C-A</button>
+                        </div>
+                    </div>
+
+                    {/* 行列表示エリア */}
+                    <div className="mt-12 md:mt-0 bg-blue-50 p-6 rounded-xl border border-blue-100 w-full max-w-xs">
+                        <h4 className="text-center font-bold text-blue-800 mb-4">💻 コンピュータの頭の中<br/>（隣接行列）</h4>
+                        <table className="w-full text-center border-collapse">
+                            <thead>
+                                <tr className="text-blue-600">
+                                    <th></th><th>A</th><th>B</th><th>C</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-xl font-mono text-gray-700 bg-white">
+                                <tr>
+                                    <td className="font-bold text-blue-600 bg-blue-50">A</td>
+                                    <td className="border p-2">0</td>
+                                    <td className={`border p-2 font-bold transition-colors ${edges.AB ? 'bg-indigo-100 text-indigo-700' : ''}`}>{edges.AB ? 1 : 0}</td>
+                                    <td className={`border p-2 font-bold transition-colors ${edges.CA ? 'bg-indigo-100 text-indigo-700' : ''}`}>{edges.CA ? 1 : 0}</td>
+                                </tr>
+                                <tr>
+                                    <td className="font-bold text-blue-600 bg-blue-50">B</td>
+                                    <td className={`border p-2 font-bold transition-colors ${edges.AB ? 'bg-indigo-100 text-indigo-700' : ''}`}>{edges.AB ? 1 : 0}</td>
+                                    <td className="border p-2">0</td>
+                                    <td className={`border p-2 font-bold transition-colors ${edges.BC ? 'bg-indigo-100 text-indigo-700' : ''}`}>{edges.BC ? 1 : 0}</td>
+                                </tr>
+                                <tr>
+                                    <td className="font-bold text-blue-600 bg-blue-50">C</td>
+                                    <td className={`border p-2 font-bold transition-colors ${edges.CA ? 'bg-indigo-100 text-indigo-700' : ''}`}>{edges.CA ? 1 : 0}</td>
+                                    <td className={`border p-2 font-bold transition-colors ${edges.BC ? 'bg-indigo-100 text-indigo-700' : ''}`}>{edges.BC ? 1 : 0}</td>
+                                    <td className="border p-2">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p className="text-xs text-center mt-3 text-blue-600">線がつながっていると「1」になるよ！</p>
+                    </div>
+                </div>
+            );
+        };
+
+        // 2. ダイクストラ風シミュレーター
+        const RouteSimulator = () => {
+            // S:店舗, A:交差点A, B:交差点B, G:配達先
+            // 距離: S-A(4), S-B(2), A-G(3), B-A(1), B-G(6)
+            // 最短: S -> B -> A -> G = 2 + 1 + 3 = 6
+            const [currentNode, setCurrentNode] = useState('S');
+            const [path, setPath] = useState(['S']);
+            const [cost, setCost] = useState(0);
+            const [gameStatus, setGameStatus] = useState('playing'); // playing, won, try_again
+
+            const graph = {
+                'S': { 'A': 4, 'B': 2 },
+                'A': { 'G': 3 },
+                'B': { 'A': 1, 'G': 6 },
+                'G': {}
+            };
+
+            const nodeNames = { 'S': '🛵 店舗', 'A': '🏢 交差点A', 'B': '🌲 交差点B', 'G': '🏠 配達先' };
+
+            const moveTo = (next) => {
+                if(gameStatus !== 'playing') return;
+                const edgeCost = graph[currentNode][next];
+                setPath([...path, next]);
+                setCost(cost + edgeCost);
+                setCurrentNode(next);
+                if(next === 'G') {
+                    if(cost + edgeCost === 6) setGameStatus('won');
+                    else setGameStatus('try_again');
+                }
+            };
+
+            const reset = () => {
+                setCurrentNode('S');
+                setPath(['S']);
+                setCost(0);
+                setGameStatus('playing');
+            };
+
+            return (
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm my-8">
+                    <div className="flex flex-col items-center">
+                        <div className="text-center mb-6">
+                            <h4 className="text-xl font-bold text-gray-800 mb-2">ピザ配達シミュレーター🍕</h4>
+                            <p className="text-gray-600">店舗(S)から配達先(G)まで、一番距離が短いルートを選んでみよう！</p>
+                        </div>
+
+                        {/* 簡易マップ（テキストベースの直感的なUI） */}
+                        <div className="bg-orange-50 p-6 rounded-xl w-full max-w-md relative">
+                            <div className="flex justify-between items-center mb-12 relative z-10">
+                                <div className={`p-3 rounded-full font-bold ${currentNode === 'S' ? 'bg-orange-500 text-white animate-pulse-slow' : 'bg-gray-200 text-gray-600'}`}>S</div>
+                                <div className="text-sm font-bold text-orange-400">上ルート: 距離4<br/>下ルート: 距離2</div>
+                                <div className="flex flex-col gap-8">
+                                    <div className={`p-3 rounded-full font-bold ${currentNode === 'A' ? 'bg-orange-500 text-white animate-pulse-slow' : 'bg-gray-200 text-gray-600'}`}>A</div>
+                                    <div className={`p-3 rounded-full font-bold ${currentNode === 'B' ? 'bg-orange-500 text-white animate-pulse-slow' : 'bg-gray-200 text-gray-600'}`}>B</div>
+                                </div>
+                                <div className="text-sm font-bold text-orange-400">
+                                    <div className="-mt-16">距離3</div>
+                                    <div className="mt-12">距離6</div>
+                                </div>
+                                <div className={`p-3 rounded-full font-bold ${currentNode === 'G' ? 'bg-orange-500 text-white animate-pulse-slow' : 'bg-gray-200 text-gray-600'}`}>G</div>
+                            </div>
+                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 bg-white px-2 rounded-full border">
+                                BからAへの抜け道：距離1
+                            </div>
+                        </div>
+
+                        {/* 操作パネル */}
+                        <div className="w-full max-w-md mt-6">
+                            <p className="text-center font-bold text-gray-700 mb-2">現在地: {nodeNames[currentNode]}</p>
+                            <div className="flex justify-center gap-4 mb-4">
+                                {Object.keys(graph[currentNode]).map(next => (
+                                    <button 
+                                        key={next} 
+                                        onClick={() => moveTo(next)}
+                                        className="bg-gradient-to-r from-orange-400 to-amber-500 text-white font-bold py-2 px-6 rounded-full shadow hover:shadow-lg transform hover:-translate-y-1 transition"
+                                    >
+                                        {nodeNames[next]} へ行く (距離: {graph[currentNode][next]})
+                                    </button>
+                                ))}
+                                {Object.keys(graph[currentNode]).length === 0 && gameStatus !== 'playing' && (
+                                    <button onClick={reset} className="bg-gray-200 text-gray-700 font-bold py-2 px-6 rounded-full hover:bg-gray-300 transition">最初からやり直す</button>
+                                )}
+                            </div>
+
+                            <div className="bg-gray-100 p-4 rounded-xl flex justify-between items-center">
+                                <div>
+                                    <span className="text-sm text-gray-500">ルート: </span>
+                                    <span className="font-bold text-gray-800">{path.join(' ➔ ')}</span>
+                                </div>
+                                <div>
+                                    <span className="text-sm text-gray-500">合計距離: </span>
+                                    <span className="font-bold text-2xl text-orange-600">{cost}</span>
+                                </div>
+                            </div>
+
+                            {/* 結果表示 */}
+                            {gameStatus === 'won' && (
+                                <div className="mt-4 p-4 bg-green-100 text-green-800 rounded-xl font-bold text-center animate-bounce">
+                                    🎉 大正解！最短ルート（距離6）を見つけました！これがダイクストラ法の考え方だよ。
+                                </div>
+                            )}
+                            {gameStatus === 'try_again' && (
+                                <div className="mt-4 p-4 bg-yellow-100 text-yellow-800 rounded-xl font-bold text-center">
+                                    うーん、無事に着いたけど、もっと短いルート（距離6）があるかも？やり直してみよう！
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Main App ---
+        const App = () => {
+            return (
+                <div className="relative pb-20">
+                    {/* 背景の装飾 */}
+                    <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+                        <div className="absolute top-10 left-10 w-64 h-64 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
+                        <div className="absolute top-40 right-10 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob" style={{ animationDelay: '2s' }}></div>
+                        <div className="absolute -bottom-8 left-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob" style={{ animationDelay: '4s' }}></div>
+                    </div>
+
+                    <header className="container mx-auto px-4 pt-16 pb-12 text-center max-w-4xl">
+                        <div className="inline-block animate-float mb-4">
+                            <span className="px-4 py-1 rounded-full bg-white/50 text-indigo-600 font-bold text-sm shadow-sm border border-white">
+                                情報科学 / アルゴリズム
+                            </span>
+                        </div>
+                        <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight">
+                            点と線で世界がつながる！<br/>
+                            <span className="text-gradient">グラフ構造</span>の世界へようこそ✨
+                        </h1>
+                        <p className="text-lg md:text-xl text-gray-600 font-medium">
+                            プログラミングの授業で出てくる「グラフ」って、実は折れ線グラフのことじゃないんだ。<br/>
+                            SNSの繋がりや電車の乗り換えアプリで使われている、超便利な仕組みをさわって理解しよう！
+                        </p>
+                    </header>
+
+                    <main className="container mx-auto px-4 max-w-4xl space-y-8">
+                        
+                        {/* Section 1 */}
+                        <Section title="1. 「グラフ」ってなんだろう？" icon={IconNetwork} color="blue">
+                            <p>
+                                コンピュータの世界で言う「グラフ」とは、<strong><ruby>頂点<rt>ノード</rt></ruby>（点）</strong>と<strong><ruby>辺<rt>エッジ</rt></ruby>（線）</strong>の集まりのこと！
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div className="bg-white/60 p-4 rounded-xl">
+                                    <h4 className="font-bold text-blue-700 mb-2">👫 身近な例：SNSのフォロー</h4>
+                                    <p className="text-sm">人は「頂点」、フォロー関係は「辺」。AさんがBさんをフォローしているという繋がりを表現できるよ。</p>
+                                </div>
+                                <div className="bg-white/60 p-4 rounded-xl">
+                                    <h4 className="font-bold text-blue-700 mb-2">🚃 身近な例：路線図</h4>
+                                    <p className="text-sm">駅は「頂点」、線路は「辺」。A駅からB駅への行き方を計算する時に大活躍！</p>
+                                </div>
+                            </div>
+                            <p className="mt-4">
+                                ちなみに、線に「矢印（方向）」がついているものを<strong><ruby>有向<rt>ゆうこう</rt></ruby>グラフ</strong>（一方通行）、ついていないものを<strong><ruby>無向<rt>むこう</rt></ruby>グラフ</strong>（両通行）って呼ぶよ。
+                            </p>
+                        </Section>
+
+                        {/* Section 2 */}
+                        <Section title="2. グラフをコンピュータに教えよう！" icon={IconRoute} color="pink">
+                            <p>
+                                私たちは図を見れば「繋がってる！」ってわかるけど、コンピュータは図を見ることができないんだ。<br/>
+                                だから、<strong><ruby>隣接行列<rt>りんせつぎょうれつ</rt></ruby></strong>という「数字の表」を使って繋がりを教えるよ。
+                            </p>
+                            <MatrixSimulator />
+                            <p>
+                                点の数が増えると表が巨大になっちゃう時は、繋がっている先だけをリストアップする「<strong><ruby>隣接<rt>りんせつ</rt></ruby>リスト</strong>」という方法を使うこともあるよ！
+                            </p>
+                        </Section>
+
+                        {/* Section 3 */}
+                        <Section title="3. グラフの中を大冒険！（探索アルゴリズム）" icon={IconLightbulb} color="purple">
+                            <p>
+                                迷路のような巨大なグラフの中から、目的の点を探し出すことを「<strong><ruby>探索<rt>たんさく</rt></ruby></strong>」と言うよ。<br/>
+                                探し方には、大きく分けて２つの性格があるんだ。
+                            </p>
+                            <div className="flex flex-col md:flex-row gap-6 mt-6">
+                                <div className="flex-1 bg-white/80 p-6 rounded-2xl border-t-4 border-purple-500 shadow-sm relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-4 text-6xl opacity-10">🏃‍♂️</div>
+                                    <h4 className="text-xl font-bold text-purple-700 mb-2">① 深さ優先探索 (DFS)</h4>
+                                    <p className="text-sm text-gray-600 mb-4">Depth-First Search</p>
+                                    <p>行けるところまでガンガン突き進む！行き止まりになったら、一つ前の分かれ道まで戻って別の道へ。<br/><strong>一直線タイプの探し方。</strong></p>
+                                </div>
+                                <div className="flex-1 bg-white/80 p-6 rounded-2xl border-t-4 border-fuchsia-500 shadow-sm relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-4 text-6xl opacity-10">🚶‍♂️🚶‍♀️</div>
+                                    <h4 className="text-xl font-bold text-fuchsia-700 mb-2">② 幅優先探索 (BFS)</h4>
+                                    <p className="text-sm text-gray-600 mb-4">Breadth-First Search</p>
+                                    <p>スタート地点から近いところを、しらみつぶしに全部チェックしてから、次の遠い場所へ進む。<br/><strong>慎重派タイプの探し方。</strong></p>
+                                </div>
+                            </div>
+                            
+                            <Quiz 
+                                question="高校の文化祭！4階建ての校舎で、色んなクラスの出し物を見たい時、あなたはどっちの回り方をする？"
+                                options={[
+                                    { text: "A: とりあえず1階の端の階段から4階まで一気に上がって、順番に降りながら見る！", correct: true },
+                                    { text: "B: まず1階のクラスを全部見て、終わったら2階を全部見て…と階ごとに制覇する！", correct: true }
+                                ]}
+                                explanation="実はこれ、どっちも正解！Aは「深さ優先探索(DFS)」、Bは「幅優先探索(BFS)」の考え方なんだ。プログラミングでも、迷路を解く時はDFS、最短距離を探す時はBFS、みたいに使い分けるよ！"
+                            />
+
+                            <TipBox title="プログラミングの裏話：スタックとキュー">
+                                DFSとBFSをプログラムで書くとき、見つけた分かれ道をメモしておく特別な箱を使うよ。<br/>
+                                DFSは「<strong>スタック</strong>（机の上に本を積むように、一番新しいメモから取り出す）」、BFSは「<strong>キュー</strong>（レジ待ちの行列のように、一番古いメモから取り出す）」を使うのが定番テクニックなんだ！
+                            </TipBox>
+                        </Section>
+
+                        {/* Section 4 */}
+                        <Section title="4. 最短ルートを探せ！ダイクストラ法" icon={IconRoute} color="orange">
+                            <p>
+                                現実の世界では、線によって「距離」や「かかる時間」が違うよね。この数字のことを「<strong>重み（コスト）</strong>」と呼ぶよ。<br/>
+                                この重みを計算しながら、一番早くゴールに着く道を見つける最強の計算方法が「<strong>ダイクストラ法</strong>」だ！
+                            </p>
+                            <RouteSimulator />
+                            <p>
+                                ダイクストラ法は、「今の場所から一番近い（コストが低い）場所を確定させていく」のを繰り返すアルゴリズム。カーナビやGoogleマップの裏側でも、この考え方が応用されているんだよ！
+                            </p>
+                        </Section>
+
+                        {/* Section 5 */}
+                        <Section title="5. 謎解き！一筆書きの法則" icon={IconLightbulb} color="green">
+                            <p>
+                                最後に、グラフを使った有名なパズル「ケーニヒスベルクの七つの橋」を紹介するね。<br/>
+                                「川にかかる7つの橋を、全部1回ずつ渡って元の場所に戻れるか？」という問題だよ。
+                            </p>
+                            
+                            <div className="bg-white/70 p-6 rounded-2xl mt-6 flex flex-col md:flex-row gap-6 items-center">
+                                <div className="flex-1">
+                                    <h4 className="font-bold text-green-700 mb-2">💡 一筆書きできるかの見分け方</h4>
+                                    <p className="mb-4">点につながっている線の数（次数）に注目！</p>
+                                    <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                                        <li>奇数本の線が繋がっている点を「<strong>奇点（きてん）</strong>」と呼ぶよ。</li>
+                                        <li>奇点が<strong>0個</strong>なら、どこからスタートしても一筆書きできて元の場所に戻れる！</li>
+                                        <li>奇点が<strong>2個</strong>なら、一筆書きはできるけど、スタートとゴールが別の場所になるよ。</li>
+                                        <li>それ以外（奇点が4つなど）は絶対に一筆書きできない！</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <Quiz 
+                                question="ノートの端によく描く「家のマーク🏠（四角の上に三角屋根、中にバツ印）」。これは一筆書きできる？"
+                                options={[
+                                    { text: "できる！", correct: true },
+                                    { text: "できない！", correct: false }
+                                ]}
+                                explanation="正解は「できる」！下の2つの角には線が3本（奇点）、他の角には線が2本や4本（偶点）集まっているよ。奇点が2つだけだから、下の角のどちらかからスタートすれば一筆書きできるんだ！"
+                            />
+
+                            <TipBox title="天才数学者オイラー">
+                                この「一筆書きの法則」を見つけたのは、18世紀の天才数学者レオンハルト・オイラー。「全部の道を実際に歩いて試す」のではなく、土地を「点」、橋を「線」という『グラフ』に置き換えて計算で証明したんだ。これが「グラフ理論」の始まりと言われているよ！かっこいいよね✨
+                            </TipBox>
+                        </Section>
+
+                    </main>
+
+                    <footer className="text-center mt-20 text-gray-500 font-medium">
+                        <p>Graph & Algorithms Interactive Guide 🚀</p>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
