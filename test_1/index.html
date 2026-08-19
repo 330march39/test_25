@@ -1,5 +1,109 @@
-<html>
-  
-  <head>test</head>
-  <body>bodydesuこんにちは🌞</body>
+<!DOCTYPE html>
+
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>test_1</title>
+        <link rel="icon" type="image/png" href="https://u.jimcdn.com/cms/o/sf840fd957db00a90/img/favicon.png?t=1605848253">
+    <link href="https://googleapis.com" rel="stylesheet">
+    
+    <style>
+      body{
+        background-color: #ffe4e4;
+        font-family: 'Inter','Zen Maru Gothic', sans-serif;
+      }
+      .main-title{
+        font-size: 3rem;
+        color: #666666;
+      }
+      .sab-title{
+        font-size: 7rem;
+        color: #0505e0;
+      }
+      .settings-cancel-button {
+            background-color: #CBD5E1;
+            color: #4A5568;
+            padding: 8px 20px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        .settings-cancel-button:hover {
+            background-color: #A0B3C8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        .settings-cancel-button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+  </head>
+  <header>test_1</header>
+  <body>
+    <div id="disclaimerModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>ご利用にあたっての注意事項</h2>
+            <p>このサービスはAI（人工知能）を利用して英文添削を行っています。</p>
+            <p>Google社のGemini APIを利用しています。</p>
+            <p>AIによる添削結果には、誤った情報が含まれる可能性があり、その正確性を保証するものではありません。</p>
+            <p>当サービスのご利用により生じた、いかなる損害についても、当方は一切の責任を負いません。</p>
+            <p>添削結果はあくまで参考としてご利用ください。</p>
+
+            <div class="terms-box">
+                <h3>利用規約</h3>
+                <p>
+                    <strong>第1条（本サービスの目的）</strong><br>
+                    本サービス「英作くん」は、ユーザーが入力した英文に対してAIによる添削とフィードバックを提供することを目的とします。本サービスは学習補助ツールであり、専門家による添削を代替するものではありません。
+                </p>
+                <p>
+                    <strong>第2条（免責事項）</strong><br>
+                    1. 本サービスが提供するAI添削結果は、入力された英文に基づきAIが生成したものであり、その内容の正確性、完全性、信頼性、有用性、特定の目的への適合性について、いかなる保証も行いません。<br>
+                    2. AIの特性上、添削結果に誤り、不適切な表現、またはユーザーの意図と異なる内容が含まれる可能性があります。ユーザーはこれを理解し、自身の判断と責任において本サービスを利用するものとします。<br>
+                    3. 本サービスのご利用により生じた、いかなる損害についても、当方は一切の責任を負いません。ユーザーは、本サービスを利用したことにより第三者との間で紛争が生じた場合、自己の責任と費用においてこれを解決するものとします。<br>
+                    4. 本サービスは、システムの障害、通信環境の悪化、メンテナンス等により、事前の通知なく一時的に中断または停止されることがあります。これによりユーザーに生じた損害についても、当方は責任を負いません。
+                </p>
+                <p>
+                    <strong>第3条（禁止事項）</strong><br>
+                    ユーザーは、本サービスの利用にあたり、以下の行為を行ってはならないものとします。<br>
+                    1. 法令または公序良俗に違反する行為<br>
+                    2. 他のユーザーまたは第三者の著作権、商標権等の知的財産権、プライバシー権、肖像権その他の権利を侵害する行為、または侵害するおそれのある行為<br>
+                    3. 他のユーザーまたは第三者を誹謗中傷する行為、または名誉・信用を毀損する行為<br>
+                    4. 犯罪行為またはこれを助長する行為<br>
+                    5. 本サービスの運営を妨害する行為<br>
+                    6. その他、当方が不適切と判断する行為
+                </p>
+                <p>
+                    <strong>第4条（個人情報の取扱い）</strong><br>
+                    当方は、本サービスを通じて取得したユーザーの個人情報を、別途定めるプライバシーポリシーに基づき、適切に取り扱います。
+                </p>
+                <p>
+                    <strong>第5条（利用規約の変更）</strong><br>
+                    当方は、ユーザーに事前の通知をすることなく、本規約の全部または一部を変更できるものとします。変更後の規約は、本ウェブサイトに掲載された時点から効力を生じるものとします。
+                </p>
+                <p>
+                    <strong>第6条（準拠法および管轄裁判所）</strong><br>
+                    本規約の解釈にあたっては、日本法を準拠法とします。本サービスに関して紛争が生じた場合には、当方の本店所在地を管轄する裁判所を第一審の専属的合意管轄裁判所とします。
+                </p>
+            </div>
+            <button id="agreeButton" class="modal-button">上記の内容に同意する</button>
+        </div>
+    </div>
+
+    <div class="sab-title">
+      <h1>bodydesu</h1>
+    <h2>ko🌞</h2>
+    <h3><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"></svg>
+    </div>
+    
+    <h3>wataはここは？<br>siha</h3>
+
+    <button id="cancelSettingsButton" class="settings-cancel-button">キャンセル</button>
+    <img src=dog.jpg>
+  </body>
 </html>
