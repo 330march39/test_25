@@ -204,17 +204,17 @@
                     </svg>
                 </div>
 
-                <!-- Clean Numeric Readout -->
-                <div class="flex-1 flex flex-col justify-center">
+                <!-- Clean Numeric Readout (ガタつき防止のため幅を固定) -->
+                <div class="flex-1 flex flex-col justify-center min-w-[120px]">
                     <div class="flex items-center justify-between text-[11px] text-slate-400 mb-0.5">
-    <span>STEERING</span>
-    <span id="steerDirectionLabel" class="font-semibold text-blue-500 inline-block w-20 text-right">0.0回転</span>
-</div>
-                    <div class="flex items-baseline gap-1.5">
-                        <span id="steerWheelDegText" class="text-3xl font-mono font-bold tracking-tight">0°</span>
+                        <span class="w-16">STEERING</span>
+                        <span id="steerDirectionLabel" class="font-semibold text-blue-500 w-24 text-right tabular-nums">0.0回転</span>
+                    </div>
+                    <div class="flex items-baseline gap-1.5 h-9">
+                        <span id="steerWheelDegText" class="text-3xl font-mono font-bold tracking-tight w-20 text-left tabular-nums">0°</span>
                     </div>
                     <!-- Minimal Left/Right Bar -->
-                    <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden relative mt-2">
+                    <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden relative mt-1">
                         <div class="absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-slate-400/60 z-10"></div>
                         <div id="steerBarFill" class="h-full bg-blue-500" style="width: 0%; margin-left: 50%;"></div>
                     </div>
@@ -326,17 +326,27 @@
                 <div>
                     <div class="flex justify-between text-[11px] mb-1">
                         <span class="text-slate-500 dark:text-slate-400">前の道路幅</span>
-                        <span id="roadWidthVal" class="font-mono font-semibold text-blue-500">5.6 m</span>
+                        <span id="roadWidthVal" class="font-mono font-semibold text-blue-500 tabular-nums">5.6 m</span>
                     </div>
                     <input id="roadWidthSlider" type="range" min="3.4" max="8.5" step="0.1" value="5.6" oninput="onDimensionSliderChange()" class="w-full" />
                 </div>
 
-                <div>
+                <!-- 並列用スライダー -->
+                <div id="perpSpotSliderContainer">
                     <div class="flex justify-between text-[11px] mb-1">
                         <span class="text-slate-500 dark:text-slate-400">駐車枠の横幅</span>
-                        <span id="spotWidthVal" class="font-mono font-semibold text-blue-500">2.50 m</span>
+                        <span id="spotWidthVal" class="font-mono font-semibold text-blue-500 tabular-nums">2.50 m</span>
                     </div>
                     <input id="spotWidthSlider" type="range" min="1.8" max="3.5" step="0.05" value="2.50" oninput="onDimensionSliderChange()" class="w-full" />
+                </div>
+
+                <!-- 縦列用スライダー (最初は非表示) -->
+                <div id="paraSpotSliderContainer" class="hidden">
+                    <div class="flex justify-between text-[11px] mb-1">
+                        <span class="text-slate-500 dark:text-slate-400">駐車枠の前後長</span>
+                        <span id="paraLengthVal" class="font-mono font-semibold text-blue-500 tabular-nums">6.10 m</span>
+                    </div>
+                    <input id="paraLengthSlider" type="range" min="4.8" max="8.0" step="0.1" value="6.10" oninput="onDimensionSliderChange()" class="w-full" />
                 </div>
 
                 <div class="flex items-center justify-between pt-2 border-t border-slate-200/50 dark:border-slate-800">
@@ -426,6 +436,7 @@
             roadWidth: 5.6,
             spotWidth: 2.50,
             spotDepth: 5.30,
+            parallelSpotLength: 6.10, // ←これを追加
 
             startPose: {
                 x: -4.2,
@@ -590,7 +601,7 @@
             let minClearance = 9.9;
 
             const isParallel = state.parkingType === 'parallel';
-            const halfSpot = isParallel ? 3.05 : state.spotWidth / 2;
+            const halfSpot = isParallel ? state.parallelSpotLength / 2 : state.spotWidth / 2;
             const bayBottom = isParallel ? -2.30 : -state.spotDepth;
 
             // 1. Check Top Road Boundary Wall (y = state.roadWidth)
@@ -1339,7 +1350,16 @@ for (const margin of [0.08, 0.04, 0.01]) {
             // Update circular gauge arc
             const arc = document.getElementById('steerArc');
             const circumference = 282.74;
+            // 変更後
             const frac = Math.min(1, Math.abs(clampedWheelDeg) / MAX_STEERING_WHEEL_DEG);
+            // 左に切った場合はSVG要素を左右反転して反時計回りにする
+            if (clampedWheelDeg < 0) {
+                arc.style.transform = 'scale(-1, 1)';
+                arc.style.transformOrigin = '50% 50%';
+            } else {
+                arc.style.transform = 'scale(1, 1)';
+                arc.style.transformOrigin = '50% 50%';
+            }
             arc.style.strokeDashoffset = (circumference * (1 - frac)).toFixed(2);
             arc.style.stroke = clampedWheelDeg > 6 ? '#f59e0b' : (clampedWheelDeg < -6 ? '#06b6d4' : '#3e6ae1');
 
@@ -1443,7 +1463,13 @@ for (const margin of [0.08, 0.04, 0.01]) {
             ctx.save();
             const halfSpot = state.spotWidth / 2;
             const bayDepth = state.parkingType === 'parallel' ? 2.3 : state.spotDepth;
-            const bayHalfWidth = state.parkingType === 'parallel' ? 3.05 : halfSpot;
+            if (wy < 0.2 && wy > -bayDepth) {
+                const halfSpot = state.parkingType === 'parallel' ? state.parallelSpotLength / 2 : state.spotWidth / 2;
+                if (Math.abs(Math.abs(wx) - halfSpot) < 0.25) {
+                    return { type: 'spotWidth' };
+                }
+            }
+            const bayHalfWidth = state.parkingType === 'parallel' ? state.parallelSpotLength / 2 : halfSpot;
 
             // Road surface
             const roadTopLeft = worldToScreen(-20, state.roadWidth);
@@ -1517,19 +1543,18 @@ for (const margin of [0.08, 0.04, 0.01]) {
                 isHoverWall
             );
 
-            // Minimalist Grip Handles on Left/Right of Spot
-            if (state.parkingType === 'perpendicular') {
-                const leftSpotHandle = worldToScreen(-halfSpot, -bayDepth * 0.35);
-                const rightSpotHandle = worldToScreen(halfSpot, -bayDepth * 0.35);
-                const isHoverSpot = state.hoveredHandle === 'spotWidth' || state.dragTarget === 'spotWidth';
-                drawMinimalHandle(leftSpotHandle.x, leftSpotHandle.y, '', isHoverSpot);
-                drawMinimalHandle(
-                    rightSpotHandle.x,
-                    rightSpotHandle.y,
-                    isHoverSpot || state.uiMode === 'detail' ? `${state.spotWidth.toFixed(2)}m` : '',
-                    isHoverSpot
-                );
-            }
+            const leftSpotHandle = worldToScreen(-bayHalfWidth, -bayDepth * 0.35);
+            const rightSpotHandle = worldToScreen(bayHalfWidth, -bayDepth * 0.35);
+            const isHoverSpot = state.hoveredHandle === 'spotWidth' || state.dragTarget === 'spotWidth';
+            drawMinimalHandle(leftSpotHandle.x, leftSpotHandle.y, '', isHoverSpot);
+            
+            const displayVal = state.parkingType === 'parallel' ? state.parallelSpotLength : state.spotWidth;
+            drawMinimalHandle(
+                rightSpotHandle.x,
+                rightSpotHandle.y,
+                isHoverSpot || state.uiMode === 'detail' ? `${displayVal.toFixed(2)}m` : '',
+                isHoverSpot
+            );
 
             ctx.restore();
         }
@@ -1919,10 +1944,22 @@ for (const margin of [0.08, 0.04, 0.01]) {
                 document.getElementById('roadWidthVal').textContent = `${state.roadWidth.toFixed(1)} m`;
                 computeParkingPlan();
             } else if (state.dragTarget === 'spotWidth') {
-                const newSpotWidth = Math.max(1.8, Math.min(3.5, Math.abs(wx) * 2));
-                state.spotWidth = Number(newSpotWidth.toFixed(2));
-                document.getElementById('spotWidthSlider').value = state.spotWidth;
-                document.getElementById('spotWidthVal').textContent = `${state.spotWidth.toFixed(2)} m`;
+                if (state.parkingType === 'parallel') {
+                    const newLen = Math.max(4.8, Math.min(8.0, Math.abs(wx) * 2));
+                    state.parallelSpotLength = Number(newLen.toFixed(2));
+                    document.getElementById('paraLengthSlider').value = state.parallelSpotLength;
+                    document.getElementById('paraLengthVal').textContent = `${state.parallelSpotLength.toFixed(2)} m`;
+                    
+                    const lx = -(state.parallelSpotLength / 2 + 2.4);
+                    const rx = (state.parallelSpotLength / 2 + 2.4);
+                    state.leftNeighbor.x = lx;
+                    state.rightNeighbor.x = rx;
+                } else {
+                    const newSpotWidth = Math.max(1.8, Math.min(3.5, Math.abs(wx) * 2));
+                    state.spotWidth = Number(newSpotWidth.toFixed(2));
+                    document.getElementById('spotWidthSlider').value = state.spotWidth;
+                    document.getElementById('spotWidthVal').textContent = `${state.spotWidth.toFixed(2)} m`;
+                }
                 computeParkingPlan();
             } else if (state.dragTarget === 'leftNeighbor') {
                 state.leftNeighbor.x = wx - state.dragOffset.x;
@@ -2034,17 +2071,29 @@ for (const margin of [0.08, 0.04, 0.01]) {
             state.parkingType = type;
             const perpBtn = document.getElementById('modePerpBtn');
             const paraBtn = document.getElementById('modeParallelBtn');
+            // スライダーコンテナの取得
+            const perpSlider = document.getElementById('perpSpotSliderContainer');
+            const paraSlider = document.getElementById('paraSpotSliderContainer');
+
             if (type === 'perpendicular') {
                 perpBtn.className = 'px-2.5 py-1 rounded-lg bg-slate-900/10 dark:bg-white/10 text-slate-900 dark:text-white transition-all';
                 paraBtn.className = 'px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all';
+                perpSlider.classList.remove('hidden'); // 並列スライダーを表示
+                paraSlider.classList.add('hidden');
+                
                 state.leftNeighbor = { enabled: true, x: -2.50, y: -2.65, theta: Math.PI / 2, width: 1.76, length: 4.50 };
                 state.rightNeighbor = { enabled: true, x: 2.50, y: -2.65, theta: Math.PI / 2, width: 1.76, length: 4.50 };
                 state.startPose = { x: -4.2, y: 2.3, theta: 0.0 };
             } else {
                 paraBtn.className = 'px-2.5 py-1 rounded-lg bg-slate-900/10 dark:bg-white/10 text-slate-900 dark:text-white transition-all';
                 perpBtn.className = 'px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all';
-                state.leftNeighbor = { enabled: true, x: -5.45, y: -1.15, theta: 0.0, width: 1.76, length: 4.45 };
-                state.rightNeighbor = { enabled: true, x: 5.45, y: -1.15, theta: 0.0, width: 1.76, length: 4.45 };
+                perpSlider.classList.add('hidden');
+                paraSlider.classList.remove('hidden'); // 縦列スライダーを表示
+                
+                const lx = -(state.parallelSpotLength / 2 + 2.4);
+                const rx = (state.parallelSpotLength / 2 + 2.4);
+                state.leftNeighbor = { enabled: true, x: lx, y: -1.15, theta: 0.0, width: 1.76, length: 4.45 };
+                state.rightNeighbor = { enabled: true, x: rx, y: -1.15, theta: 0.0, width: 1.76, length: 4.45 };
                 state.startPose = { x: -4.2, y: 1.45, theta: 0.0 };
             }
             replanAndResetCar();
@@ -2080,8 +2129,19 @@ for (const margin of [0.08, 0.04, 0.01]) {
         function onDimensionSliderChange() {
             state.roadWidth = parseFloat(document.getElementById('roadWidthSlider').value);
             state.spotWidth = parseFloat(document.getElementById('spotWidthSlider').value);
+            state.parallelSpotLength = parseFloat(document.getElementById('paraLengthSlider').value);
+            
             document.getElementById('roadWidthVal').textContent = `${state.roadWidth.toFixed(1)} m`;
             document.getElementById('spotWidthVal').textContent = `${state.spotWidth.toFixed(2)} m`;
+            document.getElementById('paraLengthVal').textContent = `${state.parallelSpotLength.toFixed(2)} m`;
+
+            // 縦列時は、枠の長さに合わせて隣の車も押し広げる
+            if (state.parkingType === 'parallel') {
+                const lx = -(state.parallelSpotLength / 2 + 2.4);
+                const rx = (state.parallelSpotLength / 2 + 2.4);
+                state.leftNeighbor.x = lx;
+                state.rightNeighbor.x = rx;
+            }
             replanAndResetCar();
         }
 
