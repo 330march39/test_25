@@ -1350,11 +1350,10 @@ for (const margin of [0.08, 0.04, 0.01]) {
             // Update circular gauge arc
             const arc = document.getElementById('steerArc');
             const circumference = 282.74;
-            // 変更後
             const frac = Math.min(1, Math.abs(clampedWheelDeg) / MAX_STEERING_WHEEL_DEG);
-            // 左に切った場合はSVG要素を左右反転して反時計回りにする
+            // 左に切った場合はY軸を反転(上下反転)させて反時計回りにする
             if (clampedWheelDeg < 0) {
-                arc.style.transform = 'scale(-1, 1)';
+                arc.style.transform = 'scale(1, -1)';
                 arc.style.transformOrigin = '50% 50%';
             } else {
                 arc.style.transform = 'scale(1, 1)';
