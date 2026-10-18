@@ -1463,12 +1463,6 @@ for (const margin of [0.08, 0.04, 0.01]) {
             ctx.save();
             const halfSpot = state.spotWidth / 2;
             const bayDepth = state.parkingType === 'parallel' ? 2.3 : state.spotDepth;
-            if (wy < 0.2 && wy > -bayDepth) {
-                const halfSpot = state.parkingType === 'parallel' ? state.parallelSpotLength / 2 : state.spotWidth / 2;
-                if (Math.abs(Math.abs(wx) - halfSpot) < 0.25) {
-                    return { type: 'spotWidth' };
-                }
-            }
             const bayHalfWidth = state.parkingType === 'parallel' ? state.parallelSpotLength / 2 : halfSpot;
 
             // Road surface
@@ -1514,7 +1508,7 @@ for (const margin of [0.08, 0.04, 0.01]) {
             ctx.lineTo(cTR.x, cTR.y);
             ctx.stroke();
 
-            // Minimalist "P" inside target bay (No noisy text!)
+            // Minimalist "P" inside target bay
             const spotCenter = worldToScreen(0, -bayDepth * 0.52);
             ctx.fillStyle = state.plan.valid
                 ? (isDark ? 'rgba(59, 130, 246, 0.28)' : 'rgba(37, 99, 235, 0.25)')
@@ -1534,7 +1528,7 @@ for (const margin of [0.08, 0.04, 0.01]) {
             ctx.lineTo(canvas.width, wallY);
             ctx.stroke();
 
-            // Minimalist Grip Handle on Top Road Wall (Shows dimension only when hovered/dragged or in detail mode)
+            // Minimalist Grip Handle on Top Road Wall
             const wallHandlePos = worldToScreen(0, state.roadWidth);
             drawMinimalHandle(
                 wallHandlePos.x,
@@ -1558,7 +1552,7 @@ for (const margin of [0.08, 0.04, 0.01]) {
 
             ctx.restore();
         }
-
+        
         function drawMinimalHandle(sx, sy, text, highlighted) {
             ctx.save();
             if (!text) {
@@ -1878,8 +1872,10 @@ for (const margin of [0.08, 0.04, 0.01]) {
                 return { type: 'roadWall' };
             }
 
-            if (state.parkingType === 'perpendicular' && wy < 0.2 && wy > -state.spotDepth) {
-                const halfSpot = state.spotWidth / 2;
+            // 縦列駐車の枠の長さをドラッグで変更するための判定
+            const bayDepth = state.parkingType === 'parallel' ? 2.3 : state.spotDepth;
+            if (wy < 0.2 && wy > -bayDepth) {
+                const halfSpot = state.parkingType === 'parallel' ? state.parallelSpotLength / 2 : state.spotWidth / 2;
                 if (Math.abs(Math.abs(wx) - halfSpot) < 0.25) {
                     return { type: 'spotWidth' };
                 }
