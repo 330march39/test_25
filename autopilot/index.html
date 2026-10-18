@@ -915,10 +915,10 @@ for (const margin of [0.08, 0.04, 0.01]) {
         function trySolveExactPerpendicular(start, goalPose, veh, margin) {
             const candidates = [];
 
-            // 変更後（探索の解像度を大幅に上げる）
-    const yEntries = [-2.10, -1.85, -1.50, -1.10, -0.70, -0.30]; 
-    const steerFactors = [1.0, 0.95, 0.88, 0.80, 0.75];
-    const turnSides = start.x <= 0.2 ? [1, -1] : [-1, 1];
+            // 探索の解像度を大幅に上げる
+            const yEntries = [-2.10, -1.85, -1.50, -1.10, -0.70, -0.30]; 
+            const steerFactors = [1.0, 0.95, 0.88, 0.80, 0.75];
+            const turnSides = start.x <= 0.2 ? [1, -1] : [-1, 1];
 
             for (const side of turnSides) {
                 for (const yEntry of yEntries) {
@@ -930,7 +930,6 @@ for (const margin of [0.08, 0.04, 0.01]) {
                         steer: 0.0
                     };
 
-                    // Verify the final straight backing segment inside the bay is collision-free
                     const revStraightCheck = sampleExactKinematicSegment(bayEntryPose, -1, 0, pullOutDist, veh, margin);
                     if (!revStraightCheck.valid) continue;
 
@@ -941,7 +940,6 @@ for (const margin of [0.08, 0.04, 0.01]) {
                         // CASE A: 1-Arc Reverse Entry + Straight Back-in
                         for (const sweepDeg of [90, 85, 78, 70, 60, 50, 40, 30]) {
                             const arcLen = R * (sweepDeg * Math.PI / 180);
-                            // Integrate outward from bayEntryPose to find exact ApexPose
                             const traceOut = sampleExactKinematicSegment(bayEntryPose, +1, curveSteer, arcLen, veh, margin);
                             if (!traceOut.valid) continue;
 
@@ -949,7 +947,6 @@ for (const margin of [0.08, 0.04, 0.01]) {
                             const setup = buildCollisionFreeSetupBridge(start, apexPose, veh, margin);
                             if (!setup || !setup.valid) continue;
 
-                            // Integrate inward from apexPose -> bayEntryPose -> goalPose (100% exact!)
                             const revCurve = sampleExactKinematicSegment(apexPose, -1, curveSteer, arcLen, veh, margin);
                             if (!revCurve.valid) continue;
 
@@ -968,15 +965,14 @@ for (const margin of [0.08, 0.04, 0.01]) {
                             ));
                         }
 
-                        // CASE B: 1 K-Turn (切り返し1回追加) for narrow roads or tight obstacles
+                        // CASE B: 1 K-Turn (切り返し1回追加)
                         for (const finalSweepDeg of [65, 55, 45, 36, 25]) {
-                    for (const kSweepDeg of [45, 35, 25, 18, 12]) {
+                            for (const kSweepDeg of [45, 35, 25, 18, 12]) {
                                 const arcFinal = R * (finalSweepDeg * Math.PI / 180);
                                 const arcK = R * (kSweepDeg * Math.PI / 180);
                                 const arcFirst = R * ((90 - finalSweepDeg - kSweepDeg) * Math.PI / 180);
                                 if (arcFirst < 0.4) continue;
 
-                                // Trace backward from bayEntryPose:
                                 const tFinal = sampleExactKinematicSegment(bayEntryPose, +1, curveSteer, arcFinal, veh, margin);
                                 if (!tFinal.valid) continue;
 
@@ -990,7 +986,6 @@ for (const margin of [0.08, 0.04, 0.01]) {
                                 const setup = buildCollisionFreeSetupBridge(start, apexPose, veh, margin);
                                 if (!setup || !setup.valid) continue;
 
-                                // Forward-in-time exact verification
                                 const rev1 = sampleExactKinematicSegment(apexPose, -1, curveSteer, arcFirst, veh, margin);
                                 if (!rev1.valid) continue;
                                 const fwdK = sampleExactKinematicSegment(rev1.endPose, +1, -curveSteer, arcK, veh, margin);
@@ -1015,55 +1010,56 @@ for (const margin of [0.08, 0.04, 0.01]) {
                             }
                         }
 
-                        // CASE C: 2 K-Turns (切り返し2回追加) for very narrow aisles (e.g., 3.8m - 4.2m road width)
+                        // CASE C: 2 K-Turns (切り返し2回追加)
                         for (const s3Deg of [45, 38, 30, 20]) {
-                    for (const s2Deg of [30, 22, 15]) {
-                        const s1Deg = s2Deg;
-                            const arc3 = R * (s3Deg * Math.PI / 180);
-                            const arcK = R * (s2Deg * Math.PI / 180);
+                            for (const s2Deg of [30, 22, 15]) {
+                                const s1Deg = s2Deg;
+                                const arc3 = R * (s3Deg * Math.PI / 180);
+                                const arcK = R * (s2Deg * Math.PI / 180);
 
-                            const t3 = sampleExactKinematicSegment(bayEntryPose, +1, curveSteer, arc3, veh, margin);
-                            if (!t3.valid) continue;
-                            const tk2 = sampleExactKinematicSegment(t3.endPose, -1, -curveSteer, arcK, veh, margin);
-                            if (!tk2.valid) continue;
-                            const t2 = sampleExactKinematicSegment(tk2.endPose, +1, curveSteer, arcK, veh, margin);
-                            if (!t2.valid) continue;
-                            const tk1 = sampleExactKinematicSegment(t2.endPose, -1, -curveSteer, arcK, veh, margin);
-                            if (!tk1.valid) continue;
-                            const t1 = sampleExactKinematicSegment(tk1.endPose, +1, curveSteer, arcK, veh, margin);
-                            if (!t1.valid) continue;
+                                const t3 = sampleExactKinematicSegment(bayEntryPose, +1, curveSteer, arc3, veh, margin);
+                                if (!t3.valid) continue;
+                                const tk2 = sampleExactKinematicSegment(t3.endPose, -1, -curveSteer, arcK, veh, margin);
+                                if (!tk2.valid) continue;
+                                const t2 = sampleExactKinematicSegment(tk2.endPose, +1, curveSteer, arcK, veh, margin);
+                                if (!t2.valid) continue;
+                                const tk1 = sampleExactKinematicSegment(t2.endPose, -1, -curveSteer, arcK, veh, margin);
+                                if (!tk1.valid) continue;
+                                const t1 = sampleExactKinematicSegment(tk1.endPose, +1, curveSteer, arcK, veh, margin);
+                                if (!t1.valid) continue;
 
-                            const apexPose = t1.endPose;
-                            const setup = buildCollisionFreeSetupBridge(start, apexPose, veh, margin);
-                            if (!setup || !setup.valid) continue;
+                                const apexPose = t1.endPose;
+                                const setup = buildCollisionFreeSetupBridge(start, apexPose, veh, margin);
+                                if (!setup || !setup.valid) continue;
 
-                            const rev1 = sampleExactKinematicSegment(apexPose, -1, curveSteer, arcK, veh, margin);
-                            if (!rev1.valid) continue;
-                            const fwd1 = sampleExactKinematicSegment(rev1.endPose, +1, -curveSteer, arcK, veh, margin);
-                            if (!fwd1.valid) continue;
-                            const rev2 = sampleExactKinematicSegment(fwd1.endPose, -1, curveSteer, arcK, veh, margin);
-                            if (!rev2.valid) continue;
-                            const fwd2 = sampleExactKinematicSegment(rev2.endPose, +1, -curveSteer, arcK, veh, margin);
-                            if (!fwd2.valid) continue;
-                            const rev3 = sampleExactKinematicSegment(fwd2.endPose, -1, curveSteer, arc3, veh, margin);
-                            if (!rev3.valid) continue;
-                            const revStraight = sampleExactKinematicSegment(rev3.endPose, -1, 0, pullOutDist, veh, margin);
-                            if (!revStraight.valid) continue;
+                                const rev1 = sampleExactKinematicSegment(apexPose, -1, curveSteer, arcK, veh, margin);
+                                if (!rev1.valid) continue;
+                                const fwd1 = sampleExactKinematicSegment(rev1.endPose, +1, -curveSteer, arcK, veh, margin);
+                                if (!fwd1.valid) continue;
+                                const rev2 = sampleExactKinematicSegment(fwd1.endPose, -1, curveSteer, arcK, veh, margin);
+                                if (!rev2.valid) continue;
+                                const fwd2 = sampleExactKinematicSegment(rev2.endPose, +1, -curveSteer, arcK, veh, margin);
+                                if (!fwd2.valid) continue;
+                                const rev3 = sampleExactKinematicSegment(fwd2.endPose, -1, curveSteer, arc3, veh, margin);
+                                if (!rev3.valid) continue;
+                                const revStraight = sampleExactKinematicSegment(rev3.endPose, -1, 0, pullOutDist, veh, margin);
+                                if (!revStraight.valid) continue;
 
-                            const segments = [
-                                ...setup.segments,
-                                { gear: -1, steer: curveSteer, points: rev1.points },
-                                { gear: +1, steer: -curveSteer, points: fwd1.points },
-                                { gear: -1, steer: curveSteer, points: rev2.points },
-                                { gear: +1, steer: -curveSteer, points: fwd2.points },
-                                { gear: -1, steer: curveSteer, points: rev3.points },
-                                { gear: -1, steer: 0, points: revStraight.points }
-                            ];
+                                const segments = [
+                                    ...setup.segments,
+                                    { gear: -1, steer: curveSteer, points: rev1.points },
+                                    { gear: +1, steer: -curveSteer, points: fwd1.points },
+                                    { gear: -1, steer: curveSteer, points: rev2.points },
+                                    { gear: +1, steer: -curveSteer, points: fwd2.points },
+                                    { gear: -1, steer: curveSteer, points: rev3.points },
+                                    { gear: -1, steer: 0, points: revStraight.points }
+                                ];
 
-                            candidates.push(scoreCandidatePlan(
-                                segments,
-                                Math.min(setup.minClearance, rev1.minClearance, fwd1.minClearance, rev2.minClearance, rev3.minClearance)
-                            ));
+                                candidates.push(scoreCandidatePlan(
+                                    segments,
+                                    Math.min(setup.minClearance, rev1.minClearance, fwd1.minClearance, rev2.minClearance, rev3.minClearance)
+                                ));
+                            }
                         }
                     }
                 }
@@ -1074,7 +1070,6 @@ for (const margin of [0.08, 0.04, 0.01]) {
             return candidates[0];
         }
 
-        // Exact Parallel Parking Solver (two opposite circular kinematic arcs + final straight alignment at theta = 0.0)
         function computeParallelParkingPlan(veh) {
             const start = { ...state.startPose, steer: 0 };
             const goalPose = {
@@ -1094,82 +1089,82 @@ for (const margin of [0.08, 0.04, 0.01]) {
             const candidates = [];
 
             // 変更後（切り返しを含む柔軟な縦列駐車）
-for (const sf of [1.0, 0.95, 0.85, 0.75]) {
-    const steerMag = veh.maxSteerRad * sf;
-    const R = veh.wheelbase / Math.tan(steerMag);
+            for (const sf of [1.0, 0.95, 0.85, 0.75]) {
+                const steerMag = veh.maxSteerRad * sf;
+                const R = veh.wheelbase / Math.tan(steerMag);
 
-    for (const xBackEnd of [-0.8, -0.5, -0.35, -0.15, 0.0, 0.3]) {
-        const fwdDist = Math.abs(xBackEnd);
-        const backEndPose = { x: xBackEnd, y: -1.15, theta: 0.0, steer: 0 };
+                for (const xBackEnd of [-0.8, -0.5, -0.35, -0.15, 0.0, 0.3]) {
+                    const fwdDist = Math.abs(xBackEnd);
+                    const backEndPose = { x: xBackEnd, y: -1.15, theta: 0.0, steer: 0 };
 
-        for (const sweepDeg of [25, 30, 35, 40, 45, 50]) {
-            const arcLen = R * (sweepDeg * Math.PI / 180);
+                    for (const sweepDeg of [25, 30, 35, 40, 45, 50]) {
+                        const arcLen = R * (sweepDeg * Math.PI / 180);
 
-            // ① 通常のS字バック（一発入れ）
-            const outArc2 = sampleExactKinematicSegment(backEndPose, +1, +steerMag, arcLen, veh, margin);
-            if (outArc2.valid) {
-                const outArc1 = sampleExactKinematicSegment(outArc2.endPose, +1, -steerMag, arcLen, veh, margin);
-                if (outArc1.valid) {
-                    const pullUpPose = outArc1.endPose;
-                    const setup = buildCollisionFreeSetupBridge(start, pullUpPose, veh, margin);
-                    if (setup && setup.valid) {
-                        const revArc1 = sampleExactKinematicSegment(pullUpPose, -1, -steerMag, arcLen, veh, margin);
-                        if (revArc1.valid) {
-                            const revArc2 = sampleExactKinematicSegment(revArc1.endPose, -1, +steerMag, arcLen, veh, margin);
-                            if (revArc2.valid) {
-                                const segments = [
-                                    ...setup.segments,
-                                    { gear: -1, steer: -steerMag, points: revArc1.points },
-                                    { gear: -1, steer: +steerMag, points: revArc2.points }
-                                ];
-                                if (fwdDist > 0.04) {
-                                    const fwdAlign = sampleExactKinematicSegment(revArc2.endPose, +1, 0, fwdDist, veh, margin);
-                                    if (fwdAlign.valid) segments.push({ gear: +1, steer: 0, points: fwdAlign.points });
-                                }
-                                candidates.push(scoreCandidatePlan(segments, Math.min(setup.minClearance, revArc1.minClearance, revArc2.minClearance)));
-                            }
-                        }
-                    }
-                }
-            }
-
-            // ② 縦列切り返しパターン（深く斜めに入ってから、前進して真っ直ぐにする）
-            const kTurnFwdDist = 0.6; // 前進で調整する距離
-            const tiltedPose = sampleExactKinematicSegment(backEndPose, -1, -steerMag, kTurnFwdDist, veh, margin);
-            if (!tiltedPose.valid) continue;
-            
-            const kOutArc2 = sampleExactKinematicSegment(tiltedPose.endPose, +1, +steerMag, arcLen, veh, margin);
-            if (kOutArc2.valid) {
-                const kOutArc1 = sampleExactKinematicSegment(kOutArc2.endPose, +1, -steerMag, arcLen, veh, margin);
-                if (kOutArc1.valid) {
-                    const setup = buildCollisionFreeSetupBridge(start, kOutArc1.endPose, veh, margin);
-                    if (setup && setup.valid) {
-                        const r1 = sampleExactKinematicSegment(kOutArc1.endPose, -1, -steerMag, arcLen, veh, margin);
-                        if (r1.valid) {
-                            const r2 = sampleExactKinematicSegment(r1.endPose, -1, +steerMag, arcLen, veh, margin);
-                            if (r2.valid) {
-                                const f1 = sampleExactKinematicSegment(r2.endPose, +1, -steerMag, kTurnFwdDist, veh, margin);
-                                if (f1.valid) {
-                                    const segments = [
-                                        ...setup.segments,
-                                        { gear: -1, steer: -steerMag, points: r1.points },
-                                        { gear: -1, steer: +steerMag, points: r2.points },
-                                        { gear: +1, steer: -steerMag, points: f1.points } // 前進切り返し
-                                    ];
-                                    if (fwdDist > 0.04) {
-                                        const fwdAlign = sampleExactKinematicSegment(f1.endPose, +1, 0, fwdDist, veh, margin);
-                                        if (fwdAlign.valid) segments.push({ gear: +1, steer: 0, points: fwdAlign.points });
+                        // ① 通常のS字バック（一発入れ）
+                        const outArc2 = sampleExactKinematicSegment(backEndPose, +1, +steerMag, arcLen, veh, margin);
+                        if (outArc2.valid) {
+                            const outArc1 = sampleExactKinematicSegment(outArc2.endPose, +1, -steerMag, arcLen, veh, margin);
+                            if (outArc1.valid) {
+                                const pullUpPose = outArc1.endPose;
+                                const setup = buildCollisionFreeSetupBridge(start, pullUpPose, veh, margin);
+                                if (setup && setup.valid) {
+                                    const revArc1 = sampleExactKinematicSegment(pullUpPose, -1, -steerMag, arcLen, veh, margin);
+                                    if (revArc1.valid) {
+                                        const revArc2 = sampleExactKinematicSegment(revArc1.endPose, -1, +steerMag, arcLen, veh, margin);
+                                        if (revArc2.valid) {
+                                            const segments = [
+                                                ...setup.segments,
+                                                { gear: -1, steer: -steerMag, points: revArc1.points },
+                                                { gear: -1, steer: +steerMag, points: revArc2.points }
+                                            ];
+                                            if (fwdDist > 0.04) {
+                                                const fwdAlign = sampleExactKinematicSegment(revArc2.endPose, +1, 0, fwdDist, veh, margin);
+                                                if (fwdAlign.valid) segments.push({ gear: +1, steer: 0, points: fwdAlign.points });
+                                            }
+                                            candidates.push(scoreCandidatePlan(segments, Math.min(setup.minClearance, revArc1.minClearance, revArc2.minClearance)));
+                                        }
                                     }
-                                    candidates.push(scoreCandidatePlan(segments, Math.min(setup.minClearance, r1.minClearance, r2.minClearance, f1.minClearance)));
+                                }
+                            }
+                        }
+
+                        // ② 縦列切り返しパターン（深く斜めに入ってから、前進して真っ直ぐにする）
+                        const kTurnFwdDist = 0.6; // 前進で調整する距離
+                        const tiltedPose = sampleExactKinematicSegment(backEndPose, -1, -steerMag, kTurnFwdDist, veh, margin);
+                        if (!tiltedPose.valid) continue;
+                        
+                        const kOutArc2 = sampleExactKinematicSegment(tiltedPose.endPose, +1, +steerMag, arcLen, veh, margin);
+                        if (kOutArc2.valid) {
+                            const kOutArc1 = sampleExactKinematicSegment(kOutArc2.endPose, +1, -steerMag, arcLen, veh, margin);
+                            if (kOutArc1.valid) {
+                                const setup = buildCollisionFreeSetupBridge(start, kOutArc1.endPose, veh, margin);
+                                if (setup && setup.valid) {
+                                    const r1 = sampleExactKinematicSegment(kOutArc1.endPose, -1, -steerMag, arcLen, veh, margin);
+                                    if (r1.valid) {
+                                        const r2 = sampleExactKinematicSegment(r1.endPose, -1, +steerMag, arcLen, veh, margin);
+                                        if (r2.valid) {
+                                            const f1 = sampleExactKinematicSegment(r2.endPose, +1, -steerMag, kTurnFwdDist, veh, margin);
+                                            if (f1.valid) {
+                                                const segments = [
+                                                    ...setup.segments,
+                                                    { gear: -1, steer: -steerMag, points: r1.points },
+                                                    { gear: -1, steer: +steerMag, points: r2.points },
+                                                    { gear: +1, steer: -steerMag, points: f1.points } // 前進切り返し
+                                                ];
+                                                if (fwdDist > 0.04) {
+                                                    const fwdAlign = sampleExactKinematicSegment(f1.endPose, +1, 0, fwdDist, veh, margin);
+                                                    if (fwdAlign.valid) segments.push({ gear: +1, steer: 0, points: fwdAlign.points });
+                                                }
+                                                candidates.push(scoreCandidatePlan(segments, Math.min(setup.minClearance, r1.minClearance, r2.minClearance, f1.minClearance)));
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-    }
-}
 
             if (candidates.length === 0) {
                 applyImpossiblePlan('縦列駐車のスペースが不足しているか、障害物に接触するため駐車不可です');
@@ -1178,7 +1173,6 @@ for (const sf of [1.0, 0.95, 0.85, 0.75]) {
             candidates.sort((a, b) => a.cost - b.cost);
             applyPlanToState(candidates[0]);
         }
-
         function scoreCandidatePlan(segments, minClearance) {
             let gearChanges = 0;
             let totalPts = 0;
