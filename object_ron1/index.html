@@ -8,6 +8,19 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
+  <!-- ▼ ここを追加：TailwindのデフォルトフォントをZen Maru Gothicに設定 ▼ -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Zen Maru Gothic"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  
   <!-- React & ReactDOM -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -28,8 +41,8 @@
 
   <style>
     /* 基本フォントと行間設定 */
-    body {
-      font-family: 'Zen Maru Gothic', sans-serif;
+    body, #root {
+      font-family: 'Zen Maru Gothic', sans-serif !important;
       background-color: #f8fafc;
       color: #334155;
       margin: 0;
@@ -37,7 +50,7 @@
       overflow-x: hidden;
       -webkit-tap-highlight-color: transparent;
       line-height: 1.8;
-      letter-spacing: 0.02em; /* 文字の間隔を少し開けて視認性UP */
+      letter-spacing: 0.02em;
     }
 
     /* 蛍光ペン風ハイライト */
