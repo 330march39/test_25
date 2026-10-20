@@ -526,6 +526,10 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
       { id: 'E', name: 'クラス型変数・参照渡し', desc: '値渡しと参照渡し, クラスライブラリ', icon: '📦', color: 'text-teal-600', bg: 'bg-teal-50' },
       { id: '2023', name: '2023年度風 予想問題', desc: '過去問ライクな総合問題セット', icon: '📅', color: 'text-slate-700', bg: 'bg-slate-100' },
       { id: '2024', name: '2024年度風 予想問題', desc: 'コード読解・穴埋め中心', icon: '🎓', color: 'text-slate-800', bg: 'bg-slate-200' },
+      // ▼ 既存の quizCategories の一番下（2024年度風の下）に以下を追加 ▼
+      { id: 'TF', name: '正誤判定 (〇×) ドリル', desc: 'ひっかけに注意！正しいか誤りか判定', icon: '⭕', color: 'text-indigo-600', bg: 'bg-indigo-50' },
+      { id: 'WRITE', name: '短いプログラムの記述', desc: '重要構文・メソッドを実際に書く', icon: '✏️', color: 'text-pink-600', bg: 'bg-pink-50' },
+      { id: 'REWRITE', name: 'プログラムの書き換え', desc: '別構文・カプセル化・複製への書き換え', icon: '🔄', color: 'text-amber-600', bg: 'bg-amber-50' },
     ];
 
     const allQuizData = [
@@ -577,6 +581,63 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
       { cat: '2024', q: '配列と参照渡しの挙動について。出力は？\n\nCar org = new Car();\norg.num = 1111;\nCar[] cars = new Car[2];\ncars[0] = org;\norg.num = 3333;\nSystem.out.println(cars[0].num);', options: [{t: '3333', c: true}, {t: '1111', c: false}, {t: '0', c: false}, {t: 'エラー', c: false}], exp: 'cars[0] には org の「参照（住所）」が代入されます。その後 org の実体を変更すると、同じ実体を見ている cars[0] も 3333 になります。' },
       { cat: '2024', q: '次の例外処理の出力結果は？\n\ntry {\n  int a = Integer.parseInt("A");\n  System.out.print("1");\n} catch (NumberFormatException e) {\n  System.out.print("2");\n} finally {\n  System.out.print("3");\n}', options: [{t: '23', c: true}, {t: '123', c: false}, {t: '2', c: false}, {t: '3', c: false}], exp: 'parseInt("A")で例外が発生し、tryブロックの残りの処理("1")はスキップされcatchに飛びます("2")。その後、必ずfinallyが実行されます("3")。' },
       { cat: '2024', q: 'Stringクラスのメソッドを用いたコード。出力は？\n\nString str = "ABC";\nSystem.out.println(str.charAt(1));', options: [{t: 'B', c: true}, {t: 'A', c: false}, {t: 'C', c: false}, {t: 'エラー', c: false}], exp: 'charAt(int index) は指定したインデックスの文字を返します。インデックスは0から始まるため、charAt(1) は2文字目の "B" になります。' },
+
+      // ==========================================
+      // ▼ ここから allQuizData の末尾に追加 ▼
+      // ==========================================
+
+      // --- 既存カテゴリ A〜E の追加問題 (計15問) ---
+      { cat: 'A', q: '次のビット演算を実行したときの出力結果は？\n\nbyte a = 1 | 2;\nbyte b = 1 & 2;\nSystem.out.println(a + ", " + b);', options: [{t: '3, 0', c: true}, {t: '0, 3', c: false}, {t: '3, 1', c: false}, {t: '1, 2', c: false}], exp: '2進数で 1 は「01」、2 は「10」です。論理和(|)は一方が1なら1になるため「11(3)」、論理積(&)は両方1のときのみ1になるため「00(0)」となります。' },
+      { cat: 'A', q: 'シフト演算子「>>>」の特徴として正しいものはどれか。', options: [{t: '符号なし右シフトであり、シフト後に空いた左端（最上位ビット）は常に「0」で埋められる。', c: true}, {t: '符号あり右シフトであり、最上位ビットは元の符号ビットと同じ値で埋められる。', c: false}, {t: '左へビットシフトし、空いた右端は「1」で埋められる。', c: false}, {t: '小数点以下を切り上げながら右へシフトする。', c: false}], exp: '「>>」は符号あり右シフト（最上位ビットは符号と同じ値で埋まる）ですが、「>>>」は符号なし右シフトであり、最上位ビットが0で埋められます。' },
+      { cat: 'A', q: 'エスケープシーケンスについて、画面に「改行」と「水平タブ」を出力する組み合わせとして正しいものはどれか。', options: [{t: '改行: \\n ／ 水平タブ: \\t', c: true}, {t: '改行: \\t ／ 水平タブ: \\n', c: false}, {t: '改行: \\r ／ 水平タブ: \\b', c: false}, {t: '改行: \\f ／ 水平タブ: \\s', c: false}], exp: '\\n は改行、\\t は水平タブ、\\b はバックスペース、\\\' や \\" は引用符文字そのものを表します。' },
+
+      { cat: 'B', q: '次のswitch文を実行したときの y の値はいくつか。\n\nint x = 3, y = 0;\nswitch(x % 3) {\n  case 0:\n    y = 10;\n  case 1:\n    y = 20;\n    break;\n  default:\n    y = 30;\n}', options: [{t: '20', c: true}, {t: '10', c: false}, {t: '30', c: false}, {t: '0', c: false}], exp: 'x % 3 は 0 なので case 0 に進み y = 10 となりますが、break; が書かれていないため、そのまま次の case 1 の処理も実行され（フォールスルー）、y = 20 になります。' },
+      { cat: 'B', q: '次の2次元配列のコードを実行したとき、最後の出力結果はどれか。\n\nint[][] mat = {{2, 3, 5}, {7, 11, 13, 17}};\nint[] tmp = mat[0];\nmat[0] = mat[1];\nmat[1] = tmp;\ntmp[2] = 99;\nSystem.out.println(mat[1][2]);', options: [{t: '99', c: true}, {t: '5', c: false}, {t: '13', c: false}, {t: '7', c: false}], exp: 'tmp と mat[1] は同じ配列 {2, 3, 5} の住所（参照）を指しています。そのため tmp[2] を 99 に変更すると、mat[1][2] も 99 に変わります。' },
+      { cat: 'B', q: 'while文と do〜while文 の違いとして正しいものはどれか。', options: [{t: 'do〜while文は条件判定がブロックの最後に行われるため、条件が最初からfalseであっても最低1回は処理が実行される。', c: true}, {t: 'while文は最低1回は処理が実行されるが、do〜while文は1回も実行されないことがある。', c: false}, {t: 'do〜while文は条件式が false の間だけループを繰り返す。', c: false}, {t: '動作に違いはなく、書き方が異なるだけである。', c: false}], exp: 'while文は処理前に条件判定しますが、do〜while文は「do { 処理 } while(条件);」の順で書くため、必ず1回は処理が実行されます。' },
+
+      { cat: 'C', q: '次のコードの出力結果はどれか。\n\nclass ThisTest {\n  String name = "Apple";\n  void show() {\n    String name = "Orange";\n    System.out.println(name + "/" + this.name);\n  }\n}\n// main内で new ThisTest().show(); を実行', options: [{t: 'Orange/Apple', c: true}, {t: 'Apple/Orange', c: false}, {t: 'Orange/Orange', c: false}, {t: 'Apple/Apple', c: false}], exp: 'フィールド（メンバ変数）とローカル変数が同名の場合、単に「name」と書くとローカル変数(Orange)が優先され、「this.name」と書くと自分自身のフィールド(Apple)が参照されます。' },
+      { cat: 'C', q: '次のメソッドを実行したときの出力結果はどれか。\n\nstatic void counter() {\n  for(int i = 1; i < 10; i++) {\n    if(i == 3) return;\n    System.out.print(i);\n  }\n  System.out.print("End");\n}', options: [{t: '12', c: true}, {t: '12End', c: false}, {t: '123End', c: false}, {t: '12456789End', c: false}], exp: 'breakはループを抜けるだけですが、return; はメソッド自体の処理をその場で終了して呼び出し元に戻るため、for文の後の "End" も出力されません。' },
+      { cat: 'C', q: 'パッケージ「Task1」が指定された Task1.java をコンパイルした後、1つ上の階層からコマンドプロンプトで実行する正しいコマンドはどれか。', options: [{t: 'java Task1.Task1', c: true}, {t: 'java Task1/Task1.class', c: false}, {t: 'javac Task1.Task1', c: false}, {t: 'java Task1', c: false}], exp: 'パッケージが付けられたクラスを実行する際は、パッケージ名のあるフォルダの1つ上の階層から「java パッケージ名.クラス名」と指定して実行します。' },
+
+      { cat: 'D', q: '次のコードの出力結果はどれか。\n\nclass Car { static int x = 10; }\n// mainメソッド内:\nSystem.out.print(Car.x++ + ",");\nSystem.out.print(Car.x++ + ",");\nSystem.out.print(Car.x);', options: [{t: '10,11,12', c: true}, {t: '10,10,10', c: false}, {t: '11,12,12', c: false}, {t: '10,11,11', c: false}], exp: 'x は static（クラス変数）なのでクラス全体で1つだけ管理されます。後置きインクリメント(x++)なので「出力してから1増やす」を繰り返し、10, 11 と出力された後、最後は12になります。' },
+      { cat: 'D', q: 'コマンドラインで次のように実行したとき、args.length の値と args[0] の文字列の組み合わせとして正しいものはどれか。\n\n実行コマンド: java Sample "Hello Java" Lesson 1', options: [{t: 'length: 3 ／ args[0]: "Hello Java"', c: true}, {t: 'length: 4 ／ args[0]: "Hello"', c: false}, {t: 'length: 4 ／ args[0]: "Sample"', c: false}, {t: 'length: 3 ／ args[0]: "Sample"', c: false}], exp: 'ダブルクォーテーション("")で囲まれた部分はスペースを含んでいても1つの文字列として args[0] に格納されます。したがって要素数は "Hello Java", "Lesson", "1" の3つです。' },
+      { cat: 'D', q: 'メソッドに private 修飾子を付けた場合の挙動として正しいものはどれか。', options: [{t: '他のクラスからは呼び出せなくなるが、同じクラス内のコンストラクタや別メソッドからは呼び出すことができる。', c: true}, {t: '同じクラス内のコンストラクタからも一切呼び出せなくなる。', c: false}, {t: 'メソッドには private を付けることができず、コンパイルエラーになる。', c: false}, {t: 'インスタンスを生成せずに呼び出せるようになる。', c: false}], exp: 'privateメSODはクラス外からのアクセスを禁止しますが、同じクラス内（コンストラクタや内部メソッド）からであれば問題なく呼び出せます。' },
+
+      { cat: 'E', q: '次のコードを実行したあと、②の時点での cars[0].gas と cars[1].gas の値の組み合わせはどれか。\n\nCar org = new Car(1111, 50.0);\nCar[] cars = new Car[2];\ncars[0] = org;\ncars[1] = new Car(2222, org.getGas()); // ①\norg.setGas(org.getGas() - 15.0); // ②', options: [{t: 'cars[0].gas: 35.0 ／ cars[1].gas: 50.0', c: true}, {t: 'cars[0].gas: 35.0 ／ cars[1].gas: 35.0', c: false}, {t: 'cars[0].gas: 50.0 ／ cars[1].gas: 50.0', c: false}, {t: 'cars[0].gas: 50.0 ／ cars[1].gas: 35.0', c: false}], exp: 'cars[0] には org の参照（住所）が渡されているため、org の gas が 35.0 に減ると cars[0].gas も 35.0 になります。一方、cars[1] は new で別オブジェクトとして生成され、50.0 という「値」をコピーしただけ（値渡し）なので 50.0 のままです。' },
+      { cat: 'E', q: '文字列を扱うクラスについて、正しい記述はどれか。', options: [{t: 'Stringクラスは一度作成した文字列を変更できないが、StringBufferクラスはappend()メソッド等で文字列を追加・変更できる。', c: true}, {t: 'Stringクラスはappend()メソッドで直接文字を追加できるが、StringBufferクラスは変更できない。', c: false}, {t: 'Stringクラスを使うには import java.io.*; が必須である。', c: false}, {t: 'String型は基本データ型（プリミティブ型）の1つである。', c: false}], exp: 'Stringは不変（変更不可）のクラス型（参照型）であり、import不要で使えます。文字列の追加や変更を行う場合は StringBuffer クラスを使用します。' },
+      { cat: 'E', q: '次のStringクラスのメソッドを実行したときの出力結果はどれか。\n\nString str = "あいうえお";\nint num = str.indexOf(\'う\');\nSystem.out.println(num);', options: [{t: '2', c: true}, {t: '3', c: false}, {t: '1', c: false}, {t: '-1', c: false}], exp: 'indexOf() は引数の文字が最初に出現する位置（インデックス）を返します。インデックスは先頭を 0 番目として数えるため、「あ(0) い(1) う(2)」で 2 が返ります（見つからない場合は -1）。' },
+
+      // --- 新カテゴリ TF: 正誤判定 (〇×) ドリル (10問) ---
+      { cat: 'TF', q: '【正誤判定】\nJavaとJavaScriptは同じ開発元による同一の言語仕様であり、JavaをWebブラウザ向けに軽量化した略称がJavaScriptである。', options: [{t: '×（誤り）', c: true}, {t: '〇（正しい）', c: false}], exp: '誤りです。JavaとJavaScriptは名前が似ていますが、ハムとハムスターのように全く別のプログラミング言語です。' },
+      { cat: 'TF', q: '【正誤判定】\n「double d = 10.5; int i = d;」のように、大きいサイズの型から小さいサイズの型へ代入する場合でも、キャスト演算子なしで自動的に変換されコンパイルできる。', options: [{t: '×（誤り）', c: true}, {t: '〇（正しい）', c: false}], exp: '誤りです。小さいサイズの型に代入する場合は「int i = (int)d;」のようにキャスト演算子を明記しないとコンパイルエラーになります。' },
+      { cat: 'TF', q: '【正誤判定】\n1つのソースファイル（Sample.java）の中に Car クラスと Sample クラスの2つを記述してコンパイルすると、Car.class と Sample.class の2つのクラスファイルが生成される。', options: [{t: '〇（正しい）', c: true}, {t: '×（誤り）', c: false}], exp: '正しいです。1つの.javaファイルに複数のclassブロックがある場合でも、コンパイルするとクラスごとに個別の .class ファイルが生成されます。' },
+      { cat: 'TF', q: '【正誤判定】\nクラス内にコンストラクタを1つも記述しなかった場合、引数のない「デフォルトコンストラクタ」が自動的に使用される。', options: [{t: '〇（正しい）', c: true}, {t: '×（誤り）', c: false}], exp: '正しいです。コンストラクタを省略した場合は、コンパイラによって引数なしのデフォルトコンストラクタが自動的に補われます。' },
+      { cat: 'TF', q: '【正誤判定】\nメソッドの戻り値の型が「int」と「void」のように異なっていれば、引数の数・型・順番がすべて同じであってもオーバーロード（多重定義）することができる。', options: [{t: '×（誤り）', c: true}, {t: '〇（正しい）', c: false}], exp: '誤りです。オーバーロードの基準は「引数の数・型・順番」です。戻り値の型が異なるだけでは、呼び出し時にどちらを使うべきか区別できないためコンパイルエラーになります。' },
+      { cat: 'TF', q: '【正誤判定】\nインスタンスメソッド（staticが付いていない通常のメソッド）の中から、同じクラスのクラス変数（static変数）へ直接アクセスすることは可能である。', options: [{t: '〇（正しい）', c: true}, {t: '×（誤り）', c: false}], exp: '正しいです。インスタンスメソッドの中からクラス変数（static変数）を使うことは可能です。逆に、クラスメソッド（staticメソッド）の中からインスタンス変数を使うことはできません。' },
+      { cat: 'TF', q: '【正誤判定】\nローカル変数の型推論「var」を使って「var s = "hogehoge";」と宣言した後、同じ変数 s に「s = 123;」と整数を代入することができる。', options: [{t: '×（誤り）', c: true}, {t: '〇（正しい）', c: false}], exp: '誤りです。var は初期化時の右辺から自動的に型（この場合はString型）が決定される機能であり、後から異なる型（int型など）を代入するとコンパイルエラーになります。' },
+      { cat: 'TF', q: '【正誤判定】\nStringクラスはJavaの標準クラスライブラリに含まれているため、使用する際はプログラムの先頭に「import java.lang.String;」を必ず記述しなければならない。', options: [{t: '×（誤り）', c: true}, {t: '〇（正しい）', c: false}], exp: '誤りです。StringクラスやSystemクラス、Mathクラスなど（java.langパッケージ）は import 文を記述しなくても自動的に使えるようになっています。' },
+      { cat: 'TF', q: '【正誤判定】\n配列変数 a と b に対して「if (a == b)」と比較した場合、2つの配列の中身の要素がすべて同じ値かどうかが判定される。', options: [{t: '×（誤り）', c: true}, {t: '〇（正しい）', c: false}], exp: '誤りです。配列に対して「==」を使うと、参照先の「住所」が同じかどうかが比較されます。中身の値が等しいかを比較するには「Arrays.equals(a, b)」を使用します。' },
+      { cat: 'TF', q: '【正誤判定】\nファイルからの読み込み（BufferedReader と FileReader の利用）が完了した後は、メモリリーク等を防ぐために「close()」メソッドを呼び出してファイルを解放する必要がある。', options: [{t: '〇（正しい）', c: true}, {t: '×（誤り）', c: false}], exp: '正しいです。ファイルを読み込んだ後は「br.close();」のようにストリームを閉じてリソースを解放します。' },
+
+      // --- 新カテゴリ WRITE: 短いプログラムの記述 (8問) ---
+      { cat: 'WRITE', type: 'write', ans: ['Double.parseDouble(str)', 'Double.parseDouble(str);'], hint: 'DoubleクラスのparseDoubleメソッドを使います', q: '【プログラム記述】\nString型の変数 str に入った文字列（"5.5"など）を、double型の数値に変換して返す式を記述せよ。\n\ndouble a = 【 ここに記述 】;', options: [{t: 'Double.parseDouble(str)', c: true}, {t: 'Integer.parseInt(str)', c: false}, {t: 'Double.toString(str)', c: false}, {t: '(double)str', c: false}], exp: '文字列から浮動小数点数（double型）に変換するには、ラッパクラス Double のクラスメソッド「Double.parseDouble(str)」を使用します。' },
+      { cat: 'WRITE', type: 'write', ans: ['hello.length()', 'hello.length();'], hint: 'Stringクラスの長さを調べるメソッド（カッコが必要）', q: '【プログラム記述】\nString型の変数 hello（中身は "こんにちは"）の文字数を取得する式を記述せよ。\n\nint len = 【 ここに記述 】;', options: [{t: 'hello.length()', c: true}, {t: 'hello.length', c: false}, {t: 'String.length(hello)', c: false}, {t: 'hello.size()', c: false}], exp: '配列の長さは「配列名.length」（カッコなし）ですが、文字列（Stringクラス）の長さを取得する場合はメソッドなので「hello.length()」とカッコが必要です。' },
+      { cat: 'WRITE', type: 'write', ans: ['this(1234, 50.0);', 'this(1234,50.0);', 'this(1234, 50.0)', 'this(1234,50.0)'], hint: 'thisキーワードを使って引数を2つ渡します（末尾のセミコロンも可）', q: '【プログラム記述】\n引数なしのコンストラクタ内から、同じクラスの引数2つ「Car(int n, double g)」を持つコンストラクタに 1234 と 50.0 を渡して呼び出す1文を記述せよ。\n\npublic Car() {\n  【 ここに記述 】\n}', options: [{t: 'this(1234, 50.0);', c: true}, {t: 'Car(1234, 50.0);', c: false}, {t: 'new Car(1234, 50.0);', c: false}, {t: 'super(1234, 50.0);', c: false}], exp: 'コンストラクタ内から自クラスの別コンストラクタを呼び出すには「this(1234, 50.0);」と記述します。' },
+      { cat: 'WRITE', type: 'write', ans: ['sb.append(str2);', 'sb.append(str2)'], hint: 'StringBufferクラスの文字追加メソッドは append です', q: '【プログラム記述】\nStringBuffer型のオブジェクト sb の末尾に、String型の変数 str2 の文字列を追加する1文を記述せよ。\n\nStringBuffer sb = new StringBuffer(str1);\n【 ここに記述 】', options: [{t: 'sb.append(str2);', c: true}, {t: 'sb.add(str2);', c: false}, {t: 'sb.concat(str2);', c: false}, {t: 'sb.insert(str2);', c: false}], exp: 'StringBufferクラスのインスタンスに文字列を追加するには「sb.append(str2);」を使用します。' },
+      { cat: 'WRITE', type: 'write', ans: ['throws IOException'], hint: '例外を呼び出し元に投げるキーワード throws を使います', q: '【プログラム記述】\nキーボード入力（BufferedReader）を行う main メソッドで、入出力例外（IOException）をメソッド内で処理せず外に投げるために空欄に入れる記述を書け。\n\npublic static void main(String[] args) 【 ここに記述 】 {', options: [{t: 'throws IOException', c: true}, {t: 'throw IOException', c: false}, {t: 'catch IOException', c: false}, {t: 'try IOException', c: false}], exp: 'メソッド宣言の後ろには「throws 例外クラス名（throws IOException）」を記述します（s が付く点に注意）。' },
+      { cat: 'WRITE', type: 'write', ans: ['Arrays.sort(src);', 'Arrays.sort(src)'], hint: 'Arraysクラスのsortメソッドを使います', q: '【プログラム記述】\njava.util.Arrays クラスを利用して、配列 src の要素を昇順（小さい順）にソートする1文を記述せよ。\n\nint[] src = {12, 24, 18, 35, 21};\n【 ここに記述 】', options: [{t: 'Arrays.sort(src);', c: true}, {t: 'src.sort();', c: false}, {t: 'Arrays.toString(src);', c: false}, {t: 'Math.sort(src);', c: false}], exp: 'Arraysクラスのクラスメソッド「Arrays.sort(配列名);」を使うことで、配列を簡単に昇順ソートできます。' },
+      { cat: 'WRITE', type: 'write', ans: ['Car.showSum()', 'Car.showSum();'], hint: 'クラス名.メソッド名() の形で呼び出します', q: '【プログラム記述】\nCarクラスに定義されたクラスメソッド（staticメソッド）である「static int showSum()」を、インスタンスを生成せずに呼び出す式を記述せよ。\n\nint total = 【 ここに記述 】;', options: [{t: 'Car.showSum()', c: true}, {t: 'new Car.showSum()', c: false}, {t: 'this.showSum()', c: false}, {t: 'showSum(Car)', c: false}], exp: 'staticが付いたクラスメソッドは、「クラス名.メソッド名()」すなわち「Car.showSum()」と記述して呼び出します。' },
+      { cat: 'WRITE', type: 'write', ans: ['cars[i] = new Car();', 'cars[i]=new Car();', 'cars[i] = new Car()'], hint: '配列の各要素 cars[i] に new Car() を代入します', q: '【プログラム記述】\nオブジェクトの配列 cars の各要素に、Carクラスのインスタンスを生成して代入するための空欄の1文を記述せよ。\n\nCar[] cars = new Car[3];\nfor(int i = 0; i < cars.length; i++) {\n  【 ここに記述 】\n}', options: [{t: 'cars[i] = new Car();', c: true}, {t: 'cars[i] = Car();', c: false}, {t: 'Car[i] = new cars();', c: false}, {t: 'new Car(cars[i]);', c: false}], exp: '「new Car[3]」は配列の箱を3つ用意しただけなので、for文の中で「cars[i] = new Car();」と各要素にオブジェクトを生成して代入する必要があります。' },
+
+      // --- 新カテゴリ REWRITE: プログラムの書き換え (8問) ---
+      { cat: 'REWRITE', type: 'write', ans: ['(double)a / (double)b', '(double)a / b', 'a / (double)b', '(double)a/(double)b', '(double)a/b'], hint: '変数 a（または両方）の前に (double) を付けてキャストします', q: '【書き換え問題】\n次のコードでは c の値が 1.0 になってしまう。キャスト演算子を使って、小数点以下まで正しく「1.25」と計算されるように右辺の式「a / b」を書き換えよ。\n\nint a = 5, b = 4;\ndouble c = 【 a / b を書き換え 】;', options: [{t: '(double)a / (double)b', c: true}, {t: '(double)(a / b)', c: false}, {t: '(int)a / (int)b', c: false}, {t: 'double(a) / double(b)', c: false}], exp: '割り算が行われる前に「(double)a / (double)b」（または片方だけでも可）のようにキャストすることで、小数点以下が切り捨てられずに計算されます。' },
+      { cat: 'REWRITE', type: 'write', ans: ['int[] b = a.clone();', 'b = a.clone();', 'a.clone()'], hint: '配列の clone() メソッドを使います', q: '【書き換え問題】\n「int[] b = a;」と書くと参照（住所）のコピーになる。配列 a の中身の実体を複製（値のコピー）して b に代入するように、右辺の「a」をメソッドを使った式に書き換えた1行（int[] b = ...;）を記述せよ。', options: [{t: 'int[] b = a.clone();', c: true}, {t: 'int[] b = Arrays.copy(a);', c: false}, {t: 'int[] b = new int[a];', c: false}, {t: 'int[] b = a.equals();', c: false}], exp: '「int[] b = a.clone();」と書き換えることで、配列の要素が別のメモリ領域に複製され、b を変更しても a に影響しなくなります。' },
+      { cat: 'REWRITE', type: 'write', ans: ['System.out.println(Arrays.toString(week));', 'Arrays.toString(week)'], hint: 'Arrays.toString(配列名) を使います', q: '【書き換え問題】\n次のfor文を使わずに、Arraysクラスのメソッドを使って1行で配列 week の中身を「[月曜, 火曜, 水曜]」と出力する文（System.out.println(...);）に書き換えよ。\n\nfor(int i = 0; i < week.length; i++) {\n  System.out.println(week[i]);\n}', options: [{t: 'System.out.println(Arrays.toString(week));', c: true}, {t: 'System.out.println(week.toString());', c: false}, {t: 'System.out.println(Arrays.sort(week));', c: false}, {t: 'System.out.println(String.valueOf(week));', c: false}], exp: '「System.out.println(Arrays.toString(week));」を使うと、for文を使わずに1次元配列の全要素をまとめて文字列として出力できます（2次元配列なら Arrays.deepToString）。' },
+      { cat: 'REWRITE', type: 'write', ans: ['car1.setNum(1234);', 'car1.setNum(1234)'], hint: 'car1 の setNum メソッドに引数 1234 を渡します', q: '【書き換え問題】\nCarクラスのフィールド num を private に変更（カプセル化）し、「public void setNum(int n)」メソッドを用意した。mainメソッド内の以下の1行を、メソッドを使った記述に書き換えよ。\n\n書き換え前: car1.num = 1234;', options: [{t: 'car1.setNum(1234);', c: true}, {t: 'Car.setNum(1234);', c: false}, {t: 'car1.getNum(1234);', c: false}, {t: 'car1.setNum = 1234;', c: false}], exp: 'フィールドを private にすると直接「car1.num = 1234;」とは書けなくなるため、公開メソッドを使って「car1.setNum(1234);」と書き換えます。' },
+      { cat: 'REWRITE', type: 'write', ans: ['Car car1 = new Car(1234, 20.5);', 'Car car1 = new Car(1234,20.5);'], hint: 'new Car(...) のカッコ内に引数を指定します', q: '【書き換え問題】\n引数2つを受け取るコンストラクタ「Car(int n, double g)」を作成した。以下の3行の処理を、コンストラクタを使って1行のオブジェクト生成文に書き換えよ。\n\nCar car1 = new Car();\ncar1.num = 1234;\ncar1.gas = 20.5;', options: [{t: 'Car car1 = new Car(1234, 20.5);', c: true}, {t: 'Car car1(1234, 20.5) = new Car();', c: false}, {t: 'Car car1 = Car(1234, 20.5);', c: false}, {t: 'Car car1 = new Car.set(1234, 20.5);', c: false}], exp: '引数付きコンストラクタを定義しておけば、「Car car1 = new Car(1234, 20.5);」の1行でインスタンス生成と初期値の設定を同時に行えます。' },
+      { cat: 'REWRITE', type: 'write', ans: ['score >= 70 ? "合格" : "不合格"', '(score >= 70) ? "合格" : "不合格"', 'String msg = score >= 70 ? "合格" : "不合格";'], hint: '条件式 ? 式1 : 式2 の形で書きます', q: '【書き換え問題】\n次のif〜else文を、条件演算子（三項演算子 ?: ）を使った1行の式に書き換える場合、空欄に入る式を記述せよ。\n\n// 書き換え前:\n// if (score >= 70) msg = "合格"; else msg = "不合格";\nString msg = 【 ここに記述 】;', options: [{t: 'score >= 70 ? "合格" : "不合格"', c: true}, {t: 'score >= 70 : "合格" ? "不合格"', c: false}, {t: '"合格" ? score >= 70 : "不合格"', c: false}, {t: 'if(score >= 70) ? "合格" : "不合格"', c: false}], exp: '条件演算子「条件式 ? trueの時の値 : falseの時の値」を使うと、「score >= 70 ? "合格" : "不合格"」と1行で簡潔に書けます。' },
+      { cat: 'REWRITE', type: 'write', ans: ['catch (NumberFormatException | ArithmeticException e)', 'catch(NumberFormatException | ArithmeticException e)', 'NumberFormatException | ArithmeticException e'], hint: '2つの例外クラス名を「|」で繋ぎ、変数名 e は最後に1つだけ書きます', q: '【書き換え問題】\n次の2つのcatchブロックと全く同じ処理を、1つのcatchブロック（マルチキャッチ）にまとめて書き換えた場合の「catch (...)」の部分を記述せよ。\n\n} catch (NumberFormatException e) {\n  System.out.println("エラー");\n} catch (ArithmeticException e) {\n  System.out.println("エラー");\n}', options: [{t: 'catch (NumberFormatException | ArithmeticException e)', c: true}, {t: 'catch (NumberFormatException e | ArithmeticException e)', c: false}, {t: 'catch (NumberFormatException || ArithmeticException e)', c: false}, {t: 'catch (NumberFormatException, ArithmeticException e)', c: false}], exp: '複数の例外を1つのcatchにまとめる場合は「|」（縦棒1本）で区切り、変数は最後に1つだけ「catch (NumberFormatException | ArithmeticException e)」と書きます。' },
+      { cat: 'REWRITE', type: 'write', ans: ['String str = String.valueOf(num);', 'String.valueOf(num)'], hint: 'Stringクラスの valueOf メソッドを使います', q: '【書き換え問題】\n「String str = "" + num;」は空文字との結合でint型変数 num を文字列に変換している。これを String クラスに用意されているクラスメソッドを使って変換する1文（String str = ...;）に書き換えよ。', options: [{t: 'String str = String.valueOf(num);', c: true}, {t: 'String str = String.parseInt(num);', c: false}, {t: 'String str = num.toString();', c: false}, {t: 'String str = (String)num;', c: false}], exp: '数値を文字列に変換するStringクラスのメソッドは「String.valueOf(num)」です（または「Integer.valueOf(num).toString()」でも変換可能です）。' },
     ];
 
     // 配列のシャッフル関数
@@ -599,6 +660,9 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
       const [selectedOption, setSelectedOption] = useState(null);
       const [isAnswered, setIsAnswered] = useState(false);
       const [currentOptions, setCurrentOptions] = useState([]);
+      // ▼ 以下の2行を追加 ▼
+      const [userInput, setUserInput] = useState('');
+      const [useTextInput, setUseTextInput] = useState(true); // trueなら記述式、falseなら4択式
 
       const startQuiz = (catId) => {
         let filtered = [];
@@ -617,6 +681,7 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
         setScore(0);
         setIsAnswered(false);
         setSelectedOption(null);
+        setUserInput('');
         setCurrentOptions(shuffleArray(shuffledQuestions[0].options));
         setQuizState('playing');
       };
@@ -630,12 +695,24 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
         }
       };
 
+      // ▼ 記述式の採点関数を追加 ▼
+      const handleTextSubmit = (e) => {
+        e.preventDefault();
+        if (isAnswered || !userInput.trim()) return;
+        const normalize = (s) => s.replace(/\s+/g, ' ').trim();
+        const isCorrect = q.ans && q.ans.some(a => normalize(a) === normalize(userInput) || a.replace(/\s+/g, '') === userInput.replace(/\s+/g, ''));
+        setSelectedOption({ t: userInput, c: isCorrect });
+        setIsAnswered(true);
+        if (isCorrect) setScore(s => s + 1);
+      };
+
       const nextQuestion = () => {
         if (currentIndex + 1 < questions.length) {
           const nextIdx = currentIndex + 1;
           setCurrentIndex(nextIdx);
           setIsAnswered(false);
           setSelectedOption(null);
+          setUserInput('');
           setCurrentOptions(shuffleArray(questions[nextIdx].options));
         } else {
           setQuizState('result');
@@ -736,42 +813,74 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
             </h3>
           </div>
 
-          <div className="space-y-3 mb-6">
-            {currentOptions.map((opt, i) => {
-              let btnClass = "w-full text-left p-5 rounded-2xl border-2 transition-all font-bold text-sm md:text-base text-slate-700 leading-relaxed ";
-              
-              if (!isAnswered) {
-                btnClass += "bg-white/80 border-transparent hover:border-blue-300 hover:bg-white shadow-sm hover:-translate-y-0.5";
-              } else {
-                if (opt.c) {
-                  btnClass += "bg-emerald-50 border-emerald-500 text-emerald-900 shadow-md";
-                } else if (selectedOption === opt) {
-                  btnClass += "bg-red-50 border-red-400 text-red-900";
-                } else {
-                  btnClass += "bg-slate-50/50 border-slate-200 text-slate-400 opacity-50";
-                }
-              }
+          {/* ▼ 記述問題の場合は入力フォームを表示（4択への切り替えも可能） ▼ */}
+          {q.type === 'write' && (
+            <div className="flex justify-end mb-3">
+              <button
+                onClick={() => setUseTextInput(!useTextInput)}
+                disabled={isAnswered}
+                className="text-xs font-bold px-3 py-1.5 rounded-full bg-pink-100 text-pink-700 hover:bg-pink-200 transition disabled:opacity-50"
+              >
+                {useTextInput ? '💡 難しいので4択に切り替える' : '✏️ 記述入力モードに戻す'}
+              </button>
+            </div>
+          )}
 
-              return (
-                <button 
-                  key={i} 
-                  onClick={() => handleOptionClick(opt)}
-                  disabled={isAnswered}
-                  className={btnClass}
+          {q.type === 'write' && useTextInput ? (
+            <form onSubmit={handleTextSubmit} className="glass p-5 rounded-2xl mb-6">
+              <div className="text-xs font-bold text-slate-500 mb-2">💡 ヒント: {q.hint}</div>
+              <input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                disabled={isAnswered}
+                placeholder="ここにJavaコードを記述..."
+                className="w-full p-4 rounded-xl border-2 border-slate-200 font-mono text-sm md:text-base focus:border-blue-500 focus:outline-none bg-slate-900 text-green-300 mb-3"
+              />
+              {!isAnswered && (
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow hover:bg-blue-700 transition"
                 >
-                  <div className="flex items-start">
-                    <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs mr-3 shrink-0 mt-0.5 transition-colors ${!isAnswered ? 'bg-slate-200 text-slate-600' : opt.c ? 'bg-emerald-500 text-white' : selectedOption === opt ? 'bg-red-500 text-white' : 'bg-slate-200 text-slate-400'}`}>
-                      {String.fromCharCode(65 + i)}
-                    </span>
-                    <span className="pt-0.5">{opt.t}</span>
-                    
-                    {isAnswered && opt.c && <IconCheck className="w-6 h-6 ml-auto text-emerald-600 shrink-0 mt-0.5" />}
-                    {isAnswered && !opt.c && selectedOption === opt && <IconX className="w-6 h-6 ml-auto text-red-500 shrink-0 mt-0.5" />}
-                  </div>
+                  解答を判定する
                 </button>
-              );
-            })}
-          </div>
+              )}
+              {isAnswered && (
+                <div className="text-sm font-bold text-slate-700 mt-2">
+                  模範解答: <code className="bg-slate-200 text-emerald-800 px-2 py-1 rounded">{q.ans[0]}</code>
+                </div>
+              )}
+            </form>
+          ) : (
+            <div className="space-y-3 mb-6">
+              {currentOptions.map((opt, i) => {
+                let btnClass = "w-full text-left p-5 rounded-2xl border-2 transition-all font-bold text-sm md:text-base text-slate-700 leading-relaxed ";
+                if (!isAnswered) {
+                  btnClass += "bg-white/80 border-transparent hover:border-blue-300 hover:bg-white shadow-sm hover:-translate-y-0.5";
+                } else {
+                  if (opt.c) {
+                    btnClass += "bg-emerald-50 border-emerald-500 text-emerald-900 shadow-md";
+                  } else if (selectedOption === opt) {
+                    btnClass += "bg-red-50 border-red-400 text-red-900";
+                  } else {
+                    btnClass += "bg-slate-50/50 border-slate-200 text-slate-400 opacity-50";
+                  }
+                }
+                return (
+                  <button key={i} onClick={() => handleOptionClick(opt)} disabled={isAnswered} className={btnClass}>
+                    <div className="flex items-start">
+                      <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs mr-3 shrink-0 mt-0.5 transition-colors ${!isAnswered ? 'bg-slate-200 text-slate-600' : opt.c ? 'bg-emerald-500 text-white' : selectedOption === opt ? 'bg-red-500 text-white' : 'bg-slate-200 text-slate-400'}`}>
+                        {String.fromCharCode(65 + i)}
+                      </span>
+                      <span className="pt-0.5 font-mono">{opt.t}</span>
+                      {isAnswered && opt.c && <IconCheck className="w-6 h-6 ml-auto text-emerald-600 shrink-0 mt-0.5" />}
+                      {isAnswered && !opt.c && selectedOption === opt && <IconX className="w-6 h-6 ml-auto text-red-500 shrink-0 mt-0.5" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {isAnswered && (
             <div className="slide-down">
