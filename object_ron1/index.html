@@ -539,17 +539,22 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
 
     // --- Quiz Data (期末の傾向・第1〜6回の範囲に基づく完全予想問題) ---
     const quizCategories = [
-      { id: 'A', name: '基礎・型・演算', desc: 'コンパイル, キャスト, 演算順序', icon: '🔢', color: 'text-blue-600', bg: 'bg-blue-50' },
-      { id: 'B', name: '制御構文・配列・例外', desc: 'for, 配列length, try-catch', icon: '🔀', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-      { id: 'C', name: 'クラス・メソッド', desc: 'オーバーロード, コンストラクタ', icon: '🛠', color: 'text-purple-600', bg: 'bg-purple-50' },
-      { id: 'D', name: 'カプセル化・static', desc: 'アクセス修飾子, クラス変数', icon: '🛡', color: 'text-orange-600', bg: 'bg-orange-50' },
-      { id: 'E', name: 'クラス型変数・参照渡し', desc: '値渡しと参照渡し, クラスライブラリ', icon: '📦', color: 'text-teal-600', bg: 'bg-teal-50' },
-      { id: '2023', name: '2023年度風 予想問題', desc: '過去問ライクな総合問題セット', icon: '📅', color: 'text-slate-700', bg: 'bg-slate-100' },
-      { id: '2024', name: '2024年度風 予想問題', desc: 'コード読解・穴埋め中心', icon: '🎓', color: 'text-slate-800', bg: 'bg-slate-200' },
-      // ▼ 既存の quizCategories の一番下（2024年度風の下）に以下を追加 ▼
-      { id: 'TF', name: '正誤判定 (〇×) ドリル', desc: 'ひっかけに注意！正しいか誤りか判定', icon: '⭕', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-      { id: 'WRITE', name: '短いプログラムの記述', desc: '重要構文・メソッドを実際に書く', icon: '✏️', color: 'text-pink-600', bg: 'bg-pink-50' },
-      { id: 'REWRITE', name: 'プログラムの書き換え', desc: '別構文・カプセル化・複製への書き換え', icon: '🔄', color: 'text-amber-600', bg: 'bg-amber-50' },
+      // === 分野別 (genre) ===
+      { id: 'A', group: 'genre', name: '基礎・型・演算', desc: 'コンパイル, キャスト, 演算順序', icon: '🔢', color: 'text-blue-600', bg: 'bg-blue-50' },
+      { id: 'B', group: 'genre', name: '制御構文・配列・例外', desc: 'for, 配列length, try-catch', icon: '🔀', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+      { id: 'C', group: 'genre', name: 'クラス・メソッド', desc: 'オーバーロード, コンストラクタ', icon: '🛠', color: 'text-purple-600', bg: 'bg-purple-50' },
+      { id: 'D', group: 'genre', name: 'カプセル化・static', desc: 'アクセス修飾子, クラス変数', icon: '🛡', color: 'text-orange-600', bg: 'bg-orange-50' },
+      { id: 'E', group: 'genre', name: 'クラス型変数・参照渡し', desc: '値渡しと参照渡し, クラスライブラリ', icon: '📦', color: 'text-teal-600', bg: 'bg-teal-50' },
+      
+      // === 出題形式別 (format) ===
+      { id: 'TF', group: 'format', name: '正誤判定 (〇×) ドリル', desc: 'ひっかけに注意！正しいか誤りか判定', icon: '⭕', color: 'text-indigo-600', bg: 'bg-indigo-50' },
+      { id: 'WRITE', group: 'format', name: '短いプログラムの記述', desc: '重要構文・メソッドを実際に書く', icon: '✏️', color: 'text-pink-600', bg: 'bg-pink-50' },
+      { id: 'REWRITE', group: 'format', name: 'プログラムの書き換え', desc: '別構文・カプセル化・複製への書き換え', icon: '🔄', color: 'text-amber-600', bg: 'bg-amber-50' },
+      
+      // === 年度別・テスト (exam) ===
+      { id: '2023', group: 'exam', name: '2023年度風 過去問', desc: '基礎知識と実行結果の予測 (15問)', icon: '📅', color: 'text-slate-700', bg: 'bg-slate-100' },
+      { id: '2024', group: 'exam', name: '2024年度風 過去問', desc: 'コード読解・穴埋め中心 (15問)', icon: '🎓', color: 'text-slate-800', bg: 'bg-slate-200' },
+      { id: 'MOCK', group: 'exam', name: '【本番シミュレーション】', desc: '全範囲からバランスよく15問を出題', icon: '🎯', color: 'text-rose-600', bg: 'bg-rose-50' },
     ];
 
     const allQuizData = [
@@ -601,6 +606,34 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
       { cat: '2024', q: '配列と参照渡しの挙動について。出力は？\n\nCar org = new Car();\norg.num = 1111;\nCar[] cars = new Car[2];\ncars[0] = org;\norg.num = 3333;\nSystem.out.println(cars[0].num);', options: [{t: '3333', c: true}, {t: '1111', c: false}, {t: '0', c: false}, {t: 'エラー', c: false}], exp: 'cars[0] には org の「参照（住所）」が代入されます。その後 org の実体を変更すると、同じ実体を見ている cars[0] も 3333 になります。' },
       { cat: '2024', q: '次の例外処理の出力結果は？\n\ntry {\n  int a = Integer.parseInt("A");\n  System.out.print("1");\n} catch (NumberFormatException e) {\n  System.out.print("2");\n} finally {\n  System.out.print("3");\n}', options: [{t: '23', c: true}, {t: '123', c: false}, {t: '2', c: false}, {t: '3', c: false}], exp: 'parseInt("A")で例外が発生し、tryブロックの残りの処理("1")はスキップされcatchに飛びます("2")。その後、必ずfinallyが実行されます("3")。' },
       { cat: '2024', q: 'Stringクラスのメソッドを用いたコード。出力は？\n\nString str = "ABC";\nSystem.out.println(str.charAt(1));', options: [{t: 'B', c: true}, {t: 'A', c: false}, {t: 'C', c: false}, {t: 'エラー', c: false}], exp: 'charAt(int index) は指定したインデックスの文字を返します。インデックスは0から始まるため、charAt(1) は2文字目の "B" になります。' },
+
+      // ==========================================
+      // ▼ ここから 2023・2024年度の追加問題(20問) ▼
+      // ==========================================
+      
+      // --- 2023年度 追加分 ---
+      { cat: '2023', q: '次の演算を実行したときの出力はどれか。\nSystem.out.println(21 << 2);', options: [{t: '84', c: true}, {t: '42', c: false}, {t: '10', c: false}, {t: '5', c: false}], exp: '左へ2ビットシフトすることは、元の数に2の2乗（4）を掛けるのと同じです。21 × 4 = 84[cite: 78]。' },
+      { cat: '2023', q: '配列変数 test1 と test2 について「test2 = test1;」を実行した。その後「test1[0] = 100;」を実行した場合、test2[0] の値はどうなるか。', options: [{t: '100', c: true}, {t: '0', c: false}, {t: 'エラーになる', c: false}, {t: '元の値のまま', c: false}], exp: '配列は参照型なので、代入すると「住所（参照）」がコピーされます。test1を変更すると、同じ住所を見ているtest2も変更されます[cite: 88, 89]。' },
+      { cat: '2023', q: '配列 a と b の中身（要素）がすべて完全に等しいかを比較する正しい式はどれか。', options: [{t: 'Arrays.equals(a, b)', c: true}, {t: 'a == b', c: false}, {t: 'a.equals(b)', c: false}, {t: 'Arrays.same(a, b)', c: false}], exp: '配列同士を「==」で比較すると参照先の住所比較になってしまいます。中身の値が同じか比較するには Arrays.equals(a, b) を使用します[cite: 99, 100]。' },
+      { cat: '2023', q: '例外処理における finally ブロックの役割として正しいものはどれか。', options: [{t: '例外の発生有無に関わらず、必ず最後に実行される。', c: true}, {t: '例外が発生しなかった場合のみ実行される。', c: false}, {t: '例外が発生した場合のみ実行される。', c: false}, {t: 'プログラムを強制終了させるために使用する。', c: false}], exp: 'finallyブロック内の処理は、tryブロック内で例外が起きても起きなくても必ず実行されます。ファイルのクローズ処理などに使われます[cite: 210, 246]。' },
+      { cat: '2023', q: '次の多次元配列の宣言として正しいものはどれか。', options: [{t: 'int[][] num = new int[2][];', c: true}, {t: 'int[2][] num;', c: false}, {t: 'int num[2][];', c: false}, {t: 'int num = new int[][2];', c: false}], exp: '多次元配列は「型名[][] 変数名 = new 型名[行数][列数];」のように宣言します。列数は省略できますが、行数は省略できません[cite: 103]。' },
+      { cat: '2023', q: 'Stringクラスの特徴として正しいものはどれか。', options: [{t: '一度作成した文字列を変更することはできない。', c: true}, {t: 'appendメソッドを使って文字列を直接追加できる。', c: false}, {t: '基本データ型（プリミティブ型）の1つである。', c: false}, {t: '利用するには import java.lang.String; が必須である。', c: false}], exp: 'Stringクラスのオブジェクトは不変（イミュータブル）です。文字列を追加・変更したい場合は StringBuffer クラスを使用します[cite: 226, 229]。' },
+      { cat: '2023', q: '次の文のうち、コンパイルエラーになるものはどれか。', options: [{t: 'int num = 10.5;', c: true}, {t: 'double num = 10;', c: false}, {t: 'int num = (int)10.5;', c: false}, {t: 'double num = 10.5;', c: false}], exp: '大きいサイズの型（double）から小さいサイズの型（int）へは、キャストを行わずに代入しようとするとコンパイルエラーになります[cite: 74]。' },
+      { cat: '2023', q: 'パッケージを使用する主な目的はどれか。', options: [{t: '同名のクラスによる競合（名前の衝突）を防ぎ、クラスをグループ化するため。', c: true}, {t: 'プログラムの実行速度を上げるため。', c: false}, {t: 'メモリの消費量を減らすため。', c: false}, {t: '例外処理を自動的に行うため。', c: false}], exp: 'パッケージはクラスをディレクトリ単位でグループ化し、他の人が作った同名のクラスとの競合を防ぐために使用されます[cite: 137, 138]。' },
+      { cat: '2023', q: '次のコードの出力結果はどれか。\nSystem.out.println("Ans=" + 1 + 2);', options: [{t: 'Ans=12', c: true}, {t: 'Ans=3', c: false}, {t: 'エラー', c: false}, {t: 'Ans=1+2', c: false}], exp: '文字列との「+」演算は左から順に文字列結合として処理されるため、「Ans=」に「1」が結合され、さらに「2」が結合されて「Ans=12」となります[cite: 75]。' },
+      { cat: '2023', q: 'メソッド内で値を返さずに処理を終了させる（メソッドを抜ける）ために使用する命令はどれか。', options: [{t: 'return;', c: true}, {t: 'break;', c: false}, {t: 'continue;', c: false}, {t: 'exit;', c: false}], exp: '戻り値を持たない(void)メソッドであっても、return; と記述することでその時点でメソッドの処理を終了して呼び出し元に戻ります[cite: 157, 158]。' },
+
+      // --- 2024年度 追加分 ---
+      { cat: '2024', q: '次のコードの出力はどれか。\nclass Car { static int x = 0; public Car(){ x++; } }\n// main内:\nnew Car();\nnew Car();\nSystem.out.println(Car.x);', options: [{t: '2', c: true}, {t: '1', c: false}, {t: '0', c: false}, {t: 'エラー', c: false}], exp: 'x は static変数なのでクラス全体で1つだけ共有されます。new Car() によってコンストラクタが2回実行されるため、x は 2 になります[cite: 201]。' },
+      { cat: '2024', q: 'カプセル化において、クラス外部からの直接アクセスを禁止するためにフィールドに付ける修飾子はどれか。', options: [{t: 'private', c: true}, {t: 'public', c: false}, {t: 'static', c: false}, {t: 'protected', c: false}], exp: 'フィールドを private にすることで外部からの直接の読み書きを禁止し、メソッドを経由させることで予期せぬ書き換えを防ぎます（カプセル化）[cite: 184, 185]。' },
+      { cat: '2024', q: '次のプログラムが実行時にスローする例外はどれか。\nint[] a = new int[3];\na[3] = 10;', options: [{t: 'ArrayIndexOutOfBoundsException', c: true}, {t: 'NullPointerException', c: false}, {t: 'NumberFormatException', c: false}, {t: 'ArithmeticException', c: false}], exp: 'new int[3] で確保されるのはインデックス 0〜2 です。存在しないインデックス 3 にアクセスしようとすると ArrayIndexOutOfBoundsException が発生します[cite: 246, 248]。' },
+      { cat: '2024', q: 'コンパイルを実行するコマンドと、実行（インタプリタ）するコマンドの正しい組み合わせはどれか。', options: [{t: 'コンパイル: javac ／ 実行: java', c: true}, {t: 'コンパイル: java ／ 実行: javac', c: false}, {t: 'コンパイル: class ／ 実行: java', c: false}, {t: 'コンパイル: javac ／ 実行: class', c: false}], exp: 'Javaは「javac」コマンドでコンパイルして.classファイルを作成し、「java」コマンドで実行します[cite: 115]。' },
+      { cat: '2024', q: '文字列の文字数と、配列の要素数を取得する方法の違いとして正しいものはどれか。', options: [{t: '文字列は length() とカッコが必要だが、配列は length のみでカッコは不要。', c: true}, {t: '配列は length() とカッコが必要だが、文字列は length のみ。', c: false}, {t: 'どちらも length() とカッコが必要。', c: false}, {t: 'どちらも length のみでカッコは不要。', c: false}], exp: '配列の長さはフィールドの「length」、文字列の長さはStringクラスのメソッド「length()」を使用します[cite: 208, 209]。' },
+      { cat: '2024', q: '次のメソッド定義において、オーバーロードとして同時に定義できる（コンパイルが通る）メソッドはどれか。\npublic void setCar(int n)', options: [{t: 'public void setCar(double g)', c: true}, {t: 'public int setCar(int n)', c: false}, {t: 'public void setCar(int x)', c: false}, {t: 'private void setCar(int n)', c: false}], exp: 'オーバーロードは「引数の数・型・順番」のいずれかが異なる必要があります。変数名や戻り値の型、アクセス修飾子が違うだけでは区別できません[cite: 177, 179]。' },
+      { cat: '2024', q: '以下の実行コマンドでプログラムを実行した際、args.length の値はいくつか。\njava Sample Hello Java 1 2', options: [{t: '4', c: true}, {t: '3', c: false}, {t: '5', c: false}, {t: '2', c: false}], exp: 'コマンドライン引数はスペース区切りで配列 args に格納されます。「Hello」「Java」「1」「2」の4つが渡されるため、要素数は 4 となります[cite: 214]。' },
+      { cat: '2024', q: 'コンストラクタ内で、同じクラスの「引数2つ」を持つ別のコンストラクタを呼び出すための正しい記述はどれか。', options: [{t: 'this(100, 200);', c: true}, {t: 'super(100, 200);', c: false}, {t: 'new Car(100, 200);', c: false}, {t: 'Car(100, 200);', c: false}], exp: '自クラスのオーバーロードされた別コンストラクタを呼び出すには「this(引数);」を使用します[cite: 166]。' },
+      { cat: '2024', q: 'クラスメソッド（staticメソッド）の中から直接呼び出すことができないものはどれか。', options: [{t: '同じクラスのインスタンス変数', c: true}, {t: '同じクラスのクラス変数（static変数）', c: false}, {t: '同じクラスのクラスメソッド（staticメソッド）', c: false}, {t: 'メソッド内で宣言したローカル変数', c: false}], exp: 'クラスメソッドはインスタンスがなくても呼び出せるため、実体が必要なインスタンス変数には直接アクセスできません[cite: 221]。' },
+      { cat: '2024', q: 'StringBufferクラスを使用して文字列の末尾に別の文字列を追加するためのメソッドはどれか。', options: [{t: 'append()', c: true}, {t: 'add()', c: false}, {t: 'concat()', c: false}, {t: 'insert()', c: false}], exp: 'Stringクラスは不変ですが、StringBufferクラスは「append()」メソッドを使用することで文字を追加・変更できます[cite: 229]。' },
 
       // ==========================================
       // ▼ ここから allQuizData の末尾に追加 ▼
@@ -670,9 +703,8 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
       return newArray;
     };
 
-    // --- Quiz Mode ---
     const QuizMode = () => {
-      const [quizState, setQuizState] = useState('select'); // 'select' | 'playing' | 'result'
+      const [quizState, setQuizState] = useState('select');
       const [selectedCategory, setSelectedCategory] = useState(null);
       const [questions, setQuestions] = useState([]);
       const [currentIndex, setCurrentIndex] = useState(0);
@@ -680,16 +712,20 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
       const [selectedOption, setSelectedOption] = useState(null);
       const [isAnswered, setIsAnswered] = useState(false);
       const [currentOptions, setCurrentOptions] = useState([]);
-      // ▼ 以下の2行を追加 ▼
       const [userInput, setUserInput] = useState('');
-      const [useTextInput, setUseTextInput] = useState(true); // trueなら記述式、falseなら4択式
+      const [useTextInput, setUseTextInput] = useState(true);
+      
+      // ▼ これを追加（初期値は分野別） ▼
+      const [quizFilter, setQuizFilter] = useState('genre');
 
       const startQuiz = (catId) => {
         let filtered = [];
-        if (catId === 'ALL') {
-          // 全範囲からランダムに10問抽出 (総合模試)
-          filtered = shuffleArray(allQuizData).slice(0, 10);
-          setSelectedCategory({ name: '全範囲 ランダム総合模試', desc: '本番さながらの10問', icon: '🎯', color: 'text-rose-600', bg: 'bg-rose-50' });
+        // ▼ ALL ではなく MOCK (15問) に変更 ▼
+        if (catId === 'MOCK') {
+          // 記述問題を除外した選択肢問題からランダムに15問抽出
+          const pool = allQuizData.filter(q => q.type !== 'write');
+          filtered = shuffleArray(pool).slice(0, 15);
+          setSelectedCategory({ name: '本番シミュレーション模試', desc: '全範囲ランダム 15問', icon: '🎯', color: 'text-rose-600', bg: 'bg-rose-50' });
         } else {
           filtered = allQuizData.filter(q => q.cat === catId);
           setSelectedCategory(quizCategories.find(c => c.id === catId));
@@ -740,43 +776,41 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
       };
 
       if (quizState === 'select') {
+        const filteredCategories = quizCategories.filter(c => c.group === quizFilter);
+
         return (
           <div className="fade-in space-y-6 pb-28">
-            <header className="mb-8 pt-4">
+            <header className="mb-6 pt-4">
               <h2 className="text-3xl font-bold tracking-tight text-slate-800 mb-3 flex items-center">
                 <IconTarget className="w-8 h-8 mr-3 text-rose-500" /> 
                 実戦クイズドリル
               </h2>
-              <p className="text-slate-600 text-base">
-                期末テストの出題傾向（コード読解・出力結果予測・穴埋め）を徹底分析して作成した予想問題です。過去問を解いて本番に備えましょう。
+              <p className="text-slate-600 text-sm md:text-base">
+                出題傾向を徹底分析。分野ごとの復習や、1年分（15問）を解く本番シミュレーションを選べます。
               </p>
             </header>
 
+            {/* ▼ タブ切り替えボタン (Segmented Control風) ▼ */}
+            <div className="flex bg-slate-200/60 p-1.5 rounded-2xl mb-6 shadow-inner backdrop-blur-sm">
+              <button onClick={() => setQuizFilter('genre')} className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${quizFilter === 'genre' ? 'bg-white shadow-sm text-blue-600 scale-100' : 'text-slate-500 hover:bg-white/40 active:scale-95'}`}>分野別</button>
+              <button onClick={() => setQuizFilter('format')} className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${quizFilter === 'format' ? 'bg-white shadow-sm text-pink-600 scale-100' : 'text-slate-500 hover:bg-white/40 active:scale-95'}`}>出題形式別</button>
+              <button onClick={() => setQuizFilter('exam')} className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${quizFilter === 'exam' ? 'bg-white shadow-sm text-rose-600 scale-100' : 'text-slate-500 hover:bg-white/40 active:scale-95'}`}>年度別・模試</button>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {quizCategories.map(cat => (
+              {filteredCategories.map(cat => (
                 <button 
                   key={cat.id} 
                   onClick={() => startQuiz(cat.id)} 
-                  className="glass hover:bg-white/90 p-5 rounded-2xl transition-all hover:-translate-y-1 hover:shadow-lg group flex items-center text-left"
+                  className={`glass hover:bg-white/90 p-5 rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg active:scale-95 group flex items-center text-left ${cat.id === 'MOCK' ? 'md:col-span-2 border-2 border-transparent hover:border-rose-300' : ''}`}
                 >
                   <div className={`text-3xl mr-4 p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform ${cat.bg}`}>{cat.icon}</div>
                   <div>
-                    <h3 className={`font-bold mb-1 transition-colors ${cat.color}`}>{cat.name}</h3>
-                    <p className="text-xs text-slate-500">{cat.desc} (5問)</p>
+                    <h3 className={`font-bold mb-1 transition-colors group-hover:opacity-80 ${cat.color}`}>{cat.name}</h3>
+                    <p className="text-xs text-slate-500">{cat.desc}</p>
                   </div>
                 </button>
               ))}
-              
-              <button 
-                onClick={() => startQuiz('ALL')} 
-                className="glass hover:bg-white/90 p-5 rounded-2xl transition-all hover:-translate-y-1 hover:shadow-lg md:col-span-2 border-2 border-transparent hover:border-rose-300 group flex items-center"
-              >
-                <div className="text-3xl mr-4 bg-rose-50 p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform">🎯</div>
-                <div>
-                  <h3 className="font-bold text-slate-800 mb-1 group-hover:text-rose-600 transition-colors">全範囲 ランダム総合模試</h3>
-                  <p className="text-xs text-slate-500">本番シミュレーション (10問ランダム抽出)</p>
-                </div>
-              </button>
             </div>
           </div>
         );
