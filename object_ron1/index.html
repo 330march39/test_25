@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>オブジェクト指向 中間テスト対策アプリ</title>
+  <title>オブジェクト指向 中間テスト対策 完全攻略アプリ</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -24,13 +24,13 @@
     /* 基本フォントと行間設定 */
     body {
       font-family: 'Zen Maru Gothic', sans-serif;
-      background-color: #f0fdf4;
+      background-color: #f8fafc;
       color: #334155;
       margin: 0;
       padding: 0;
       overflow-x: hidden;
-      /* スマホでのタップハイライトを無効化 */
       -webkit-tap-highlight-color: transparent;
+      line-height: 1.8; /* 行間を広くゆったりと */
     }
 
     /* 蛍光ペン風ハイライト */
@@ -38,88 +38,95 @@
       background: linear-gradient(transparent 60%, #fef08a 60%);
       font-weight: 700;
       padding: 0 0.2rem;
+      border-radius: 2px;
     }
     .highlight-blue {
       background: linear-gradient(transparent 60%, #bae6fd 60%);
       font-weight: 700;
       padding: 0 0.2rem;
+      border-radius: 2px;
+    }
+    .highlight-pink {
+      background: linear-gradient(transparent 60%, #fbcfe8 60%);
+      font-weight: 700;
+      padding: 0 0.2rem;
+      border-radius: 2px;
     }
 
-    /* 背景のアニメーション円 */
+    /* 背景のアニメーション円 (blur-3xlを採用) */
     .bg-circle {
       position: fixed;
       border-radius: 50%;
       filter: blur(80px);
       z-index: -1;
       animation: float 20s infinite ease-in-out alternate;
+      opacity: 0.6;
     }
     .circle-1 {
-      width: 400px; height: 400px;
-      background: #bae6fd; /* パステルブルー */
-      top: -100px; left: -100px;
+      width: 450px; height: 450px;
+      background: #bae6fd;
+      top: -100px; left: -150px;
     }
     .circle-2 {
-      width: 500px; height: 500px;
-      background: #fbcfe8; /* パステルピンク */
-      bottom: -150px; right: -100px;
-      animation-delay: -10s;
+      width: 550px; height: 550px;
+      background: #e9d5ff;
+      bottom: -150px; right: -150px;
+      animation-delay: -7s;
     }
     .circle-3 {
-      width: 300px; height: 300px;
-      background: #d9f99d; /* パステルグリーン */
-      top: 40%; left: 30%;
+      width: 350px; height: 350px;
+      background: #bbf7d0;
+      top: 35%; left: 20%;
       animation-duration: 25s;
     }
 
     @keyframes float {
-      0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(30px, 50px) scale(1.1); }
-      100% { transform: translate(-40px, 20px) scale(0.9); }
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+      50% { transform: translate(40px, 60px) scale(1.1) rotate(10deg); }
+      100% { transform: translate(-30px, 30px) scale(0.95) rotate(-10deg); }
     }
 
     /* グラスモーフィズム */
     .glass {
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
     }
 
     /* アニメーションクラス */
-    .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-    .slide-down { animation: slideDown 0.3s ease-out forwards; overflow: hidden; }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    .slide-down { animation: slideDown 0.4s ease-out forwards; overflow: hidden; }
     
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
     }
     @keyframes slideDown {
-      from { max-height: 0; opacity: 0; }
-      to { max-height: 800px; opacity: 1; }
+      from { max-height: 0; opacity: 0; transform: translateY(-10px); }
+      to { max-height: 1000px; opacity: 1; transform: translateY(0); }
     }
 
     /* コードブロックのスタイル */
     pre {
       background: rgba(15, 23, 42, 0.85) !important;
       color: #f8fafc;
-      border-radius: 0.75rem;
-      padding: 1rem;
+      border-radius: 1rem;
+      padding: 1.25rem;
       overflow-x: auto;
-      font-family: monospace;
-      font-size: 0.85rem;
-      line-height: 1.5;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
     }
-    code {
-      font-family: monospace;
-    }
+    code { font-family: monospace; }
+    ruby { font-weight: 500; }
+    rt { font-size: 0.6em; color: #64748b; }
 
-    /* スクロールバー非表示（モバイルライク） */
     ::-webkit-scrollbar { width: 0px; background: transparent; }
-
-    /* スマホ向け安全領域確保 */
-    .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom, 24px); }
   </style>
 </head>
 <body>
@@ -128,48 +135,52 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo } = React;
 
-    // --- Icons ---
+    // --- Lucide風 自作SVGアイコン ---
     const IconBookOpen = ({ className = "w-6 h-6" }) => (
-      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+      <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
     );
-    const IconPlayCircle = ({ className = "w-6 h-6" }) => (
-      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    const IconPenTool = ({ className = "w-6 h-6" }) => (
+      <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
     );
     const IconInfo = ({ className = "w-5 h-5" }) => (
-      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
     );
     const IconCheck = ({ className = "w-6 h-6" }) => (
-      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+      <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
     );
     const IconX = ({ className = "w-6 h-6" }) => (
-      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+      <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     );
     const IconChevronLeft = ({ className = "w-6 h-6" }) => (
-      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+      <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     );
-    const IconFlame = ({ className = "w-6 h-6" }) => (
-      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" /></svg>
+    const IconTarget = ({ className = "w-6 h-6" }) => (
+      <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
     );
 
-    // --- Helper Components ---
-    const TipBox = ({ title, children }) => {
+    // --- 共通コンポーネント ---
+    const TipBox = ({ title, children, color = "blue" }) => {
       const [isOpen, setIsOpen] = useState(false);
+      const colorMap = {
+        blue: "bg-blue-50/80 border-blue-200 text-blue-800 hover:bg-blue-100/80",
+        purple: "bg-purple-50/80 border-purple-200 text-purple-800 hover:bg-purple-100/80",
+        emerald: "bg-emerald-50/80 border-emerald-200 text-emerald-800 hover:bg-emerald-100/80"
+      };
+      
       return (
-        <div className="bg-white/50 border border-blue-200 rounded-xl overflow-hidden my-4 shadow-sm">
+        <div className="bg-white/60 border rounded-2xl overflow-hidden my-5 shadow-sm backdrop-blur-sm">
           <button 
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full px-4 py-3 flex items-center justify-between bg-blue-50/80 hover:bg-blue-100/80 transition-colors"
+            className={`w-full px-5 py-4 flex items-center justify-between transition-colors font-bold ${colorMap[color]}`}
           >
-            <div className="flex items-center text-blue-800 font-bold tracking-tight">
-              <IconInfo className="w-5 h-5 mr-2 text-blue-500 shrink-0" />
-              <span className="text-left">{title}</span>
+            <div className="flex items-center tracking-tight">
+              <IconInfo className="w-5 h-5 mr-2 opacity-80 shrink-0" />
+              <span className="text-left text-sm md:text-base">{title}</span>
             </div>
-            <div className={`transform transition-transform duration-300 shrink-0 ml-2 ${isOpen ? 'rotate-180' : ''}`}>
-              ▼
-            </div>
+            <div className={`transform transition-transform duration-300 shrink-0 ml-2 ${isOpen ? 'rotate-180' : ''}`}>▼</div>
           </button>
           {isOpen && (
-            <div className="px-4 py-3 text-sm text-slate-700 leading-loose border-t border-blue-100 bg-white/60 slide-down">
+            <div className="px-5 py-4 text-sm md:text-base text-slate-700 border-t border-slate-100 bg-white/40 slide-down">
               {children}
             </div>
           )}
@@ -177,9 +188,9 @@
       );
     };
 
-    // --- Simulators ---
-    
-    // 1. 参照渡しシミュレーター
+    // --- シミュレーターコンポーネント ---
+
+    // 1. 参照渡しシミュレーター (配列)
     const ReferenceSimulator = () => {
       const [arrayA, setArrayA] = useState(["🍎", "🍊", "🍇"]);
       const [isCopied, setIsCopied] = useState(false);
@@ -187,72 +198,49 @@
 
       const handleCopy = () => {
         setIsCopied(true);
-        setLogs(prev => [...prev, "> int[] B = A; を実行しました（住所のコピー）"]);
+        setLogs(prev => [...prev, "> 配列B = 配列A を実行（ロッカーの鍵のコピー）"]);
       };
 
       const handleChangeB = () => {
         if (!isCopied) return;
         const newArray = [...arrayA];
-        newArray[0] = "🍌";
+        newArray[0] = "🍰";
         setArrayA(newArray);
-        setLogs(prev => [...prev, "> B[0] = '🍌'; を実行しました！"]);
+        setLogs(prev => [...prev, "> B[0] = '🍰' に変更しました！"]);
       };
 
-      const handleReset = () => {
-        setArrayA(["🍎", "🍊", "🍇"]);
-        setIsCopied(false);
-        setLogs([]);
-      }
-
       return (
-        <div className="bg-white/80 rounded-xl p-5 my-4 border border-slate-200 shadow-sm">
+        <div className="bg-white/80 rounded-2xl p-6 my-6 border border-slate-200 shadow-sm">
           <h4 className="font-bold text-slate-800 mb-2 tracking-tight flex items-center">
-            <span className="bg-blue-100 text-blue-600 p-1 rounded mr-2 text-xs">体感</span> 配列の参照渡し
+            <span className="bg-gradient-to-r from-blue-400 to-indigo-500 text-white p-1 rounded mr-2 text-xs">体感</span> 配列の<ruby>参照渡<rt>さんしょうわた</rt></ruby>し
           </h4>
-          <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-            配列は<ruby>参照型<rt>さんしょうがた</rt></ruby>。変数にはデータそのものではなく「ロッカーの鍵（住所）」が入っています。
+          <p className="text-sm text-slate-600 mb-5">
+            配列などの<ruby>参照型<rt>さんしょうがた</rt></ruby>は、変数にデータではなく「実体がある住所（ロッカーの鍵）」が入ります。
           </p>
           
           <div className="flex flex-col md:flex-row gap-4 mb-4">
-            <div className="flex-1 bg-slate-50 p-3 rounded-lg border border-slate-200 text-center">
-              <div className="font-bold text-blue-600 mb-2">配列 A</div>
-              <div className="text-2xl tracking-widest">{arrayA.join("")}</div>
+            <div className="flex-1 bg-slate-50 p-4 rounded-xl border text-center relative shadow-inner">
+              <div className="font-bold text-blue-600 mb-2">配列 A (鍵A)</div>
+              <div className="text-3xl tracking-widest">{arrayA.join("")}</div>
             </div>
-            
             <div className="flex items-center justify-center">
-              {isCopied ? <div className="text-slate-500 font-bold text-xs bg-slate-100 px-2 py-1 rounded-full">🔗 同じ実体を参照</div> : <div className="text-slate-300">...</div>}
+              {isCopied ? <div className="text-slate-500 font-bold text-xs bg-slate-100 px-3 py-1 rounded-full border border-slate-200">🔗 同じ住所</div> : <div className="text-slate-300">...</div>}
             </div>
-
-            <div className={`flex-1 p-3 rounded-lg border text-center transition-all ${isCopied ? 'bg-slate-50 border-slate-200' : 'bg-slate-50 border-dashed border-slate-300 opacity-50'}`}>
-              <div className="font-bold text-green-600 mb-2">配列 B</div>
-              {isCopied ? (
-                <div className="text-2xl tracking-widest">{arrayA.join("")}</div>
-              ) : (
-                <div className="text-xs text-slate-400 mt-3">まだ代入されていません</div>
-              )}
+            <div className={`flex-1 p-4 rounded-xl border text-center transition-all ${isCopied ? 'bg-slate-50 border-slate-200 shadow-inner' : 'bg-slate-50 border-dashed border-slate-300 opacity-50'}`}>
+              <div className="font-bold text-emerald-600 mb-2">配列 B (鍵B)</div>
+              {isCopied ? <div className="text-3xl tracking-widest">{arrayA.join("")}</div> : <div className="text-xs text-slate-400 mt-3">まだ代入されていません</div>}
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2 mb-4">
-            <button onClick={handleCopy} disabled={isCopied} className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-blue-600 disabled:opacity-50 transition-colors">
-              1. B = A;
-            </button>
-            <button onClick={handleChangeB} disabled={!isCopied || arrayA[0] === "🍌"} className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-green-600 disabled:opacity-50 transition-colors">
-              2. B[0] を 🍌に変更
-            </button>
-            <button onClick={handleReset} className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-300 transition-colors ml-auto">
-              リセット
-            </button>
+            <button onClick={handleCopy} disabled={isCopied} className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-bold shadow-md hover:bg-blue-600 disabled:opacity-50 transition">1. B = A を実行</button>
+            <button onClick={handleChangeB} disabled={!isCopied || arrayA[0] === "🍰"} className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-bold shadow-md hover:bg-emerald-600 disabled:opacity-50 transition">2. B[0]を🍰に変更</button>
+            <button onClick={() => {setArrayA(["🍎", "🍊", "🍇"]); setIsCopied(false); setLogs([]);}} className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-300 ml-auto transition">リセット</button>
           </div>
-
           {logs.length > 0 && (
-            <div className="bg-slate-800 text-green-400 p-3 rounded-lg text-xs font-mono leading-relaxed">
+            <div className="bg-slate-800 text-green-300 p-4 rounded-xl text-xs font-mono">
               {logs.map((log, i) => <div key={i}>{log}</div>)}
-              {arrayA[0] === "🍌" && (
-                <div className="text-yellow-300 mt-2 border-t border-slate-600 pt-2">
-                  💡 Aの表示も「🍌」に変わりました！同じ実体（ロッカー）を見ているからです。
-                </div>
-              )}
+              {arrayA[0] === "🍰" && <div className="text-yellow-300 mt-2 pt-2 border-t border-slate-600">💡 Bを変更したのにAも「🍰」に変わった！同じロッカーを開けたからです。</div>}
             </div>
           )}
         </div>
@@ -261,212 +249,267 @@
 
     // 2. カプセル化シミュレーター
     const EncapsulationSimulator = () => {
-      const [budget, setBudget] = useState(10000);
+      const [budget, setBudget] = useState(50000);
       const [logs, setLogs] = useState([]);
 
-      const handleDirectAccess = () => {
+      const handleDirect = () => {
         setBudget(0);
-        setLogs(prev => ["🚨 外部から直接 '部費 = 0' に書き換えられました！(横領)", ...prev]);
+        setLogs(prev => ["🚨 public: 外部の人が勝手に部費を0円に書き換えました！（横領）", ...prev]);
       };
 
-      const handleMethodAccess = (amount) => {
+      const handleMethod = (amount) => {
         if (budget - amount < 0) {
-          setLogs(prev => ["❌ [出金メソッド] 残高不足のため拒否されました。", ...prev]);
+          setLogs(prev => ["❌ private: 残高不足のため出金メソッドが拒否しました。", ...prev]);
         } else {
           setBudget(b => b - amount);
-          setLogs(prev => [`✅ [出金メソッド] ${amount}円引き出しました。`, ...prev]);
+          setLogs(prev => [`✅ private: 出金メソッドを通し ${amount}円 を引き出しました。`, ...prev]);
         }
       };
 
       return (
-        <div className="bg-white/80 rounded-xl p-5 my-4 border border-slate-200 shadow-sm">
+        <div className="bg-white/80 rounded-2xl p-6 my-6 border border-slate-200 shadow-sm">
           <h4 className="font-bold text-slate-800 mb-2 tracking-tight flex items-center">
-             <span className="bg-purple-100 text-purple-600 p-1 rounded mr-2 text-xs">体感</span> カプセル化による防御
+             <span className="bg-gradient-to-r from-purple-400 to-pink-500 text-white p-1 rounded mr-2 text-xs">体感</span> <ruby>カプセル化<rt>か</rt></ruby>による防御
           </h4>
-          <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-            部費の管理です。変数を <code className="text-red-500 font-bold bg-red-50 px-1 rounded">public</code> にするか、<code className="text-blue-500 font-bold bg-blue-50 px-1 rounded">private</code> にしてメソッドを通すかの違いを見てみましょう。
+          <p className="text-sm text-slate-600 mb-5">
+            部活の部費を <code className="text-red-500 font-bold bg-red-50 px-1 rounded">public</code> に放置するか、<code className="text-blue-500 font-bold bg-blue-50 px-1 rounded">private</code> にして窓口（メソッド）を通すかの違いです。
           </p>
 
           <div className="flex justify-center mb-6">
-            <div className="bg-slate-50 px-8 py-4 rounded-full shadow-inner border border-slate-200 text-center">
+            <div className="bg-slate-50 px-10 py-5 rounded-full shadow-inner border text-center">
               <div className="text-slate-500 text-xs font-bold mb-1">現在の部費</div>
-              <div className="text-3xl font-bold text-slate-800 tracking-tighter">¥ {budget.toLocaleString()}</div>
+              <div className="text-3xl font-bold text-slate-800">¥ {budget.toLocaleString()}</div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div className="bg-red-50/50 p-4 rounded-xl border border-red-200">
-              <h5 className="font-bold text-red-700 text-sm mb-2">❌ public な場合</h5>
-              <button 
-                onClick={handleDirectAccess}
-                className="w-full py-2 bg-white text-red-600 border border-red-300 rounded-lg text-sm font-bold shadow-sm hover:bg-red-50 transition"
-              >
-                部費 = 0; を直接実行
+            <div className="bg-red-50/60 p-4 rounded-xl border border-red-200">
+              <button onClick={handleDirect} className="w-full py-2 bg-white text-red-600 border border-red-300 rounded-lg text-sm font-bold shadow-sm hover:bg-red-50 transition">
+                public（部費 = 0; を直接実行）
               </button>
             </div>
-            
-            <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-200">
-              <h5 className="font-bold text-blue-700 text-sm mb-2">✅ private ＋ メソッド</h5>
-              <button 
-                onClick={() => handleMethodAccess(8000)}
-                className="w-full py-2 bg-white text-blue-600 border border-blue-300 rounded-lg text-sm font-bold shadow-sm hover:bg-blue-50 transition"
-              >
-                出金メソッド(8000円)
+            <div className="bg-blue-50/60 p-4 rounded-xl border border-blue-200">
+              <button onClick={() => handleMethod(20000)} className="w-full py-2 bg-white text-blue-600 border border-blue-300 rounded-lg text-sm font-bold shadow-sm hover:bg-blue-50 transition">
+                private（出金メソッドを使う）
               </button>
             </div>
           </div>
 
           <div className="flex justify-end mb-2">
-             <button onClick={() => {setBudget(10000); setLogs([]);}} className="px-3 py-1 bg-slate-200 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-300">リセット</button>
+            <button onClick={() => {setBudget(50000); setLogs([]);}} className="px-3 py-1 bg-slate-200 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-300">リセット</button>
           </div>
-
-          <div className="bg-slate-800 text-slate-300 p-3 rounded-lg text-xs font-mono h-24 overflow-y-auto leading-relaxed">
-             {logs.length === 0 ? "ログがここに表示されます。" : logs.map((l, i) => <div key={i} className={l.includes('🚨') ? 'text-red-400' : l.includes('✅') ? 'text-green-400' : 'text-yellow-400'}>{l}</div>)}
+          <div className="bg-slate-800 text-slate-300 p-4 rounded-xl text-xs font-mono h-28 overflow-y-auto">
+            {logs.length === 0 ? "ログがここに表示されます。" : logs.map((l, i) => <div key={i} className={l.includes('🚨') ? 'text-red-400' : l.includes('✅') ? 'text-green-400' : 'text-yellow-400'}>{l}</div>)}
           </div>
         </div>
       );
     }
 
-    // 3. Staticシミュレーター (新規)
+    // 3. Staticシミュレーター
     const StaticSimulator = () => {
-      const [cars, setCars] = useState([]);
-      const [totalProduced, setTotalProduced] = useState(0);
+      const [tickets, setTickets] = useState([]);
+      const [totalSold, setTotalSold] = useState(0);
 
-      const produceCar = () => {
-        const newCarNum = Math.floor(Math.random() * 9000) + 1000;
-        setCars([...cars, { id: cars.length + 1, num: newCarNum }]);
-        setTotalProduced(prev => prev + 1); // 疑似的にstatic変数をインクリメント
+      const buyTicket = () => {
+        const id = tickets.length + 1;
+        const seat = ["A", "B", "C"][Math.floor(Math.random()*3)] + "-" + (Math.floor(Math.random()*50)+1);
+        setTickets([...tickets, { id, seat }]);
+        setTotalSold(prev => prev + 1);
       };
 
       return (
-        <div className="bg-white/80 rounded-xl p-5 my-4 border border-slate-200 shadow-sm">
+        <div className="bg-white/80 rounded-2xl p-6 my-6 border border-slate-200 shadow-sm">
           <h4 className="font-bold text-slate-800 mb-2 tracking-tight flex items-center">
-            <span className="bg-orange-100 text-orange-600 p-1 rounded mr-2 text-xs">体感</span> クラス変数(static)
+            <span className="bg-gradient-to-r from-orange-400 to-red-500 text-white p-1 rounded mr-2 text-xs">体感</span> <ruby>静的<rt>せいてき</rt></ruby>変数 (static)
           </h4>
-          <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-            <code className="bg-slate-100 px-1 rounded text-orange-600 font-bold">static</code> を付けると、個別のインスタンス（車）ではなく、クラス全体（工場）で共有する変数になります。
+          <p className="text-sm text-slate-600 mb-5">
+            <code className="bg-slate-100 px-1 rounded text-orange-600 font-bold">static</code> は、個別のチケット（インスタンス）ではなく、「文化祭の受付全体（クラス）」で共有される変数です。
           </p>
 
           <div className="flex flex-col md:flex-row gap-4 mb-4">
-            {/* クラス変数エリア */}
-            <div className="w-full md:w-1/3 bg-orange-50 p-4 rounded-xl border border-orange-200 flex flex-col justify-center items-center">
-              <div className="text-xs font-bold text-orange-800 mb-1">Car.sum (static変数)</div>
-              <div className="text-slate-500 text-[10px] mb-2">工場全体の累計生産数</div>
-              <div className="text-4xl font-bold text-orange-600">{totalProduced} <span className="text-sm">台</span></div>
-              <button 
-                onClick={produceCar}
-                className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-orange-600 transition"
-              >
-                車を1台生産する
-              </button>
+            <div className="w-full md:w-1/3 bg-orange-50 p-5 rounded-xl border border-orange-200 flex flex-col justify-center items-center text-center">
+              <div className="text-xs font-bold text-orange-800 mb-1">Ticket.sum (static)</div>
+              <div className="text-slate-500 text-[10px] mb-2">受付全体の累計発行枚数</div>
+              <div className="text-4xl font-bold text-orange-600">{totalSold}</div>
+              <button onClick={buyTicket} className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-bold shadow-md hover:bg-orange-600 transition">チケット発券</button>
             </div>
 
-            {/* インスタンス変数エリア */}
-            <div className="w-full md:w-2/3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-               <div className="text-xs font-bold text-slate-700 mb-1">car.num (インスタンス変数)</div>
-               <div className="text-slate-500 text-[10px] mb-3">各車が個別に持つナンバー</div>
-               
+            <div className="w-full md:w-2/3 bg-slate-50 p-5 rounded-xl border border-slate-200">
+               <div className="text-xs font-bold text-slate-700 mb-1">ticket.seat (インスタンス変数)</div>
+               <div className="text-slate-500 text-[10px] mb-3">各チケットが個別に持つ座席番号</div>
                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-                 {cars.length === 0 && <div className="text-sm text-slate-400 w-full text-center py-4">まだ生産されていません</div>}
-                 {cars.map(c => (
-                   <div key={c.id} className="bg-white border border-slate-200 rounded p-2 text-center shadow-sm w-20 fade-in">
-                     <div className="text-[10px] text-slate-400">Car {c.id}</div>
-                     <div className="font-mono font-bold text-slate-700">{c.num}</div>
+                 {tickets.length === 0 && <div className="text-sm text-slate-400 w-full text-center py-4">まだ発券されていません</div>}
+                 {tickets.map(t => (
+                   <div key={t.id} className="bg-white border border-slate-200 rounded-lg p-2 text-center shadow-sm w-20 fade-in">
+                     <div className="text-[10px] text-slate-400">枚目: {t.id}</div>
+                     <div className="font-bold text-slate-700">{t.seat}</div>
                    </div>
                  ))}
                </div>
             </div>
           </div>
           <div className="flex justify-end">
-            <button onClick={() => {setCars([]); setTotalProduced(0);}} className="px-3 py-1 bg-slate-200 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-300">リセット</button>
+            <button onClick={() => {setTickets([]); setTotalSold(0);}} className="px-3 py-1 bg-slate-200 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-300">リセット</button>
           </div>
         </div>
       );
     };
 
+    // 4. クラス型変数の値渡しと参照渡しシミュレーター (新規追加)
+    const ClassReferenceSimulator = () => {
+      const [carOrgNum, setCarOrgNum] = useState(1111);
+      const [carArray0Num, setCarArray0Num] = useState(1111);
+      const [step, setStep] = useState(0);
+
+      const handleStep1 = () => {
+        setCarOrgNum(3333);
+        setCarArray0Num(3333); // 同じ参照を見ているため同時に変わる
+        setStep(1);
+      };
+
+      const handleReset = () => {
+        setCarOrgNum(1111);
+        setCarArray0Num(1111);
+        setStep(0);
+      };
+
+      return (
+        <div className="bg-white/80 rounded-2xl p-6 my-6 border border-slate-200 shadow-sm">
+          <h4 className="font-bold text-slate-800 mb-2 tracking-tight flex items-center">
+            <span className="bg-gradient-to-r from-teal-400 to-emerald-500 text-white p-1 rounded mr-2 text-xs">体感</span> クラス型変数の参照渡し
+          </h4>
+          <p className="text-sm text-slate-600 mb-5">
+            クラス型のオブジェクトを別の変数や配列に代入すると、<strong>実体のコピーではなく、住所（参照）が渡されます。</strong>（第6回 過去問頻出）
+          </p>
+          
+          <pre className="mb-4">
+<code>Car org = new Car(1111, 50.0);
+Car[] cars = new Car[2];
+cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
+<span className={step >= 1 ? "text-yellow-300 font-bold" : "text-slate-400"}>org.setNum(3333); // orgのナンバーを変更</span></code>
+          </pre>
+
+          <div className="flex gap-4 mb-4">
+            <div className="flex-1 bg-slate-50 border p-4 rounded-xl text-center">
+              <div className="text-xs font-bold text-slate-500 mb-1">org.num</div>
+              <div className={`text-2xl font-bold ${step >= 1 ? 'text-teal-600' : 'text-slate-700'}`}>{carOrgNum}</div>
+            </div>
+            <div className="flex items-center justify-center text-slate-400 font-bold text-xl">=</div>
+            <div className="flex-1 bg-slate-50 border p-4 rounded-xl text-center">
+              <div className="text-xs font-bold text-slate-500 mb-1">cars[0].num</div>
+              <div className={`text-2xl font-bold ${step >= 1 ? 'text-teal-600' : 'text-slate-700'}`}>{carArray0Num}</div>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <button onClick={handleStep1} disabled={step >= 1} className="px-5 py-2 bg-teal-500 text-white rounded-lg text-sm font-bold shadow-md hover:bg-teal-600 disabled:opacity-50 transition">orgのナンバーを3333に変更</button>
+            <button onClick={handleReset} className="px-3 py-1 bg-slate-200 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-300">リセット</button>
+          </div>
+          {step >= 1 && (
+            <div className="mt-4 p-3 bg-teal-50 border border-teal-200 rounded-lg text-sm text-teal-800 fade-in font-bold">
+              💡 orgを変更しただけで、cars[0]のナンバーも3333に変わりました！<br/>代入時（cars[0] = org）に渡されたのは「実体」ではなく「参照先の住所」だからです。
+            </div>
+          )}
+        </div>
+      );
+    }
+
     // --- Study Mode ---
     const StudyMode = () => {
       return (
-        <div className="fade-in space-y-6 pb-24">
-          <header className="mb-6">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-800 mb-2 flex items-center">
-              <IconBookOpen className="w-7 h-7 mr-2 text-blue-600" /> 
+        <div className="fade-in space-y-8 pb-28">
+          <header className="mb-8 pt-4">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-800 mb-3 flex items-center">
+              <IconBookOpen className="w-8 h-8 mr-3 text-blue-600" /> 
               要点解説（第1回〜第6回）
             </h2>
-            <p className="text-slate-600 leading-loose text-sm">
-              テスト範囲である「第1回〜第6回」の講義資料の内容をまとめました。丸暗記ではなく、<span className="highlight">自分事</span>として理解しましょう。
+            <p className="text-slate-600 text-base">
+              中間テストの範囲（Lesson1〜10）を網羅。文化祭や部活など<span className="highlight">学生生活に例えて自分事として</span>理解しましょう。過去問の出題傾向に特化しています。
             </p>
           </header>
 
-          <section className="glass p-6 rounded-2xl">
-            <h3 className="text-lg font-bold tracking-tight text-blue-800 border-b-2 border-blue-200 pb-2 mb-4">1. オブジェクト指向の基本 (第1回)</h3>
-            <p className="text-sm leading-loose text-slate-700 mb-4">
-              オブジェクト指向は「ゲーム開発などで複数人が分担して作るのに向いている」手法です。
+          <section className="glass p-6 md:p-8 rounded-3xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-2 h-full bg-blue-400"></div>
+            <h3 className="text-xl font-bold tracking-tight text-blue-900 border-b-2 border-blue-200 pb-2 mb-5">1. オブジェクト<ruby>指向<rt>しこう</rt></ruby>とJavaの基本 (第1回)</h3>
+            <p className="text-slate-700 mb-4">
+              オブジェクト指向は「複数人で分担して大きなシステム（ゲームなど）を作るのに向いている」手法です。
             </p>
-            <ul className="list-disc pl-5 space-y-2 text-sm text-slate-700 mb-4">
-              <li><span className="font-bold text-slate-800">クラス</span>: 「文化祭の模擬店のマニュアル（設計書）」。属性（フィールド）と操作（メソッド）を持ちます。</li>
-              <li><span className="font-bold text-slate-800">インスタンス</span>: マニュアルを見て実際に作った「たこ焼き（実体）」。<code className="bg-slate-200 px-1 rounded">new</code> で生成されます。</li>
+            <ul className="list-disc pl-6 space-y-3 text-slate-700 mb-6">
+              <li><span className="font-bold text-slate-900">クラス</span>: 「文化祭の模擬店のマニュアル（設計書）」。<ruby>属性<rt>ぞくせい</rt></ruby>（フィールド）と<ruby>操作<rt>そうさ</rt></ruby>（メソッド）を持ちます。</li>
+              <li><span className="font-bold text-slate-900">インスタンス</span>: マニュアルを見て実際に作った「たこ焼き（実体）」。<code className="bg-slate-200 px-1.5 py-0.5 rounded text-sm text-blue-800">new</code> 演算子で生成されます。</li>
             </ul>
-            <TipBox title="コンパイルと実行">
+            <TipBox title="Javaのコンパイルと実行（テスト頻出！）" color="blue">
               Javaは <code className="text-blue-600 font-bold">javac</code> コマンドでソースコード(.java)を翻訳し、<code className="text-blue-600 font-bold">.class</code> ファイル（バイトコード）を作成します。<br/>
-              その後 <code className="text-green-600 font-bold">java</code> コマンドで実行します。
+              その後 <code className="text-emerald-600 font-bold">java</code> コマンドで実行（インタプリタ）します。<br/>
+              ※過去問の「ソースコードを実行したときの〜」という問題は、この実行プロセスの結果を問うものです。
             </TipBox>
           </section>
 
-          <section className="glass p-6 rounded-2xl">
-            <h3 className="text-lg font-bold tracking-tight text-emerald-800 border-b-2 border-emerald-200 pb-2 mb-4">2. 型変換と演算・制御構文 (第2回)</h3>
-            <p className="text-sm leading-loose text-slate-700 mb-4">
-              Javaには <code className="font-bold">int</code>(整数) や <code className="font-bold">double</code>(小数) などの「基本型」があります。
+          <section className="glass p-6 md:p-8 rounded-3xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-2 h-full bg-emerald-400"></div>
+            <h3 className="text-xl font-bold tracking-tight text-emerald-900 border-b-2 border-emerald-200 pb-2 mb-5">2. 型変換と演算・制御構文 (第2回)</h3>
+            <p className="text-slate-700 mb-4">
+              <code className="font-bold">int</code>(整数) や <code className="font-bold">double</code>(小数) などの「<ruby>基本型<rt>きほんがた</rt></ruby>」のルールです。
             </p>
-            <ul className="list-disc pl-5 space-y-2 text-sm text-slate-700 mb-4">
-              <li><span className="highlight">整数同士の割り算は切り捨て</span>になります。<code className="bg-slate-200 px-1 rounded">10 / 4</code> は <code className="font-bold text-red-500">2</code> です。正確な計算には <code className="bg-slate-200 px-1 rounded">10.0 / 4.0</code> やキャスト <code className="bg-slate-200 px-1 rounded">(double)a / b</code> が必要です。</li>
-              <li>大きな型へは自動変換されますが、小さな型への代入はコンパイルエラーになります。</li>
+            <ul className="list-disc pl-6 space-y-3 text-slate-700 mb-6">
+              <li><span className="highlight">整数同士の割り算は切り捨て</span>になります。<code className="bg-slate-200 px-1.5 rounded">10 / 4</code> の結果は <code className="font-bold text-red-500">2</code> です。<code className="font-bold text-blue-600">2.5</code>にするには <code className="bg-slate-200 px-1.5 rounded">(double)10 / 4</code> のようにキャスト（型変換）が必要です。</li>
+              <li><span className="font-bold text-slate-900">文字列の結合:</span> <code className="bg-slate-200 px-1.5 rounded">"Ans=" + 1 + 2</code> は左から評価され <code className="font-bold">"Ans=12"</code> になります。（足し算したい場合はカッコが必要）</li>
+              <li><span className="font-bold text-slate-900">シフト演算:</span> <code className="bg-slate-200 px-1.5 rounded">21 &lt;&lt; 2</code> は左へ2ビットシフト（＝2の2乗を掛ける）で <code className="font-bold">84</code> になります。</li>
             </ul>
-            <TipBox title="例外処理 (try-catch-finally)">
-              予期せぬエラー（文字入力や0除算など）でプログラムが落ちないようにする仕組みです。<br/>
+            <TipBox title="例外処理 (try-catch-finally) とは？" color="emerald">
+              予期せぬエラーでプログラムが強制終了しないようにする仕組みです。<br/>
               ・<code className="font-bold text-slate-800">try</code>: エラーが起きそうな処理<br/>
               ・<code className="font-bold text-slate-800">catch</code>: エラーが起きた時の処理<br/>
-              ・<code className="font-bold text-slate-800">finally</code>: <span className="highlight-blue">エラーの有無に関わらず「必ず最後に」実行される処理</span>。
+              ・<code className="font-bold text-slate-800">finally</code>: <span className="highlight-blue">例外発生の有無に関わらず「必ず最後に」実行される処理</span>。テストで非常によく問われます。
             </TipBox>
           </section>
 
-          <section className="glass p-6 rounded-2xl">
-            <h3 className="text-lg font-bold tracking-tight text-purple-800 border-b-2 border-purple-200 pb-2 mb-4">3. 配列と参照型 (第2・3回)</h3>
-            <p className="text-sm leading-loose text-slate-700 mb-4">
-              基本型は箱に直接数字が入りますが、配列やクラスなどの<ruby>参照型<rt>さんしょうがた</rt></ruby>は、箱の中に<span className="highlight">「実体がある場所の住所（ロッカーの鍵）」</span>が入ります。
+          <section className="glass p-6 md:p-8 rounded-3xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-2 h-full bg-purple-400"></div>
+            <h3 className="text-xl font-bold tracking-tight text-purple-900 border-b-2 border-purple-200 pb-2 mb-5">3. 配列と<ruby>参照型<rt>さんしょうがた</rt></ruby> (第2・3回)</h3>
+            <p className="text-slate-700 mb-4">
+              配列やクラスなどの<ruby>参照型<rt>さんしょうがた</rt></ruby>は、箱の中にデータそのものではなく<span className="highlight-pink">「実体がある場所の住所（ロッカーの鍵）」</span>が入っています。
             </p>
             <ReferenceSimulator />
-            <TipBox title="配列の長さを知るには？">
-              配列変数名.<code className="text-blue-600 font-bold">length</code> で取得できます。メソッドではないので `()` は不要です。<br/>
-              文字列の長さを取得する場合は Stringクラスのメソッドなので <code className="text-blue-600 font-bold">length()</code> とカッコが必要です。
+            <TipBox title="配列の長さを知るには？" color="purple">
+              配列変数名.<code className="text-purple-600 font-bold">length</code> で取得できます。<span className="highlight">カッコ () は不要</span>です。<br/>
+              一方、文字列（Stringクラス）の長さを取得する場合はメソッドなので <code className="text-purple-600 font-bold">length()</code> とカッコが必要です。この違いは頻出です。
             </TipBox>
           </section>
 
-          <section className="glass p-6 rounded-2xl">
-            <h3 className="text-lg font-bold tracking-tight text-pink-800 border-b-2 border-pink-200 pb-2 mb-4">4. メソッドとコンストラクタ (第4回)</h3>
-            <ul className="list-disc pl-5 space-y-3 text-sm text-slate-700 mb-4">
-              <li><span className="font-bold text-slate-800">メソッドのオーバーロード</span>: <span className="highlight">引数の「数」「型」「順番」</span>が異なれば、同じ名前のメソッドを複数定義できます。（※戻り値が違うだけではNG）</li>
-              <li><span className="font-bold text-slate-800">コンストラクタ</span>: <code className="bg-slate-200 px-1 rounded">new</code> された瞬間に1回だけ実行される初期設定。戻り値の型（void等）は書きません。</li>
+          <section className="glass p-6 md:p-8 rounded-3xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-2 h-full bg-pink-400"></div>
+            <h3 className="text-xl font-bold tracking-tight text-pink-900 border-b-2 border-pink-200 pb-2 mb-5">4. メソッドとコンストラクタ (第4回)</h3>
+            <ul className="list-disc pl-6 space-y-3 text-slate-700 mb-6">
+              <li><span className="font-bold text-slate-900">メソッドのオーバーロード</span>: <span className="highlight">引数の「数」「型」「順番」</span>が異なれば、同じ名前のメソッドを複数定義できます。（※戻り値が違うだけではNG）</li>
+              <li><span className="font-bold text-slate-900">コンストラクタ</span>: <code className="bg-slate-200 px-1.5 rounded text-blue-800">new</code> された瞬間に1回だけ実行される初期設定。クラス名と同じ名前で、<span className="highlight-blue">戻り値の型（void等）は一切書きません</span>。</li>
             </ul>
-            <TipBox title="this() による呼び出し">
-              コンストラクタの中で <code className="text-blue-600 font-bold">this(100, 200);</code> のように書くと、自分のクラス内の「引数が2つある別のコンストラクタ」を呼び出すことができます。
+            <TipBox title="this() によるコンストラクタ呼び出し" color="pink">
+              コンストラクタの中で <code className="text-pink-600 font-bold">this(100, 200);</code> のように書くと、自分のクラス内の「引数が2つある別のコンストラクタ」を呼び出すことができます。過去問の穴埋め問題でよく出題されます。
             </TipBox>
           </section>
 
-          <section className="glass p-6 rounded-2xl">
-            <h3 className="text-lg font-bold tracking-tight text-orange-800 border-b-2 border-orange-200 pb-2 mb-4">5. カプセル化と static (第5・6回)</h3>
-            <p className="text-sm leading-loose text-slate-700 mb-4">
-              大切なデータを守り、クラスを安全に使うための仕組みです。
-            </p>
+          <section className="glass p-6 md:p-8 rounded-3xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-2 h-full bg-orange-400"></div>
+            <h3 className="text-xl font-bold tracking-tight text-orange-900 border-b-2 border-orange-200 pb-2 mb-5">5. カプセル化と Static (第5回)</h3>
             <EncapsulationSimulator />
-            
-            <p className="text-sm leading-loose text-slate-700 mt-6 mb-4 border-t border-slate-200 pt-4">
-              また、フィールドやメソッドに <code className="font-bold text-orange-600">static</code> を付けると振る舞いが大きく変わります。
-            </p>
             <StaticSimulator />
-            <TipBox title="staticのアクセス制限ルール">
-              <span className="highlight">クラスメソッド（staticメソッド）の中から、インスタンス変数やインスタンスメソッドは直接使えません。</span><br/>
-              （誰のインスタンスか特定できないため）。逆に、インスタンスメソッドの中からクラス変数（static変数）を使うことは可能です。
+            <TipBox title="staticのアクセス制限ルール（超重要）" color="orange">
+              <span className="highlight">クラスメソッド（staticメソッド）の中から、インスタンス変数やインスタンスメソッドは直接使えません。</span>（実体がなくても呼び出せるため、誰のデータか特定できないから）。逆に、インスタンスメソッドの中からクラス変数（static変数）を使うことは可能です。
+            </TipBox>
+          </section>
+
+          <section className="glass p-6 md:p-8 rounded-3xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-2 h-full bg-teal-400"></div>
+            <h3 className="text-xl font-bold tracking-tight text-teal-900 border-b-2 border-teal-200 pb-2 mb-5">6. クラス型変数と参照渡し (第6回)</h3>
+            <p className="text-slate-700 mb-4">
+              クラスのインスタンスをメソッドの引数に渡したり、配列に入れたりする際の動きは、期末テストでも必ず出題される超重要ポイントです。
+            </p>
+            <ClassReferenceSimulator />
+            <TipBox title="StringとMathクラス（クラスライブラリ）" color="teal">
+              ・<code className="font-bold">Integer.parseInt()</code>: 文字列をint型に変換（失敗するとNumberFormatException）。<br/>
+              ・<code className="font-bold">Math.random()</code>: 0.0以上1.0未満のランダムな小数を返す。<br/>
+              これらは<span className="highlight">インスタンスを生成(new)せずに使えるクラスメソッド（staticメソッド）</span>です。
             </TipBox>
           </section>
 
@@ -474,50 +517,66 @@
       );
     };
 
-    // --- Quiz Data (Totally original based on provided course materials 1-6) ---
+    // --- Quiz Data (期末の傾向・第1〜6回の範囲に基づく完全予想問題) ---
     const quizCategories = [
-      { id: 'A', name: '基礎・型・演算 (第1-2回)', icon: '🔢' },
-      { id: 'B', name: '制御構文・例外処理 (第2回)', icon: '🔀' },
-      { id: 'C', name: '配列・参照型 (第2-3回)', icon: '📦' },
-      { id: 'D', name: 'メソッド・コンストラクタ (第4-5回)', icon: '🛠' },
-      { id: 'E', name: 'カプセル化・static (第5-6回)', icon: '🛡' },
+      { id: 'A', name: '基礎・型・演算', desc: 'コンパイル, キャスト, 演算順序', icon: '🔢', color: 'text-blue-600', bg: 'bg-blue-50' },
+      { id: 'B', name: '制御構文・配列・例外', desc: 'for, 配列length, try-catch', icon: '🔀', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+      { id: 'C', name: 'クラス・メソッド', desc: 'オーバーロード, コンストラクタ', icon: '🛠', color: 'text-purple-600', bg: 'bg-purple-50' },
+      { id: 'D', name: 'カプセル化・static', desc: 'アクセス修飾子, クラス変数', icon: '🛡', color: 'text-orange-600', bg: 'bg-orange-50' },
+      { id: 'E', name: 'クラス型変数・参照渡し', desc: '値渡しと参照渡し, クラスライブラリ', icon: '📦', color: 'text-teal-600', bg: 'bg-teal-50' },
+      { id: '2023', name: '2023年度風 予想問題', desc: '過去問ライクな総合問題セット', icon: '📅', color: 'text-slate-700', bg: 'bg-slate-100' },
+      { id: '2024', name: '2024年度風 予想問題', desc: 'コード読解・穴埋め中心', icon: '🎓', color: 'text-slate-800', bg: 'bg-slate-200' },
     ];
 
     const allQuizData = [
-      // Category A: 基礎・型・演算
-      { cat: 'A', q: 'Javaのコンパイルと実行の手順として正しいものはどれか。', options: [{t: 'javacコマンドでコンパイルし、.classファイルを作成。その後javaコマンドで実行する。', c: true}, {t: 'javaコマンドでコンパイルし、.javaファイルを作成。その後javacコマンドで実行する。', c: false}, {t: 'javacコマンドでコンパイルと実行を同時に行う。', c: false}, {t: 'コンパイルは不要で、直接javaコマンドで実行できる。', c: false}], exp: 'Javaはソースコード(.java)をjavacでコンパイルし、バイトコード(.class)を生成してからjavaコマンドで実行（インタプリタ）します。' },
+      // --- A: 基礎・型・演算 ---
+      { cat: 'A', q: 'Javaのコンパイルと実行の手順として正しいものはどれか。', options: [{t: 'javacコマンドでコンパイルし、.classファイルを作成。その後javaコマンドで実行する。', c: true}, {t: 'javaコマンドでコンパイルし、.javaファイルを作成。その後javacコマンドで実行する。', c: false}, {t: 'javacコマンドでコンパイルと実行を同時に行う。', c: false}, {t: 'コンパイルは不要で、直接javaコマンドで実行できる。', c: false}], exp: 'ソースコード(.java)を javac でコンパイルし、バイトコード(.class)を生成してから java コマンドでインタプリタ実行します。' },
       { cat: 'A', q: '次のコードを実行したときの出力結果は？\n\nint a = 5;\nint b = 4;\ndouble c = a / b;\nSystem.out.println(c);', options: [{t: '1.0', c: true}, {t: '1.25', c: false}, {t: '1', c: false}, {t: 'コンパイルエラー', c: false}], exp: 'a / b は int型同士の計算なので、小数点以下が切り捨てられ 1 となります。その後 double 型の変数 c に代入されるため 1.0 と出力されます。' },
       { cat: 'A', q: '次の式のうち、変数aに 1.25 が代入されるものはどれか。\n※int x = 5, y = 4; とする。', options: [{t: 'double a = (double)x / (double)y;', c: true}, {t: 'double a = (double)(x / y);', c: false}, {t: 'double a = x / y;', c: false}, {t: 'double a = (int)x / (int)y;', c: false}], exp: '割り算が行われる前にキャスト（型変換）を行う必要があります。(double)(x / y) のように後からキャストしても、既に切り捨てられた 1 が 1.0 になるだけです。' },
-      { cat: 'A', q: '文字列の結合と計算順序について。出力結果は？\n\nint a = 1, b = 2;\nSystem.out.println("Ans = " + a + b);', options: [{t: 'Ans = 12', c: true}, {t: 'Ans = 3', c: false}, {t: 'コンパイルエラー', c: false}, {t: '実行時エラー', c: false}], exp: '左から順に評価されるため、文字列 "Ans = " に 1 が文字として結合され "Ans = 1" となり、それに 2 が結合されて "Ans = 12" になります。Ans = 3 にしたい場合は + (a + b) と括弧が必要です。' },
-      { cat: 'A', q: 'シフト演算子について。\n`int i = 21 << 2;` の実行後、i の値はいくつになるか。', options: [{t: '84', c: true}, {t: '5', c: false}, {t: '42', c: false}, {t: '10', c: false}], exp: '左へ2ビットシフトすることは、2の2乗（=4）を掛けることと同じです。21 × 4 = 84 となります。' },
+      { cat: 'A', q: '文字列の結合と計算順序について。出力結果は？\n\nint a = 1, b = 2;\nSystem.out.println("Ans=" + a + b);', options: [{t: 'Ans=12', c: true}, {t: 'Ans=3', c: false}, {t: 'コンパイルエラー', c: false}, {t: '実行時エラー', c: false}], exp: '左から順に評価されるため、文字列 "Ans=" に 1 が文字として結合され "Ans=1" となり、それに 2 が結合されて "Ans=12" になります。' },
+      { cat: 'A', q: 'シフト演算子について。\n`int i = 21 << 2;` の実行後、i の値はいくつか。', options: [{t: '84', c: true}, {t: '5', c: false}, {t: '42', c: false}, {t: '10', c: false}], exp: '左へ2ビットシフトすることは、2の2乗（=4）を掛けることと同じです。21 × 4 = 84 となります。' },
 
-      // Category B: 制御構文・例外処理
-      { cat: 'B', q: '例外処理（try-catch-finally）について正しい記述はどれか。', options: [{t: 'finallyブロック内の処理は、例外が発生したかどうかにかかわらず必ず最後に実行される。', c: true}, {t: 'tryブロック内で例外が発生しなかった場合、finallyブロックはスキップされる。', c: false}, {t: '例外が発生した場合、プログラムは必ず強制終了する。', c: false}, {t: 'catchブロックは複数記述することはできない。', c: false}], exp: 'finallyブロックは、ファイルやデータベースを閉じるなど、エラーの有無に関わらず確実に実行したい後処理を書くために使用します。' },
+      // --- B: 制御構文・配列・例外 ---
+      { cat: 'B', q: '例外処理（try-catch-finally）について正しい記述はどれか。', options: [{t: 'finallyブロック内の処理は、例外が発生したかどうかにかかわらず必ず最後に実行される。', c: true}, {t: 'tryブロック内で例外が発生しなかった場合、finallyブロックはスキップされる。', c: false}, {t: '例外が発生した場合、プログラムは必ず強制終了する。', c: false}, {t: 'catchブロックは複数記述することはできない。', c: false}], exp: 'finallyブロックはエラーの有無に関わらず確実に実行したい後処理（ファイルのクローズ等）を書くために使用します。期末頻出知識です。' },
       { cat: 'B', q: '次のfor文の出力結果は？\n\nfor(int i = 1; i <= 5; i++) {\n  if(i == 3) continue;\n  System.out.print(i);\n}', options: [{t: '1245', c: true}, {t: '12', c: false}, {t: '12345', c: false}, {t: '45', c: false}], exp: 'continue文は、その周の残りの処理を飛ばし、次のループの先頭（i++）に戻ります。したがって 3 の出力だけが飛ばされます。' },
-      { cat: 'B', q: 'switch文について。caseブロックの最後に `break;` を書き忘れた場合どうなるか。', options: [{t: '条件に一致したcaseから始まり、それ以降のcaseの処理も続けて実行されてしまう（フォールスルー）。', c: true}, {t: 'コンパイルエラーになる。', c: false}, {t: '実行時エラーでプログラムが停止する。', c: false}, {t: 'そのcaseの処理だけが実行され、自動的にswitch文を抜ける。', c: false}], exp: 'breakを忘れると、次のcaseの条件判定を無視して処理がそのまま流れ込んでしまいます（フォールスルー）。' },
+      { cat: 'B', q: '配列の長さ（要素数）を取得する正しい書き方はどれか。\n※ `int[] test = new int[5];`', options: [{t: 'test.length', c: true}, {t: 'test.length()', c: false}, {t: 'test.size()', c: false}, {t: 'test.count', c: false}], exp: '配列の長さを取得する場合は「.length」を使用します。文字列の長さを取得する「Stringクラスのメソッド」の場合は「.length()」とカッコが必要です。' },
+      { cat: 'B', q: '多次元配列の宣言として正しいものはどれか。', options: [{t: 'int[][] num = new int[2][];', c: true}, {t: 'int[2][] num;', c: false}, {t: 'int num[2][];', c: false}, {t: 'int num = new int[][2];', c: false}], exp: '多次元配列は「型名[][] 変数名 = new 型名[行数][列数];」のように宣言します。列数は省略できますが行数は省略できません。' },
       { cat: 'B', q: 'キーボード入力時に `Integer.parseInt()` で文字列を数値に変換しようとした際、文字("A"など)が入力された場合に発生する例外クラスはどれか。', options: [{t: 'NumberFormatException', c: true}, {t: 'ArrayIndexOutOfBoundsException', c: false}, {t: 'NullPointerException', c: false}, {t: 'ArithmeticException', c: false}], exp: 'NumberFormatExceptionは、文字列の形式が正しくなく、数値型に変換できない場合に発生します。' },
-      { cat: 'B', q: '配列外のインデックスにアクセスしようとしたときに発生する例外はどれか。\n例：要素数5の配列で a[10] を参照。', options: [{t: 'ArrayIndexOutOfBoundsException', c: true}, {t: 'NumberFormatException', c: false}, {t: 'NullPointerException', c: false}, {t: 'ArithmeticException', c: false}], exp: 'ArrayIndexOutOfBoundsException は、配列の要素数（長さ）を超えたインデックスを指定した際に発生します。' },
 
-      // Category C: 配列・参照型
-      { cat: 'C', q: '配列の代入と参照渡しについて。出力結果は？\n\nint[] a = {1, 2, 3};\nint[] b = a;\nb[0] = 99;\nSystem.out.println(a[0]);', options: [{t: '99', c: true}, {t: '1', c: false}, {t: '2', c: false}, {t: '実行時エラー', c: false}], exp: '配列は参照型です。「b = a」ではデータの実体ではなく「住所（参照）」がコピーされるため、bを変更すると同じ実体を参照しているaにも影響します。' },
-      { cat: 'C', q: '配列の中身の等価性（値が全て同じか）を比較する正しい方法はどれか。\n※ `int[] a`, `int[] b` を比較する。', options: [{t: 'Arrays.equals(a, b)', c: true}, {t: 'a == b', c: false}, {t: 'a.equals(b)', c: false}, {t: 'a === b', c: false}], exp: '「==」は参照（住所）が同じかを比較します。別々に作られた配列の中身が同じかを比較するには、java.util.Arraysクラスの equals() メソッドを使用します。' },
-      { cat: 'C', q: '配列の長さ（要素数）を取得する正しい書き方はどれか。\n※ `int[] test = new int[5];`', options: [{t: 'test.length', c: true}, {t: 'test.length()', c: false}, {t: 'test.size()', c: false}, {t: 'test.count', c: false}], exp: '配列の長さを取得する場合は「.length」を使用します。文字列の長さを取得する「Stringクラスのメソッド」の場合は「.length()」とカッコが必要です。' },
-      { cat: 'C', q: '多次元配列の宣言として正しいものはどれか。', options: [{t: 'int[][] num = new int[2][];', c: true}, {t: 'int[2][] num;', c: false}, {t: 'int num[2][];', c: false}, {t: 'int num = new int[][2];', c: false}], exp: '多次元配列は「型名[][] 変数名 = new 型名[行数][列数];」のように宣言します。列数は省略（後から要素ごとに確保）できますが行数は省略できません。' },
-      { cat: 'C', q: 'クラス型の配列について。以下のコードでコンパイルエラーや実行時エラーにならない正しい処理はどれか。\n`Car[] cars = new Car[3];`', options: [{t: 'cars[0] = new Car();', c: true}, {t: 'cars[0].num = 1234;', c: false}, {t: 'cars.num = 1234;', c: false}, {t: 'cars[0] = 1234;', c: false}], exp: '「new Car[3]」はCarを入れるための箱を3つ用意しただけで、中身はまだnullです。各要素を使う前に「cars[0] = new Car();」のようにインスタンスを生成して代入する必要があります。' },
+      // --- C: クラス・メソッド ---
+      { cat: 'C', q: 'メソッドの「オーバーロード」が成立するための条件として正しいものはどれか。', options: [{t: '引数の「数」「型」「順番」のいずれかが異なる。', c: true}, {t: '戻り値の型だけが異なる。', c: false}, {t: 'アクセス修飾子（public等）が異なる。', c: false}, {t: '引数の変数名だけが異なる。', c: false}], exp: 'オーバーロードは、呼び出し時にどのメソッドを使えばよいかコンピュータが区別できる必要があります。戻り値の型や変数名が違うだけでは区別できません。' },
+      { cat: 'C', q: 'コンストラクタについて誤っている記述はどれか。', options: [{t: '戻り値の型として必ず void を記述しなければならない。', c: true}, {t: 'メソッド名はクラス名と完全に同じでなければならない。', c: false}, {t: 'インスタンスが生成(new)された時に自動的に1回だけ実行される。', c: false}, {t: '引数の数や型を変えることで、オーバーロードすることができる。', c: false}], exp: 'コンストラクタには戻り値の型（voidを含む）を一切記述しません。記述すると普通のメソッドとして扱われてしまいます。' },
+      { cat: 'C', q: 'コンストラクタ内で、自分のクラスの別のコンストラクタを呼び出すための正しい記述はどれか。', options: [{t: 'this(100, 200);', c: true}, {t: 'super(100, 200);', c: false}, {t: 'Car(100, 200);', c: false}, {t: 'new Car(100, 200);', c: false}], exp: 'オーバーロードされた別のコンストラクタを呼び出すには「this(引数);」を使用します。super()は親クラスのコンストラクタ呼び出しです。' },
+      { cat: 'C', q: 'メソッドで値を持たずに終了して呼び出し元に戻る（void型メソッドを途中で抜ける）ための命令はどれか。', options: [{t: 'return;', c: true}, {t: 'break;', c: false}, {t: 'continue;', c: false}, {t: 'exit;', c: false}], exp: '戻り値を持たない(void)メソッドであっても、return; と記述することでその時点でメソッドの処理を終了して呼び出し元に戻ることができます。' },
+      { cat: 'C', q: '次のように宣言されたメソッドを呼び出す正しい記述はどれか。\n`void setNumGas(int n, double g)`\n※ `Car car1 = new Car();` とする', options: [{t: 'car1.setNumGas(1234, 20.5);', c: true}, {t: 'car1.setNumGas(20.5, 1234);', c: false}, {t: 'car1.setNumGas(1234);', c: false}, {t: 'car1.setNumGas(int 1234, double 20.5);', c: false}], exp: 'メソッド呼び出し時は、定義された引数の型・数・順番通りに値を渡す必要があります。型名（int等）を書く必要はありません。' },
 
-      // Category D: メソッド・コンストラクタ
-      { cat: 'D', q: 'メソッドの「オーバーロード」が成立するための条件として正しいものはどれか。', options: [{t: '引数の「数」「型」「順番」のいずれかが異なる。', c: true}, {t: '戻り値の型だけが異なる。', c: false}, {t: 'アクセス修飾子（public等）が異なる。', c: false}, {t: '引数の変数名だけが異なる。', c: false}], exp: 'オーバーロードは、呼び出し時にどのメソッドを使えばよいかコンピュータが区別できる必要があります。戻り値の型や変数名が違うだけでは区別できません。' },
-      { cat: 'D', q: 'コンストラクタについて誤っている記述はどれか。', options: [{t: '戻り値の型として必ず void を記述しなければならない。', c: true}, {t: 'メソッド名はクラス名と完全に同じでなければならない。', c: false}, {t: 'インスタンスが生成(new)された時に自動的に1回だけ実行される。', c: false}, {t: '引数の数や型を変えることで、オーバーロードすることができる。', c: false}], exp: 'コンストラクタには戻り値の型（voidを含む）を一切記述しません。記述すると普通のメソッドとして扱われてしまいます。' },
-      { cat: 'D', q: 'コンストラクタ内で、自分のクラスの別のコンストラクタを呼び出すための正しい記述はどれか。', options: [{t: 'this(100, 200);', c: true}, {t: 'super(100, 200);', c: false}, {t: 'Car(100, 200);', c: false}, {t: 'new Car(100, 200);', c: false}], exp: 'オーバーロードされた別のコンストラクタを呼び出すには「this(引数);」を使用します。super()は親クラスのコンストラクタ呼び出しです。' },
-      { cat: 'D', q: 'メソッドで値を持たずに終了して呼び出し元に戻る（void型メソッドを途中で抜ける）ための命令はどれか。', options: [{t: 'return;', c: true}, {t: 'break;', c: false}, {t: 'continue;', c: false}, {t: 'exit;', c: false}], exp: '戻り値を持たない(void)メソッドであっても、return; と記述することでその時点でメソッドの処理を終了して呼び出し元に戻ることができます。' },
-      { cat: 'D', q: '基本型と参照型の引数（値渡しと参照渡し）について。クラスのインスタンスをメソッドの引数として渡した場合の挙動はどれか。', options: [{t: '参照（住所）が渡されるため、メソッド内でオブジェクトを変更すると呼び出し元のオブジェクトも変更される。', c: true}, {t: '値のコピーが渡されるため、メソッド内で変更しても呼び出し元には影響しない。', c: false}, {t: 'クラスのインスタンスを引数にすることはできない。', c: false}, {t: 'メソッド内ではオブジェクトは読み取り専用となる。', c: false}], exp: 'クラス型（参照型）変数を引数で渡すと、メモリ上の「住所」が渡されます（参照渡し）。そのため、渡された先で中身を変更すると、大元のオブジェクトも変更されます。' },
+      // --- D: カプセル化・static ---
+      { cat: 'D', q: 'カプセル化を実現するため、フィールド（変数）を外部から隠すために付けるアクセス修飾子はどれか。', options: [{t: 'private', c: true}, {t: 'public', c: false}, {t: 'static', c: false}, {t: 'protected', c: false}], exp: 'フィールドを private にすることでクラス外からの直接アクセスを禁止し、予期せぬ書き換えを防ぎます。' },
+      { cat: 'D', q: 'クラス変数（static変数）についての正しい記述はどれか。', options: [{t: 'インスタンスごとに個別に作られるのではなく、クラス全体で1つだけ作られ共有される。', c: true}, {t: 'インスタンスを生成（new）しなければ利用することができない。', c: false}, {t: 'メソッドの中で宣言するローカル変数にもstaticを付けることができる。', c: false}, {t: '定数として扱われるため、後から値を変更することはできない。', c: false}], exp: 'staticが付いた変数は、各オブジェクト（インスタンス）ではなく、大元の設計図（クラス）側に属する変数となり、全インスタンスで値が共有されます。' },
+      { cat: 'D', q: 'クラスメソッド（staticメソッド）から直接アクセス「できない」ものはどれか。', options: [{t: 'インスタンス変数（非staticなフィールド）', c: true}, {t: 'クラス変数（staticなフィールド）', c: false}, {t: '他のクラスメソッド（staticなメソッド）', c: false}, {t: 'そのメソッド内で宣言したローカル変数', c: false}], exp: 'クラスメソッドはインスタンスが生成されていなくても呼び出せます。そのため、どのインスタンスのものか特定できない「インスタンス変数」には直接アクセスできません。' },
+      { cat: 'D', q: '次のコードの出力結果は？\n\nclass Car { static int x = 10; }\n// ...\nCar obj1 = new Car();\nCar obj2 = new Car();\nobj1.x = 20;\nSystem.out.println(obj2.x);', options: [{t: '20', c: true}, {t: '10', c: false}, {t: '0', c: false}, {t: 'コンパイルエラー', c: false}], exp: 'x は static変数なので、obj1とobj2で同じ一つの変数を共有しています。obj1経由で20に変更すると、obj2から見ても20になります。' },
+      { cat: 'D', q: 'コマンドライン引数について。`java Sample Hello Java 1 2` と実行したとき、`args[1]` の中身はどれか。', options: [{t: '"Java"', c: true}, {t: '"Hello"', c: false}, {t: '"Sample"', c: false}, {t: '"1"', c: false}], exp: 'コマンドライン引数は実行するクラス名の後ろからスペース区切りで配列 args に格納されます。args[0]は"Hello"、args[1]は"Java"になります。' },
 
-      // Category E: カプセル化・static
-      { cat: 'E', q: 'カプセル化を実現するため、フィールド（変数）を外部から隠すために付けるアクセス修飾子はどれか。', options: [{t: 'private', c: true}, {t: 'public', c: false}, {t: 'static', c: false}, {t: 'protected', c: false}], exp: 'フィールドを private にすることでクラス外からの直接アクセスを禁止し、予期せぬ書き換えを防ぎます。' },
-      { cat: 'E', q: 'クラス変数（static変数）についての正しい記述はどれか。', options: [{t: 'インスタンスごとに個別に作られるのではなく、クラス全体で1つだけ作られ共有される。', c: true}, {t: 'インスタンスを生成（new）しなければ利用することができない。', c: false}, {t: 'メソッドの中で宣言するローカル変数にもstaticを付けることができる。', c: false}, {t: '定数として扱われるため、後から値を変更することはできない。', c: false}], exp: 'staticが付いた変数は、各オブジェクト（インスタンス）ではなく、大元の設計図（クラス）側に属する変数となり、全インスタンスで値が共有されます。' },
-      { cat: 'E', q: 'クラスメソッド（staticメソッド）から直接アクセス「できない」ものはどれか。', options: [{t: 'インスタンス変数（非staticなフィールド）', c: true}, {t: 'クラス変数（staticなフィールド）', c: false}, {t: '他のクラスメソッド（staticなメソッド）', c: false}, {t: 'そのメソッド内で宣言したローカル変数', c: false}], exp: 'クラスメソッドはインスタンスが生成されていなくても呼び出せます。そのため、どのインスタンスのものか特定できない「インスタンス変数」には直接アクセスできません。' },
-      { cat: 'E', q: 'コマンドライン引数について。`java Sample Hello Java 1 2` と実行したとき、`args[1]` の中身はどれか。', options: [{t: '"Java"', c: true}, {t: '"Hello"', c: false}, {t: '"Sample"', c: false}, {t: '"1"', c: false}], exp: 'コマンドライン引数は実行するクラス名の後ろからスペース区切りで配列 args に格納されます。args[0]は"Hello"、args[1]は"Java"になります。' },
-      { cat: 'E', q: '次のコードの出力結果は？\n\nclass Car { static int x = 10; }\n// ...\nCar obj1 = new Car();\nCar obj2 = new Car();\nobj1.x = 20;\nSystem.out.println(obj2.x);', options: [{t: '20', c: true}, {t: '10', c: false}, {t: '0', c: false}, {t: 'コンパイルエラー', c: false}], exp: 'x は static変数なので、obj1とobj2で同じ一つの変数を共有しています。obj1経由で20に変更すると、obj2から見ても20になります。（※警告は出ますが実行は可能です）' },
+      // --- E: クラス型変数・参照渡し ---
+      { cat: 'E', q: '配列の中身の等価性（値が全て同じか）を比較する正しい方法はどれか。\n※ `int[] a`, `int[] b` を比較する。', options: [{t: 'Arrays.equals(a, b)', c: true}, {t: 'a == b', c: false}, {t: 'a.equals(b)', c: false}, {t: 'a === b', c: false}], exp: '「==」は参照（住所）が同じかを比較します。別々に作られた配列の中身が同じかを比較するには、java.util.Arraysクラスの equals() メソッドを使用します。' },
+      { cat: 'E', q: 'クラス型変数の代入と変更について。出力結果は？\n\nCar car1 = new Car();\ncar1.num = 111;\nCar car2 = car1;\ncar2.num = 999;\nSystem.out.println(car1.num);', options: [{t: '999', c: true}, {t: '111', c: false}, {t: '0', c: false}, {t: '実行時エラー', c: false}], exp: 'クラス型変数は参照型です。「car2 = car1」ではデータの実体ではなく「住所（参照）」がコピーされるため、car2を変更すると同じ実体を参照しているcar1にも影響します。' },
+      { cat: 'E', q: '基本型と参照型の引数（値渡しと参照渡し）について。クラスのインスタンスをメソッドの引数として渡した場合の挙動はどれか。', options: [{t: '参照（住所）が渡されるため、メソッド内でオブジェクトのフィールドを変更すると呼び出し元のオブジェクトも変更される。', c: true}, {t: '値のコピーが渡されるため、メソッド内で変更しても呼び出し元には影響しない。', c: false}, {t: 'クラスのインスタンスを引数にすることはできない。', c: false}, {t: 'メソッド内ではオブジェクトは読み取り専用となる。', c: false}], exp: 'クラス型（参照型）変数を引数で渡すと、メモリ上の「住所」が渡されます（参照渡し）。そのため、渡された先で中身を変更すると、大元のオブジェクトも変更されます。' },
+      { cat: 'E', q: 'オブジェクトの配列について。以下のコードでコンパイルエラーや実行時エラーにならない正しい処理はどれか。\n`Car[] cars = new Car[3];`', options: [{t: 'cars[0] = new Car();', c: true}, {t: 'cars[0].num = 1234;', c: false}, {t: 'cars.num = 1234;', c: false}, {t: 'cars[0] = 1234;', c: false}], exp: '「new Car[3]」はCarを入れるための箱を3つ用意しただけで、中身はまだnullです。各要素を使う前に「cars[0] = new Car();」のようにインスタンスを生成して代入する必要があります。' },
+      { cat: 'E', q: '変数に `null` を代入するとどうなるか。', options: [{t: 'その変数はどのオブジェクトも指し示さなくなる。', c: true}, {t: '変数の値が0（ゼロ）になる。', c: false}, {t: 'コンパイルエラーになる。', c: false}, {t: '文字列の "null" というデータが入る。', c: false}], exp: 'null は「何もない」ことを意味します。クラス型変数に null を代入すると、それまで参照していたオブジェクトから紐付けが切れます。' },
+
+      // --- 2023年度風 予想問題 (総合・コード読解) ---
+      { cat: '2023', q: '次のソースコードを実行したときの出力結果は？\n\nclass Car { int num = 123; }\n//...\nCar c1 = new Car();\nCar c2 = new Car();\nc1.num = 456;\nSystem.out.println(c2.num);', options: [{t: '123', c: true}, {t: '456', c: false}, {t: '0', c: false}, {t: 'エラー', c: false}], exp: 'c1とc2は別々にnewされた異なるインスタンスです。c1のnumを変更しても、c2のnum（初期値123）には影響しません。' },
+      { cat: '2023', q: '次のソースコードの出力結果は？\n\nint x = 5;\nint y;\ny = ++x;\nSystem.out.println("x=" + x + ", y=" + y);', options: [{t: 'x=6, y=6', c: true}, {t: 'x=6, y=5', c: false}, {t: 'x=5, y=6', c: false}, {t: 'x=5, y=5', c: false}], exp: '++x（前置き）は、まずxを1増やして(x=6)、その結果をyに代入します。したがって両方とも6になります。y = x++（後置き）ならyは5になります。' },
+      { cat: '2023', q: '次の出力結果になるように空欄を埋めよ。\n\nclass Car { \n  public Car() { this(999); } \n  public Car(int n) { System.out.print(n); }\n}\n//...\nCar c = new Car();\n\n出力: 999', options: [{t: 'this(999);', c: true}, {t: 'Car(999);', c: false}, {t: 'new Car(999);', c: false}, {t: 'super(999);', c: false}], exp: 'コンストラクタ内から自クラスの別のコンストラクタを呼び出すには、this(引数); を使用します。' },
+      { cat: '2023', q: '次の出力結果は？\n\nint[] a = {1, 2, 3};\nint[] b = a.clone();\nb[0] = 99;\nSystem.out.println(a[0]);', options: [{t: '1', c: true}, {t: '99', c: false}, {t: '実行時エラー', c: false}, {t: 'コンパイルエラー', c: false}], exp: 'clone()メソッドを使用すると、配列の実体が複製されて別の住所に作成されます。したがってbを変更してもaには影響しません。' },
+      { cat: '2023', q: 'クラス変数について。次のコードの出力結果は？\n\nclass Car { static int sum = 0; public Car() { sum++; } }\n//...\nnew Car();\nnew Car();\nSystem.out.println(Car.sum);', options: [{t: '2', c: true}, {t: '1', c: false}, {t: '0', c: false}, {t: 'エラー', c: false}], exp: 'sumはstatic変数なのでクラス全体で1つだけ共有されます。new Car()が2回実行されたため、sumは2になります。' },
+
+      // --- 2024年度風 予想問題 (期末テストの傾向を踏襲した穴埋め・読解) ---
+      { cat: '2024', q: '次のソースコードの出力結果は？\n\nclass Car {\n  int num;\n  public Car() {\n    num = 123;\n  }\n  public Car(int n) {\n    num = n;\n  }\n}\n//...\nCar car1 = new Car(456);\nSystem.out.println(car1.num);', options: [{t: '456', c: true}, {t: '123', c: false}, {t: '0', c: false}, {t: 'エラー', c: false}], exp: '引数付きのコンストラクタ `Car(int n)` が呼び出されるため、numには456が代入されます。' },
+      { cat: '2024', q: '次のプログラムが実行できない理由（コンパイルエラー）はどれか。\n\nclass A {\n  int a;\n  static void showA() {\n    System.out.println(a);\n  }\n}', options: [{t: 'クラスメソッド(static)の中から、インスタンス変数(a)を直接参照しようとしているから。', c: true}, {t: '変数aが初期化されていないから。', c: false}, {t: 'showAメソッドに戻り値の型がないから。', c: false}, {t: 'System.out.printlnの引数が間違っているから。', c: false}], exp: 'staticメソッドの中からは、実体がないと存在しないインスタンス変数（非static変数）には直接アクセスできません。第6回過去問頻出の理論です。' },
+      { cat: '2024', q: '配列と参照渡しの挙動について。出力は？\n\nCar org = new Car();\norg.num = 1111;\nCar[] cars = new Car[2];\ncars[0] = org;\norg.num = 3333;\nSystem.out.println(cars[0].num);', options: [{t: '3333', c: true}, {t: '1111', c: false}, {t: '0', c: false}, {t: 'エラー', c: false}], exp: 'cars[0] には org の「参照（住所）」が代入されます。その後 org の実体を変更すると、同じ実体を見ている cars[0] も 3333 になります。' },
+      { cat: '2024', q: '次の例外処理の出力結果は？\n\ntry {\n  int a = Integer.parseInt("A");\n  System.out.print("1");\n} catch (NumberFormatException e) {\n  System.out.print("2");\n} finally {\n  System.out.print("3");\n}', options: [{t: '23', c: true}, {t: '123', c: false}, {t: '2', c: false}, {t: '3', c: false}], exp: 'parseInt("A")で例外が発生し、tryブロックの残りの処理("1")はスキップされcatchに飛びます("2")。その後、必ずfinallyが実行されます("3")。' },
+      { cat: '2024', q: 'Stringクラスのメソッドを用いたコード。出力は？\n\nString str = "ABC";\nSystem.out.println(str.charAt(1));', options: [{t: 'B', c: true}, {t: 'A', c: false}, {t: 'C', c: false}, {t: 'エラー', c: false}], exp: 'charAt(int index) は指定したインデックスの文字を返します。インデックスは0から始まるため、charAt(1) は2文字目の "B" になります。' },
     ];
 
     // 配列のシャッフル関数
@@ -544,9 +603,9 @@
       const startQuiz = (catId) => {
         let filtered = [];
         if (catId === 'ALL') {
-          // 全範囲からランダムに10問抽出
+          // 全範囲からランダムに10問抽出 (総合模試)
           filtered = shuffleArray(allQuizData).slice(0, 10);
-          setSelectedCategory({ name: '全範囲 ランダム模試 (10問)', icon: '🔥' });
+          setSelectedCategory({ name: '全範囲 ランダム総合模試', desc: '本番さながらの10問', icon: '🎯', color: 'text-rose-600', bg: 'bg-rose-50' });
         } else {
           filtered = allQuizData.filter(q => q.cat === catId);
           setSelectedCategory(quizCategories.find(c => c.id === catId));
@@ -585,13 +644,14 @@
 
       if (quizState === 'select') {
         return (
-          <div className="fade-in space-y-6 pb-24">
-            <header className="mb-8 text-center md:text-left">
-              <h2 className="text-2xl font-bold tracking-tight text-slate-800 mb-2 flex items-center justify-center md:justify-start">
-                <IconPlayCircle className="w-7 h-7 mr-2 text-blue-600" /> 分野別 実戦ドリル
+          <div className="fade-in space-y-6 pb-28">
+            <header className="mb-8 pt-4">
+              <h2 className="text-3xl font-bold tracking-tight text-slate-800 mb-3 flex items-center">
+                <IconTarget className="w-8 h-8 mr-3 text-rose-500" /> 
+                実戦クイズドリル
               </h2>
-              <p className="text-slate-600 leading-loose text-sm">
-                中間テスト（第1回〜第6回）の範囲に特化した完全予想問題です。過去問の出題形式を徹底分析して作成しています。
+              <p className="text-slate-600 text-base">
+                期末テストの出題傾向（コード読解・出力結果予測・穴埋め）を徹底分析して作成した予想問題です。過去問を解いて本番に備えましょう。
               </p>
             </header>
 
@@ -600,24 +660,24 @@
                 <button 
                   key={cat.id} 
                   onClick={() => startQuiz(cat.id)} 
-                  className="glass hover:bg-white/90 p-5 rounded-2xl transition-all hover:-translate-y-1 group flex items-center text-left"
+                  className="glass hover:bg-white/90 p-5 rounded-2xl transition-all hover:-translate-y-1 hover:shadow-lg group flex items-center text-left"
                 >
-                  <div className="text-3xl mr-4 bg-white p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform">{cat.icon}</div>
+                  <div className={`text-3xl mr-4 p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform ${cat.bg}`}>{cat.icon}</div>
                   <div>
-                    <h3 className="font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">{cat.name}</h3>
-                    <p className="text-xs text-slate-500">分野別ドリル (5問)</p>
+                    <h3 className={`font-bold mb-1 transition-colors ${cat.color}`}>{cat.name}</h3>
+                    <p className="text-xs text-slate-500">{cat.desc} (5問)</p>
                   </div>
                 </button>
               ))}
               
               <button 
                 onClick={() => startQuiz('ALL')} 
-                className="glass hover:bg-white/90 p-5 rounded-2xl transition-all hover:-translate-y-1 md:col-span-2 border-2 border-transparent hover:border-red-300 group flex items-center"
+                className="glass hover:bg-white/90 p-5 rounded-2xl transition-all hover:-translate-y-1 hover:shadow-lg md:col-span-2 border-2 border-transparent hover:border-rose-300 group flex items-center"
               >
-                <div className="text-3xl mr-4 bg-red-50 p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform">🔥</div>
+                <div className="text-3xl mr-4 bg-rose-50 p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform">🎯</div>
                 <div>
-                  <h3 className="font-bold text-slate-800 mb-1 group-hover:text-red-600 transition-colors">全範囲 ランダム模試</h3>
-                  <p className="text-xs text-slate-500">本番さながらのテスト (10問抽出)</p>
+                  <h3 className="font-bold text-slate-800 mb-1 group-hover:text-rose-600 transition-colors">全範囲 ランダム総合模試</h3>
+                  <p className="text-xs text-slate-500">本番シミュレーション (10問ランダム抽出)</p>
                 </div>
               </button>
             </div>
@@ -628,25 +688,26 @@
       if (quizState === 'result') {
         const percentage = Math.round((score / questions.length) * 100);
         let message = "";
-        if (percentage === 100) message = "完璧です！この調子なら本番も満点間違いなし！🎉";
-        else if (percentage >= 80) message = "素晴らしい理解度です！間違えた箇所を復習すれば完璧です👏";
-        else if (percentage >= 60) message = "合格ライン！復習モードで弱点を補強しましょう。💪";
-        else message = "基礎の確認が必要です。「復習モード」をもう一度読み直してみましょう📚";
+        let colorClass = "";
+        if (percentage === 100) { message = "完璧です！本番も満点間違いなし！🎉"; colorClass = "text-emerald-500"; }
+        else if (percentage >= 80) { message = "素晴らしい理解度です！間違えた箇所を復習すれば完璧です👏"; colorClass = "text-blue-500"; }
+        else if (percentage >= 60) { message = "合格ライン！「要点復習」で弱点を補強しましょう💪"; colorClass = "text-orange-500"; }
+        else { message = "基礎の確認が必要です。「要点復習」をもう一度読み直してみましょう📚"; colorClass = "text-red-500"; }
 
         return (
-          <div className="fade-in text-center py-10 pb-24">
-            <div className="text-sm font-bold text-slate-500 mb-4">{selectedCategory.name}</div>
-            <h2 className="text-3xl font-bold text-slate-800 mb-6">結果発表</h2>
-            <div className="glass inline-block p-10 rounded-full mb-6 w-48 h-48 flex items-center justify-center flex-col shadow-lg border-4 border-white relative overflow-hidden group">
-               <div className="absolute inset-0 bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="text-5xl font-bold text-blue-600 relative z-10">{score}<span className="text-2xl text-slate-400">/{questions.length}</span></div>
+          <div className="fade-in text-center py-12 pb-28">
+            <div className="text-sm font-bold text-slate-500 mb-2">{selectedCategory.name}</div>
+            <h2 className="text-3xl font-bold text-slate-800 mb-8 tracking-tight">結果発表</h2>
+            <div className="glass inline-block p-10 rounded-full mb-6 w-52 h-52 flex items-center justify-center flex-col shadow-xl border-4 border-white relative overflow-hidden group">
+               <div className="absolute inset-0 bg-slate-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className={`text-6xl font-bold relative z-10 ${colorClass}`}>{score}<span className="text-3xl text-slate-300">/{questions.length}</span></div>
             </div>
-            <p className="text-2xl font-bold text-slate-700 mb-3">{percentage} <span className="text-lg text-slate-500">点</span></p>
-            <p className="text-slate-600 mb-10 leading-loose px-4">{message}</p>
+            <p className={`text-2xl font-bold mb-4 ${colorClass}`}>{percentage} <span className="text-lg">点</span></p>
+            <p className="text-slate-600 mb-10 leading-loose px-4 max-w-md mx-auto">{message}</p>
             
             <button 
               onClick={() => setQuizState('select')}
-              className="px-8 py-4 bg-slate-800 text-white font-bold rounded-xl shadow-lg hover:bg-slate-900 transition-transform hover:scale-105"
+              className="px-10 py-4 bg-slate-800 text-white font-bold rounded-xl shadow-lg hover:bg-slate-900 transition-transform hover:scale-105"
             >
               一覧に戻る
             </button>
@@ -657,37 +718,37 @@
       const q = questions[currentIndex];
       
       return (
-        <div className="fade-in max-w-2xl mx-auto pb-24">
-          <div className="flex items-center justify-between mb-4">
-            <button onClick={() => setQuizState('select')} className="text-slate-500 hover:text-slate-700 flex items-center text-sm font-bold transition-colors bg-white/50 px-3 py-2 rounded-lg">
+        <div className="fade-in max-w-2xl mx-auto pb-28">
+          <div className="flex items-center justify-between mb-6">
+            <button onClick={() => setQuizState('select')} className="text-slate-500 hover:text-slate-700 flex items-center text-sm font-bold transition-colors bg-white/50 px-3 py-2 rounded-lg border border-slate-200">
               <IconChevronLeft className="w-4 h-4 mr-1" /> やめる
             </button>
             <div className="text-sm font-bold text-slate-600 bg-white/80 px-4 py-2 rounded-lg shadow-sm border border-slate-200 flex items-center">
-              <span className="mr-2">{selectedCategory.icon}</span> {currentIndex + 1} <span className="text-slate-400 mx-1">/</span> {questions.length}
+              <span className="mr-2 text-lg">{selectedCategory.icon}</span> 問 {currentIndex + 1} <span className="text-slate-400 mx-1">/</span> {questions.length}
             </div>
           </div>
 
-          <div className="glass p-6 md:p-8 rounded-2xl shadow-sm mb-6 border-t-4 border-t-blue-400">
+          <div className="glass p-6 md:p-8 rounded-3xl shadow-sm mb-6 border-t-4 border-t-blue-400 relative overflow-hidden">
             <h3 className="text-base md:text-lg font-bold text-slate-800 leading-loose whitespace-pre-wrap">
               {q.q.split('`').map((part, i) => 
-                i % 2 === 1 ? <code key={i} className="bg-slate-800 text-green-300 px-2 py-0.5 rounded font-mono text-sm shadow-inner">{part}</code> : part
+                i % 2 === 1 ? <code key={i} className="bg-slate-800 text-blue-200 px-2 py-0.5 rounded font-mono text-sm shadow-inner mx-0.5">{part}</code> : part
               )}
             </h3>
           </div>
 
           <div className="space-y-3 mb-6">
             {currentOptions.map((opt, i) => {
-              let btnClass = "w-full text-left p-4 rounded-xl border-2 transition-all font-bold text-sm md:text-base text-slate-700 leading-relaxed ";
+              let btnClass = "w-full text-left p-5 rounded-2xl border-2 transition-all font-bold text-sm md:text-base text-slate-700 leading-relaxed ";
               
               if (!isAnswered) {
-                btnClass += "bg-white/90 border-transparent hover:border-blue-300 hover:bg-white shadow-sm hover:-translate-y-0.5";
+                btnClass += "bg-white/80 border-transparent hover:border-blue-300 hover:bg-white shadow-sm hover:-translate-y-0.5";
               } else {
                 if (opt.c) {
-                  btnClass += "bg-green-50 border-green-500 text-green-900 shadow-sm";
+                  btnClass += "bg-emerald-50 border-emerald-500 text-emerald-900 shadow-md";
                 } else if (selectedOption === opt) {
                   btnClass += "bg-red-50 border-red-400 text-red-900";
                 } else {
-                  btnClass += "bg-slate-50/50 border-slate-200 text-slate-400 opacity-60";
+                  btnClass += "bg-slate-50/50 border-slate-200 text-slate-400 opacity-50";
                 }
               }
 
@@ -699,12 +760,12 @@
                   className={btnClass}
                 >
                   <div className="flex items-start">
-                    <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs mr-3 shrink-0 mt-0.5 transition-colors ${!isAnswered ? 'bg-slate-100 text-slate-500' : opt.c ? 'bg-green-500 text-white' : selectedOption === opt ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-300'}`}>
+                    <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs mr-3 shrink-0 mt-0.5 transition-colors ${!isAnswered ? 'bg-slate-200 text-slate-600' : opt.c ? 'bg-emerald-500 text-white' : selectedOption === opt ? 'bg-red-500 text-white' : 'bg-slate-200 text-slate-400'}`}>
                       {String.fromCharCode(65 + i)}
                     </span>
-                    <span className="pt-1">{opt.t}</span>
+                    <span className="pt-0.5">{opt.t}</span>
                     
-                    {isAnswered && opt.c && <IconCheck className="w-6 h-6 ml-auto text-green-600 shrink-0 mt-0.5" />}
+                    {isAnswered && opt.c && <IconCheck className="w-6 h-6 ml-auto text-emerald-600 shrink-0 mt-0.5" />}
                     {isAnswered && !opt.c && selectedOption === opt && <IconX className="w-6 h-6 ml-auto text-red-500 shrink-0 mt-0.5" />}
                   </div>
                 </button>
@@ -714,23 +775,23 @@
 
           {isAnswered && (
             <div className="slide-down">
-              <div className={`p-5 md:p-6 rounded-2xl mb-6 border shadow-sm ${selectedOption.c ? 'bg-green-50/90 border-green-200' : 'bg-red-50/90 border-red-200'}`}>
-                <h4 className={`font-bold text-lg mb-3 flex items-center ${selectedOption.c ? 'text-green-800' : 'text-red-800'}`}>
+              <div className={`p-6 rounded-3xl mb-6 border shadow-sm ${selectedOption.c ? 'bg-emerald-50/90 border-emerald-200' : 'bg-red-50/90 border-red-200'}`}>
+                <h4 className={`font-bold text-lg mb-3 flex items-center tracking-tight ${selectedOption.c ? 'text-emerald-800' : 'text-red-800'}`}>
                   {selectedOption.c ? (
-                    <><div className="bg-green-100 p-1.5 rounded-full mr-2"><IconCheck className="w-5 h-5" /></div> 正解！</>
+                    <><div className="bg-emerald-100 p-1.5 rounded-full mr-2"><IconCheck className="w-5 h-5" /></div> 正解！</>
                   ) : (
                     <><div className="bg-red-100 p-1.5 rounded-full mr-2"><IconX className="w-5 h-5" /></div> 不正解...</>
                   )}
                 </h4>
-                <div className="bg-white/60 p-4 rounded-xl text-slate-700 text-sm leading-loose border border-white">
-                  <span className="font-bold text-slate-800 mr-2 border-b-2 border-blue-200 pb-0.5">解説</span><br className="md:hidden"/>
+                <div className="bg-white/70 p-5 rounded-2xl text-slate-700 text-sm md:text-base leading-loose border border-white">
+                  <span className="font-bold text-slate-900 mr-2 border-b-2 border-slate-300 pb-0.5 inline-block mb-2">解説</span><br/>
                   {q.exp}
                 </div>
               </div>
               
               <button 
                 onClick={nextQuestion}
-                className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center text-lg"
+                className="w-full py-5 bg-slate-800 text-white font-bold rounded-2xl shadow-lg hover:bg-slate-900 transition-colors flex items-center justify-center text-lg tracking-wide"
               >
                 {currentIndex + 1 < questions.length ? "次の問題へ" : "結果を見る"}
               </button>
@@ -745,48 +806,48 @@
       const [activeTab, setActiveTab] = useState('study');
 
       return (
-        <div className="min-h-screen relative font-sans">
+        <div className="min-h-screen relative font-sans selection:bg-blue-200 selection:text-blue-900">
           {/* 背景の動く円 */}
           <div className="bg-circle circle-1"></div>
           <div className="bg-circle circle-2"></div>
           <div className="bg-circle circle-3"></div>
 
           {/* ヘッダー領域 */}
-          <header className="pt-14 pb-8 px-6 text-center relative z-10">
-            <div className="inline-block bg-white/50 px-4 py-1.5 rounded-full text-xs font-bold text-slate-600 tracking-widest mb-4 border border-white shadow-sm">
-              第1回 〜 第6回 対応
+          <header className="pt-12 pb-8 px-6 text-center relative z-10">
+            <div className="inline-block bg-white/60 px-5 py-1.5 rounded-full text-xs font-bold text-slate-600 tracking-widest mb-4 border border-white shadow-sm backdrop-blur-md">
+              第1回 〜 第6回 範囲対応
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tighter drop-shadow-sm leading-tight">
+            <h1 className="text-3xl md:text-5xl font-bold text-slate-800 tracking-tight drop-shadow-sm leading-tight">
               オブジェクト指向<br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">中間テスト 対策アプリ</span>
             </h1>
           </header>
 
           {/* メインコンテンツ領域 */}
-          <main className="px-4 md:px-8 max-w-4xl mx-auto relative z-10">
+          <main className="px-5 md:px-8 max-w-4xl mx-auto relative z-10">
             {activeTab === 'study' ? <StudyMode /> : <QuizMode />}
           </main>
 
           {/* 下部固定タブバー */}
-          <nav className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-lg border-t border-slate-200 pb-safe z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+          <nav className="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-xl border-t border-slate-200 pb-safe z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
             <div className="flex justify-center max-w-md mx-auto relative">
               {/* アクティブインジケーター */}
-              <div className={`absolute top-0 h-1 bg-blue-600 rounded-b-full transition-all duration-300 ${activeTab === 'study' ? 'left-[10%] w-[30%]' : 'left-[60%] w-[30%]'}`}></div>
+              <div className={`absolute top-0 h-1 bg-blue-600 rounded-b-full transition-all duration-300 ease-out ${activeTab === 'study' ? 'left-[10%] w-[30%]' : 'left-[60%] w-[30%]'}`}></div>
               
               <button 
                 onClick={() => setActiveTab('study')}
                 className={`flex-1 pt-4 pb-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'study' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 <IconBookOpen className={`w-6 h-6 mb-1.5 transition-transform ${activeTab === 'study' ? 'scale-110' : ''}`} />
-                <span className="text-[11px] font-bold tracking-wider">要点復習</span>
+                <span className="text-[11px] font-bold tracking-widest">要点復習</span>
               </button>
               
               <button 
                 onClick={() => setActiveTab('quiz')}
                 className={`flex-1 pt-4 pb-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'quiz' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
               >
-                <IconFlame className={`w-6 h-6 mb-1.5 transition-transform ${activeTab === 'quiz' ? 'scale-110' : ''}`} />
-                <span className="text-[11px] font-bold tracking-wider">実戦ドリル</span>
+                <IconPenTool className={`w-6 h-6 mb-1.5 transition-transform ${activeTab === 'quiz' ? 'scale-110' : ''}`} />
+                <span className="text-[11px] font-bold tracking-widest">実戦ドリル</span>
               </button>
             </div>
           </nav>
