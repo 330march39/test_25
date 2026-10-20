@@ -20,6 +20,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
 
+<!-- Google Fonts: Zen Maru Gothic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- ▼ ウェイト（太さ）を 300(細字)〜900(極太)まで追加拡張 ▼ -->
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
   <style>
     /* 基本フォントと行間設定 */
     body {
@@ -30,7 +36,8 @@
       padding: 0;
       overflow-x: hidden;
       -webkit-tap-highlight-color: transparent;
-      line-height: 1.8; /* 行間を広くゆったりと */
+      line-height: 1.8;
+      letter-spacing: 0.02em; /* 文字の間隔を少し開けて視認性UP */
     }
 
     /* 蛍光ペン風ハイライト */
@@ -53,14 +60,14 @@
       border-radius: 2px;
     }
 
-    /* 背景のアニメーション円 (blur-3xlを採用) */
+    /* 背景のアニメーション円 (より柔らかく) */
     .bg-circle {
       position: fixed;
       border-radius: 50%;
-      filter: blur(80px);
+      filter: blur(100px); /* ぼかしを強くして上品に */
       z-index: -1;
-      animation: float 20s infinite ease-in-out alternate;
-      opacity: 0.6;
+      animation: float 25s infinite ease-in-out alternate;
+      opacity: 0.5; /* 少し透明にしてコンテンツを目立たせる */
     }
     .circle-1 {
       width: 450px; height: 450px;
@@ -86,13 +93,13 @@
       100% { transform: translate(-30px, 30px) scale(0.95) rotate(-10deg); }
     }
 
-    /* グラスモーフィズム */
+    /* グラスモーフィズム（より美しく進化） */
     .glass {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+      background: rgba(255, 255, 255, 0.6); /* 透明度を少し上げる */
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.9); /* エッジを少し白く輝かせる */
+      box-shadow: 0 10px 40px rgba(31, 38, 135, 0.05); /* 青みがかった柔らかい影 */
     }
 
     /* アニメーションクラス */
@@ -233,7 +240,7 @@
           </div>
 
           <div className="flex flex-wrap gap-2 mb-4">
-            <button onClick={handleCopy} disabled={isCopied} className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-bold shadow-md hover:bg-blue-600 disabled:opacity-50 transition">1. B = A を実行</button>
+            <button onClick={handleCopy} disabled={isCopied} className="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-bold shadow-md hover:bg-blue-600 disabled:opacity-50 transition active:scale-95">1. B = A を実行</button>
             <button onClick={handleChangeB} disabled={!isCopied || arrayA[0] === "🍰"} className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-bold shadow-md hover:bg-emerald-600 disabled:opacity-50 transition">2. B[0]を🍰に変更</button>
             <button onClick={() => {setArrayA(["🍎", "🍊", "🍇"]); setIsCopied(false); setLogs([]);}} className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-300 ml-auto transition">リセット</button>
           </div>
@@ -856,7 +863,7 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
               {currentOptions.map((opt, i) => {
                 let btnClass = "w-full text-left p-5 rounded-2xl border-2 transition-all font-bold text-sm md:text-base text-slate-700 leading-relaxed ";
                 if (!isAnswered) {
-                  btnClass += "bg-white/80 border-transparent hover:border-blue-300 hover:bg-white shadow-sm hover:-translate-y-0.5";
+                  btnClass += "bg-white/80 border-transparent hover:border-blue-300 hover:bg-white shadow-sm hover:-translate-y-0.5 active:scale-95";
                 } else {
                   if (opt.c) {
                     btnClass += "bg-emerald-50 border-emerald-500 text-emerald-900 shadow-md";
@@ -937,27 +944,26 @@ cars[0] = org; <span className="text-slate-400">// 住所が渡される</span>
             {activeTab === 'study' ? <StudyMode /> : <QuizMode />}
           </main>
 
-          {/* 下部固定タブバー */}
-          <nav className="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-xl border-t border-slate-200 pb-safe z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
-            <div className="flex justify-center max-w-md mx-auto relative">
-              {/* アクティブインジケーター */}
-              <div className={`absolute top-0 h-1 bg-blue-600 rounded-b-full transition-all duration-300 ease-out ${activeTab === 'study' ? 'left-[10%] w-[30%]' : 'left-[60%] w-[30%]'}`}></div>
+          {/* ▼ 進化した下部固定フローティング・タブバー ▼ */}
+          <nav className="fixed bottom-4 left-0 w-full z-50 px-4 pb-safe">
+            <div className="glass max-w-sm mx-auto rounded-full flex justify-between p-1.5 shadow-lg border border-white/80">
               
               <button 
                 onClick={() => setActiveTab('study')}
-                className={`flex-1 pt-4 pb-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'study' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 py-3 flex items-center justify-center rounded-full transition-all duration-300 ${activeTab === 'study' ? 'bg-blue-600 text-white shadow-md scale-100' : 'text-slate-500 hover:bg-white/50 active:scale-95'}`}
               >
-                <IconBookOpen className={`w-6 h-6 mb-1.5 transition-transform ${activeTab === 'study' ? 'scale-110' : ''}`} />
-                <span className="text-[11px] font-bold tracking-widest">要点復習</span>
+                <IconBookOpen className={`w-5 h-5 mr-2 transition-transform ${activeTab === 'study' ? 'animate-bounce' : ''}`} />
+                <span className="text-sm font-bold tracking-widest">要点復習</span>
               </button>
               
               <button 
                 onClick={() => setActiveTab('quiz')}
-                className={`flex-1 pt-4 pb-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'quiz' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 py-3 flex items-center justify-center rounded-full transition-all duration-300 ${activeTab === 'quiz' ? 'bg-rose-500 text-white shadow-md scale-100' : 'text-slate-500 hover:bg-white/50 active:scale-95'}`}
               >
-                <IconPenTool className={`w-6 h-6 mb-1.5 transition-transform ${activeTab === 'quiz' ? 'scale-110' : ''}`} />
-                <span className="text-[11px] font-bold tracking-widest">実戦ドリル</span>
+                <IconPenTool className={`w-5 h-5 mr-2 transition-transform ${activeTab === 'quiz' ? 'animate-bounce' : ''}`} />
+                <span className="text-sm font-bold tracking-widest">実戦ドリル</span>
               </button>
+
             </div>
           </nav>
         </div>
